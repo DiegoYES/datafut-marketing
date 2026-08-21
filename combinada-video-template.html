@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>DataFut - Combinada del Partido</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #050811;
+      font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+
+      background-image:
+        radial-gradient(circle at 50% 18%, rgba(239, 68, 68, 0.24), transparent 48%),
+        radial-gradient(circle at 75% 72%, rgba(56, 189, 248, 0.22), transparent 52%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+
+      background-size:
+        100% 100%,
+        100% 100%,
+        50px 50px,
+        50px 50px;
+
+      z-index: 1;
+    }
+
+    .source-header {
+      position: absolute;
+      top: 68px;
+      left: 58px;
+      right: 58px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      z-index: 30;
+    }
+
+    .source-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      padding: 14px 28px;
+
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      border-radius: 40px;
+
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.35);
+    }
+
+    .source-logo-dot {
+      width: 16px;
+      height: 16px;
+
+      border-radius: 50%;
+
+      background: #10b981;
+      box-shadow: 0 0 16px #10b981;
+    }
+
+    .source-name {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .format-badge {
+      padding: 12px 24px;
+
+      border-radius: 24px;
+      border: 1.5px solid rgba(239, 68, 68, 0.7);
+
+      background: rgba(239, 68, 68, 0.16);
+
+      color: #fca5a5;
+
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      padding: 140px 55px 200px 55px;
+
+      opacity: 0;
+      transform: scale(0.96);
+
+      transition:
+        opacity 0.35s ease-in-out,
+        transform 0.35s ease-in-out;
+
+      z-index: 2;
+    }
+
+    .scene.active {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+    }
+
+    .section-kicker {
+      margin-bottom: 22px;
+
+      color: #f87171;
+
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .main-title {
+      max-width: 950px;
+
+      margin-bottom: 26px;
+
+      font-size: 82px;
+      font-weight: 900;
+      line-height: 1.05;
+
+      text-align: center;
+
+      text-shadow: 0 8px 35px rgba(239, 68, 68, 0.32);
+    }
+
+    .subtitle {
+      max-width: 900px;
+
+      color: #cbd5e1;
+
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.3;
+
+      text-align: center;
+    }
+
+    .match-card {
+      width: 920px;
+
+      margin-top: 40px;
+      padding: 42px 36px;
+
+      display: grid;
+      grid-template-columns: 1fr 100px 1fr;
+      gap: 24px;
+      align-items: center;
+
+      border-radius: 36px;
+
+      background: rgba(15, 23, 42, 0.95);
+
+      border: 3px solid rgba(239, 68, 68, 0.42);
+
+      box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.6),
+        0 0 45px rgba(239, 68, 68, 0.12);
+    }
+
+    .team-name {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .vs-circle {
+      width: 82px;
+      height: 82px;
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      justify-self: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ef4444,
+          #b91c1c
+        );
+
+      font-size: 30px;
+      font-weight: 900;
+
+      box-shadow:
+        0 0 28px rgba(239, 68, 68, 0.55);
+    }
+
+    .selection-card {
+      width: 960px;
+      min-height: 1080px;
+
+      padding: 58px 52px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      border-radius: 40px;
+      border: 3px solid rgba(239, 68, 68, 0.50);
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(15, 23, 42, 0.98),
+          rgba(30, 41, 59, 0.98)
+        );
+
+      box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.6),
+        0 0 55px rgba(239, 68, 68, 0.13);
+    }
+
+    .selection-number {
+      display: inline-block;
+
+      margin-bottom: 16px;
+
+      padding: 9px 18px;
+
+      align-self: flex-start;
+
+      border-radius: 18px;
+
+      background: rgba(239, 68, 68, 0.18);
+
+      color: #fca5a5;
+
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .league {
+      margin-bottom: 12px;
+
+      color: #fde047;
+
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .selection-match {
+      margin-bottom: 30px;
+
+      font-size: 50px;
+      font-weight: 900;
+      line-height: 1.12;
+    }
+
+    .market-block {
+      width: 100%;
+
+      margin-bottom: 30px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 26px;
+    }
+
+    .market-tag {
+      flex: 1;
+
+      padding: 20px 26px;
+
+      border: 2.5px solid #38bdf8;
+      border-radius: 28px;
+
+      background: rgba(56, 189, 248, 0.18);
+
+      color: #38bdf8;
+
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .percentage {
+      min-width: 280px;
+
+      color: #10b981;
+
+      font-size: 118px;
+      font-weight: 900;
+      line-height: 1;
+
+      text-align: right;
+
+      text-shadow:
+        0 0 42px rgba(16, 185, 129, 0.50);
+    }
+
+    .sample {
+      margin-bottom: 28px;
+
+      color: #94a3b8;
+
+      font-size: 29px;
+      font-weight: 800;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .evidence-grid.single {
+      grid-template-columns: 1fr;
+    }
+
+    .evidence-grid.empty {
+      display: none;
+    }
+
+    .evidence-card {
+      min-height: 230px;
+
+      padding: 30px 28px;
+
+      border-radius: 28px;
+
+      border: 2px solid rgba(56, 189, 248, 0.44);
+
+      background: rgba(15, 23, 42, 0.80);
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .evidence-label {
+      margin-bottom: 10px;
+
+      color: #94a3b8;
+
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.2;
+
+      text-transform: uppercase;
+    }
+
+    .evidence-value {
+      color: #38bdf8;
+
+      font-size: 78px;
+      font-weight: 900;
+      line-height: 1;
+
+      text-shadow:
+        0 0 30px rgba(56, 189, 248, 0.35);
+    }
+
+    .evidence-detail {
+      margin-top: 8px;
+
+      color: #cbd5e1;
+
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .no-evidence-card {
+      width: 100%;
+
+      padding: 42px 36px;
+
+      border-radius: 30px;
+
+      border: 2px solid rgba(148, 163, 184, 0.30);
+
+      background: rgba(15, 23, 42, 0.72);
+
+      color: #cbd5e1;
+
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.35;
+
+      text-align: center;
+    }
+
+    .notice-card {
+      width: 930px;
+
+      padding: 58px 50px;
+
+      border-radius: 42px;
+
+      border: 3px solid rgba(234, 179, 8, 0.70);
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(30, 41, 59, 0.98),
+          rgba(15, 23, 42, 0.98)
+        );
+
+      box-shadow:
+        0 24px 60px rgba(234, 179, 8, 0.18);
+
+      text-align: center;
+    }
+
+    .notice-icon {
+      margin-bottom: 24px;
+
+      font-size: 72px;
+    }
+
+    .notice-title {
+      margin-bottom: 26px;
+
+      color: #fde047;
+
+      font-size: 58px;
+      font-weight: 900;
+      line-height: 1.10;
+    }
+
+    .notice-text {
+      color: #e2e8f0;
+
+      font-size: 34px;
+      font-weight: 750;
+      line-height: 1.38;
+    }
+
+    .outro-title {
+      max-width: 940px;
+
+      margin-bottom: 36px;
+
+      color: #fde047;
+
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1.08;
+
+      text-align: center;
+
+      text-shadow:
+        0 8px 30px rgba(234, 179, 8, 0.35);
+    }
+
+    .cta-card {
+      width: 900px;
+
+      padding: 60px 48px;
+
+      border-radius: 42px;
+
+      border: 3px solid #10b981;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(15, 23, 42, 0.98),
+          rgba(30, 41, 59, 0.98)
+        );
+
+      box-shadow:
+        0 24px 60px rgba(16, 185, 129, 0.28);
+
+      text-align: center;
+    }
+
+    .cta-text {
+      margin-bottom: 26px;
+
+      color: #cbd5e1;
+
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .cta-url {
+      color: #10b981;
+
+      font-size: 62px;
+      font-weight: 900;
+
+      letter-spacing: 1px;
+    }
+
+    .subtitle-layer {
+      position: absolute;
+
+      left: 70px;
+      right: 70px;
+
+      bottom: 105px;
+
+      z-index: 80;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      pointer-events: none;
+    }
+
+    .subtitle-box {
+      max-width: 920px;
+
+      padding: 16px 28px;
+
+      border-radius: 22px;
+
+      background: rgba(5, 8, 17, 0.88);
+
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+
+      box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.45);
+
+      opacity: 0;
+
+      transform:
+        translateY(14px)
+        scale(0.98);
+
+      transition:
+        opacity 0.16s ease,
+        transform 0.16s ease;
+    }
+
+    .subtitle-box.visible {
+      opacity: 1;
+
+      transform:
+        translateY(0)
+        scale(1);
+    }
+
+    .subtitle-text {
+      color: #ffffff;
+
+      font-size: 34px;
+      font-weight: 900;
+
+      line-height: 1.22;
+
+      text-align: center;
+
+      letter-spacing: 0.2px;
+
+      text-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    .disclaimer {
+      position: absolute;
+
+      left: 70px;
+      right: 70px;
+      bottom: 38px;
+
+      z-index: 90;
+
+      color: rgba(203, 213, 225, 0.78);
+
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+
+      text-align: center;
+
+      pointer-events: none;
+    }
+
+    .timeline-progress {
+      position: absolute;
+
+      left: 0;
+      bottom: 0;
+
+      width: 0%;
+      height: 12px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #ef4444,
+          #38bdf8,
+          #10b981
+        );
+
+      z-index: 100;
+    }
+
+    #heartbeatCanvas {
+      position: absolute;
+
+      right: 0;
+      bottom: 0;
+
+      width: 2px;
+      height: 2px;
+
+      opacity: 0.01;
+
+      z-index: 999;
+    }
+
+    .fatal-error {
+      position: absolute;
+
+      inset: 0;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 80px;
+
+      background: #050811;
+
+      color: #ef4444;
+
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.35;
+
+      text-align: center;
+
+      z-index: 1000;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-grid"></div>
+
+  <div class="source-header">
+
+    <div class="source-tag">
+      <div class="source-logo-dot"></div>
+      <div class="source-name">DATAFUT</div>
+    </div>
+
+    <div class="format-badge">
+      COMBINADA DEL PARTIDO
+    </div>
+
+  </div>
+
+  <!-- INTRO -->
+
+  <div
+    class="scene active"
+    id="sceneIntro"
+  >
+
+    <div class="section-kicker">
+      ANÁLISIS DEL PARTIDO
+    </div>
+
+    <div
+      class="main-title"
+      id="title"
+    >
+      COMBINADA DEL PARTIDO 🔗
+    </div>
+
+    <div
+      class="subtitle"
+      id="subtitle"
+    >
+      Mercados respaldados individualmente por estadísticas
+    </div>
+
+    <div class="match-card">
+
+      <div
+        class="team-name"
+        id="introHomeTeam"
+      >
+        LOCAL
+      </div>
+
+      <div class="vs-circle">
+        VS
+      </div>
+
+      <div
+        class="team-name"
+        id="introAwayTeam"
+      >
+        VISITANTE
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SELECCIÓN 1 -->
+
+  <div
+    class="scene"
+    id="sceneSelection1"
+  >
+
+    <div class="selection-card">
+
+      <div class="selection-number">
+        SELECCIÓN 1
+      </div>
+
+      <div
+        class="league"
+        id="selection1League"
+      >
+        LIGA
+      </div>
+
+      <div
+        class="selection-match"
+        id="selection1Match"
+      >
+        Equipo A vs Equipo B
+      </div>
+
+      <div class="market-block">
+
+        <div
+          class="market-tag"
+          id="selection1Market"
+        >
+          MERCADO
+        </div>
+
+        <div
+          class="percentage"
+          id="selection1Percentage"
+        >
+          0.0%
+        </div>
+
+      </div>
+
+      <div
+        class="sample"
+        id="selection1Sample"
+      >
+        Muestra
+      </div>
+
+      <div
+        class="evidence-grid"
+        id="selection1EvidenceGrid"
+      >
+
+        <div
+          class="evidence-card"
+          id="selection1EvidenceCard1"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection1Evidence1Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection1Evidence1Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection1Evidence1Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+        <div
+          class="evidence-card"
+          id="selection1EvidenceCard2"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection1Evidence2Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection1Evidence2Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection1Evidence2Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        class="no-evidence-card"
+        id="selection1NoEvidence"
+        style="display:none;"
+      >
+        Mercado respaldado individualmente por el análisis de DataFut.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SELECCIÓN 2 -->
+
+  <div
+    class="scene"
+    id="sceneSelection2"
+  >
+
+    <div class="selection-card">
+
+      <div class="selection-number">
+        SELECCIÓN 2
+      </div>
+
+      <div
+        class="league"
+        id="selection2League"
+      >
+        LIGA
+      </div>
+
+      <div
+        class="selection-match"
+        id="selection2Match"
+      >
+        Equipo A vs Equipo B
+      </div>
+
+      <div class="market-block">
+
+        <div
+          class="market-tag"
+          id="selection2Market"
+        >
+          MERCADO
+        </div>
+
+        <div
+          class="percentage"
+          id="selection2Percentage"
+        >
+          0.0%
+        </div>
+
+      </div>
+
+      <div
+        class="sample"
+        id="selection2Sample"
+      >
+        Muestra
+      </div>
+
+      <div
+        class="evidence-grid"
+        id="selection2EvidenceGrid"
+      >
+
+        <div
+          class="evidence-card"
+          id="selection2EvidenceCard1"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection2Evidence1Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection2Evidence1Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection2Evidence1Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+        <div
+          class="evidence-card"
+          id="selection2EvidenceCard2"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection2Evidence2Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection2Evidence2Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection2Evidence2Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        class="no-evidence-card"
+        id="selection2NoEvidence"
+        style="display:none;"
+      >
+        Mercado respaldado individualmente por el análisis de DataFut.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SELECCIÓN 3 OPCIONAL -->
+
+  <div
+    class="scene"
+    id="sceneSelection3"
+  >
+
+    <div class="selection-card">
+
+      <div class="selection-number">
+        SELECCIÓN 3
+      </div>
+
+      <div
+        class="league"
+        id="selection3League"
+      >
+        LIGA
+      </div>
+
+      <div
+        class="selection-match"
+        id="selection3Match"
+      >
+        Equipo A vs Equipo B
+      </div>
+
+      <div class="market-block">
+
+        <div
+          class="market-tag"
+          id="selection3Market"
+        >
+          MERCADO
+        </div>
+
+        <div
+          class="percentage"
+          id="selection3Percentage"
+        >
+          0.0%
+        </div>
+
+      </div>
+
+      <div
+        class="sample"
+        id="selection3Sample"
+      >
+        Muestra
+      </div>
+
+      <div
+        class="evidence-grid"
+        id="selection3EvidenceGrid"
+      >
+
+        <div
+          class="evidence-card"
+          id="selection3EvidenceCard1"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection3Evidence1Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection3Evidence1Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection3Evidence1Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+        <div
+          class="evidence-card"
+          id="selection3EvidenceCard2"
+        >
+
+          <div
+            class="evidence-label"
+            id="selection3Evidence2Label"
+          >
+            DATO
+          </div>
+
+          <div
+            class="evidence-value"
+            id="selection3Evidence2Value"
+          >
+            0.00
+          </div>
+
+          <div
+            class="evidence-detail"
+            id="selection3Evidence2Detail"
+          >
+            Detalle
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        class="no-evidence-card"
+        id="selection3NoEvidence"
+        style="display:none;"
+      >
+        Mercado respaldado individualmente por el análisis de DataFut.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- NOTICE -->
+
+  <div
+    class="scene"
+    id="sceneNotice"
+  >
+
+    <div class="notice-card">
+
+      <div class="notice-icon">
+        ⚠️
+      </div>
+
+      <div class="notice-title">
+        IMPORTANTE
+      </div>
+
+      <div
+        class="notice-text"
+        id="probabilityNotice"
+      >
+        Los porcentajes son individuales y no representan la probabilidad conjunta.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- OUTRO -->
+
+  <div
+    class="scene"
+    id="sceneOutro"
+  >
+
+    <div
+      class="outro-title"
+      id="ctaTitle"
+    >
+      ¿JUGARÍAS ESTA COMBINADA? 👀
+    </div>
+
+    <div class="cta-card">
+
+      <div
+        class="cta-text"
+        id="ctaText"
+      >
+        Consulta cada mercado y su análisis completo en data-fut.com
+      </div>
+
+      <div class="cta-url">
+        data-fut.com
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SUBTITLES -->
+
+  <div
+    class="subtitle-layer"
+    id="subtitleLayer"
+  >
+
+    <div
+      class="subtitle-box"
+      id="subtitleBox"
+    >
+
+      <div
+        class="subtitle-text"
+        id="subtitleText"
+      ></div>
+
+    </div>
+
+  </div>
+
+  <!-- DISCLAIMER -->
+
+  <div
+    class="disclaimer"
+    id="disclaimer"
+  >
+    Estimaciones basadas en datos históricos. No garantizan resultados.
+  </div>
+
+  <div
+    class="timeline-progress"
+    id="progressBar"
+  ></div>
+
+  <canvas id="heartbeatCanvas"></canvas>
+
+  <div
+    class="fatal-error"
+    id="fatalError"
+  ></div>
+
+  <script>
+
+    window.RENDER_READY = false;
+    window.RENDER_ERROR = null;
+
+    let totalDuration = 54000;
+
+    let combinadaData = null;
+    let narrationManifest = null;
+
+    let subtitleCues = [];
+    let lastSubtitleText = null;
+
+    let startTime = null;
+
+    const sceneIntro =
+      document.getElementById(
+        'sceneIntro'
+      );
+
+    const sceneSelection1 =
+      document.getElementById(
+        'sceneSelection1'
+      );
+
+    const sceneSelection2 =
+      document.getElementById(
+        'sceneSelection2'
+      );
+
+    const sceneSelection3 =
+      document.getElementById(
+        'sceneSelection3'
+      );
+
+    const sceneNotice =
+      document.getElementById(
+        'sceneNotice'
+      );
+
+    const sceneOutro =
+      document.getElementById(
+        'sceneOutro'
+      );
+
+    const allScenes = [
+      sceneIntro,
+      sceneSelection1,
+      sceneSelection2,
+      sceneSelection3,
+      sceneNotice,
+      sceneOutro
+    ];
+
+    const progressBar =
+      document.getElementById(
+        'progressBar'
+      );
+
+    const subtitleBox =
+      document.getElementById(
+        'subtitleBox'
+      );
+
+    const subtitleText =
+      document.getElementById(
+        'subtitleText'
+      );
+
+    const heartbeatCanvas =
+      document.getElementById(
+        'heartbeatCanvas'
+      );
+
+    const fatalError =
+      document.getElementById(
+        'fatalError'
+      );
+
+    const ctx =
+      heartbeatCanvas.getContext(
+        '2d'
+      );
+
+    window.RENDER_DURATION_MS =
+      totalDuration;
+
+    function setText(
+      id,
+      value
+    ) {
+
+      const element =
+        document.getElementById(
+          id
+        );
+
+      if (!element) {
+
+        throw new Error(
+          `No existe el elemento #${id}`
+        );
+
+      }
+
+      element.textContent =
+        value ?? '';
+
+    }
+
+    async function loadJson(
+      path
+    ) {
+
+      const response =
+        await fetch(
+          path,
+          {
+            cache: 'no-store'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          `No se pudo cargar ${path}. HTTP ${response.status}`
+        );
+
+      }
+
+      return await response.json();
+
+    }
+
+    async function loadTextFile(
+      path
+    ) {
+
+      const response =
+        await fetch(
+          path,
+          {
+            cache: 'no-store'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          `No se pudo cargar ${path}. HTTP ${response.status}`
+        );
+
+      }
+
+      return await response.text();
+
+    }
+
+    function validateData(
+      data
+    ) {
+
+      if (!data) {
+
+        throw new Error(
+          'combinada-data.json está vacío.'
+        );
+
+      }
+
+      if (
+        !Array.isArray(
+          data.selections
+        )
+        ||
+        ![
+          2,
+          3
+        ].includes(
+          data.selections.length
+        )
+      ) {
+
+        throw new Error(
+          'Debe haber 2 o 3 selecciones.'
+        );
+
+      }
+
+      if (
+        typeof data.homeTeam !== 'string' ||
+        typeof data.awayTeam !== 'string' ||
+        typeof data.league !== 'string'
+      ) {
+
+        throw new Error(
+          'Datos del partido inválidos.'
+        );
+
+      }
+
+      data.selections.forEach(
+        (
+          selection,
+          index
+        ) => {
+
+          if (
+            typeof selection.market
+            !==
+            'string'
+          ) {
+
+            throw new Error(
+              `Selección ${index + 1}: market inválido.`
+            );
+
+          }
+
+          if (
+            typeof selection.percentage
+            !==
+            'number'
+            ||
+            Number.isNaN(
+              selection.percentage
+            )
+          ) {
+
+            throw new Error(
+              `Selección ${index + 1}: percentage inválido.`
+            );
+
+          }
+
+          if (
+            !Array.isArray(
+              selection.evidence
+            )
+          ) {
+
+            throw new Error(
+              `Selección ${index + 1}: evidence debe ser una lista.`
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+    function validateManifest(
+      manifest
+    ) {
+
+      if (
+        !manifest
+        ||
+        !Array.isArray(
+          manifest.blocks
+        )
+      ) {
+
+        throw new Error(
+          'narration-manifest.json inválido.'
+        );
+
+      }
+
+      const expectedCount =
+        manifest.selectionCount
+        +
+        3;
+
+      if (
+        manifest.blocks.length
+        !==
+        expectedCount
+      ) {
+
+        throw new Error(
+          `Se esperaban ${expectedCount} bloques y llegaron ${manifest.blocks.length}.`
+        );
+
+      }
+
+      if (
+        typeof manifest
+          .totalVideoDurationSeconds
+        !==
+        'number'
+        ||
+        manifest
+          .totalVideoDurationSeconds
+        <=
+        0
+      ) {
+
+        throw new Error(
+          'Duración del manifest inválida.'
+        );
+
+      }
+
+    }
+
+    function configureTimeline(
+      manifest
+    ) {
+
+      narrationManifest =
+        manifest;
+
+      totalDuration =
+        Math.round(
+          manifest
+            .totalVideoDurationSeconds
+          *
+          1000
+        );
+
+      window.RENDER_DURATION_MS =
+        totalDuration;
+
+    }
+
+    function applySelection(
+      index,
+      selection
+    ) {
+
+      const prefix =
+        `selection${index}`;
+
+      setText(
+        `${prefix}League`,
+        combinadaData.league
+      );
+
+      setText(
+        `${prefix}Match`,
+        `${combinadaData.homeTeam} vs ${combinadaData.awayTeam}`
+      );
+
+      setText(
+        `${prefix}Market`,
+        selection.market
+      );
+
+      setText(
+        `${prefix}Percentage`,
+        `${selection.percentage.toFixed(1)}%`
+      );
+
+      setText(
+        `${prefix}Sample`,
+        selection.sampleText || ''
+      );
+
+      const grid =
+        document.getElementById(
+          `${prefix}EvidenceGrid`
+        );
+
+      const noEvidence =
+        document.getElementById(
+          `${prefix}NoEvidence`
+        );
+
+      const evidence =
+        selection.evidence;
+
+      if (
+        evidence.length === 0
+      ) {
+
+        grid.classList.add(
+          'empty'
+        );
+
+        noEvidence.style.display =
+          'block';
+
+        return;
+
+      }
+
+      noEvidence.style.display =
+        'none';
+
+      grid.classList.remove(
+        'empty'
+      );
+
+      if (
+        evidence.length === 1
+      ) {
+
+        grid.classList.add(
+          'single'
+        );
+
+      }
+
+      else {
+
+        grid.classList.remove(
+          'single'
+        );
+
+      }
+
+      for (
+        let evidenceIndex = 0;
+        evidenceIndex < 2;
+        evidenceIndex++
+      ) {
+
+        const card =
+          document.getElementById(
+            `${prefix}EvidenceCard${evidenceIndex + 1}`
+          );
+
+        const item =
+          evidence[
+            evidenceIndex
+          ];
+
+        if (!item) {
+
+          card.style.display =
+            'none';
+
+          continue;
+
+        }
+
+        card.style.display =
+          'flex';
+
+        setText(
+          `${prefix}Evidence${evidenceIndex + 1}Label`,
+          item.label
+        );
+
+        setText(
+          `${prefix}Evidence${evidenceIndex + 1}Value`,
+          item.value
+        );
+
+        setText(
+          `${prefix}Evidence${evidenceIndex + 1}Detail`,
+          item.detail
+        );
+
+      }
+
+    }
+
+    function applyData(
+      data
+    ) {
+
+      combinadaData =
+        data;
+
+      setText(
+        'title',
+        data.title
+      );
+
+      setText(
+        'subtitle',
+        data.subtitle
+      );
+
+      setText(
+        'introHomeTeam',
+        data.homeTeam
+      );
+
+      setText(
+        'introAwayTeam',
+        data.awayTeam
+      );
+
+      setText(
+        'probabilityNotice',
+        data.probabilityNotice
+      );
+
+      setText(
+        'ctaTitle',
+        data.ctaTitle
+      );
+
+      setText(
+        'ctaText',
+        data.ctaText
+      );
+
+      setText(
+        'disclaimer',
+        data.disclaimer
+      );
+
+      data.selections.forEach(
+        (
+          selection,
+          index
+        ) => {
+
+          applySelection(
+            index + 1,
+            selection
+          );
+
+        }
+      );
+
+      if (
+        data.selections.length
+        <
+        3
+      ) {
+
+        sceneSelection3.style.display =
+          'none';
+
+      }
+
+    }
+
+    function parseSrtTimestamp(
+      value
+    ) {
+
+      const match =
+        value
+          .trim()
+          .match(
+            /(\d{2}):(\d{2}):(\d{2}),(\d{3})/
+          );
+
+      if (!match) {
+
+        throw new Error(
+          `Timestamp inválido: ${value}`
+        );
+
+      }
+
+      return (
+        Number(match[1]) * 3600
+        +
+        Number(match[2]) * 60
+        +
+        Number(match[3])
+        +
+        Number(match[4]) / 1000
+      );
+
+    }
+
+    function parseSrt(
+      text
+    ) {
+
+      const normalized =
+        text
+          .replace(
+            /\r\n/g,
+            '\n'
+          )
+          .replace(
+            /\r/g,
+            '\n'
+          )
+          .trim();
+
+      if (!normalized) {
+
+        return [];
+
+      }
+
+      const blocks =
+        normalized.split(
+          /\n\s*\n/
+        );
+
+      const cues = [];
+
+      for (
+        const block
+        of blocks
+      ) {
+
+        const lines =
+          block
+            .split('\n')
+            .map(
+              line =>
+                line.trim()
+            )
+            .filter(
+              Boolean
+            );
+
+        if (
+          lines.length < 2
+        ) {
+
+          continue;
+
+        }
+
+        let timelineIndex =
+          0;
+
+        if (
+          /^\d+$/.test(
+            lines[0]
+          )
+        ) {
+
+          timelineIndex =
+            1;
+
+        }
+
+        const timeline =
+          lines[
+            timelineIndex
+          ];
+
+        if (
+          !timeline
+          ||
+          !timeline.includes(
+            '-->'
+          )
+        ) {
+
+          continue;
+
+        }
+
+        const [
+          startText,
+          endText
+        ] =
+          timeline
+            .split('-->')
+            .map(
+              value =>
+                value.trim()
+            );
+
+        const cueText =
+          lines
+            .slice(
+              timelineIndex + 1
+            )
+            .join(' ')
+            .replace(
+              /<[^>]+>/g,
+              ''
+            )
+            .trim();
+
+        if (!cueText) {
+
+          continue;
+
+        }
+
+        cues.push(
+          {
+            startSeconds:
+              parseSrtTimestamp(
+                startText
+              ),
+
+            endSeconds:
+              parseSrtTimestamp(
+                endText
+              ),
+
+            text:
+              cueText
+          }
+        );
+
+      }
+
+      return cues;
+
+    }
+
+    async function buildSubtitles(
+      manifest
+    ) {
+
+      const cues =
+        [];
+
+      for (
+        const block
+        of manifest.blocks
+      ) {
+
+        const srt =
+          await loadTextFile(
+            `./combinada-audio/${block.subtitles}`
+          );
+
+        const localCues =
+          parseSrt(
+            srt
+          );
+
+        for (
+          const cue
+          of localCues
+        ) {
+
+          cues.push(
+            {
+              startSeconds:
+                block.startSeconds
+                +
+                cue.startSeconds,
+
+              endSeconds:
+                block.startSeconds
+                +
+                cue.endSeconds,
+
+              text:
+                cue.text
+            }
+          );
+
+        }
+
+      }
+
+      cues.sort(
+        (
+          a,
+          b
+        ) =>
+          a.startSeconds
+          -
+          b.startSeconds
+      );
+
+      subtitleCues =
+        cues;
+
+    }
+
+    function showScene(
+      activeScene
+    ) {
+
+      for (
+        const scene
+        of allScenes
+      ) {
+
+        if (
+          scene === sceneSelection3
+          &&
+          combinadaData.selections.length
+          <
+          3
+        ) {
+
+          continue;
+
+        }
+
+        scene.className =
+          scene === activeScene
+            ?
+            'scene active'
+            :
+            'scene';
+
+      }
+
+    }
+
+    function findActiveSubtitle(
+      currentSeconds
+    ) {
+
+      for (
+        const cue
+        of subtitleCues
+      ) {
+
+        if (
+          currentSeconds
+          >=
+          cue.startSeconds
+          &&
+          currentSeconds
+          <
+          cue.endSeconds
+        ) {
+
+          return cue;
+
+        }
+
+      }
+
+      return null;
+
+    }
+
+    function updateSubtitle(
+      elapsed
+    ) {
+
+      const cue =
+        findActiveSubtitle(
+          elapsed / 1000
+        );
+
+      if (!cue) {
+
+        if (
+          lastSubtitleText
+          !==
+          null
+        ) {
+
+          subtitleBox
+            .classList
+            .remove(
+              'visible'
+            );
+
+          lastSubtitleText =
+            null;
+
+        }
+
+        return;
+
+      }
+
+      if (
+        cue.text
+        !==
+        lastSubtitleText
+      ) {
+
+        subtitleText.textContent =
+          cue.text;
+
+        subtitleBox
+          .classList
+          .add(
+            'visible'
+          );
+
+        lastSubtitleText =
+          cue.text;
+
+      }
+
+    }
+
+    function getBlock(
+      id
+    ) {
+
+      return narrationManifest
+        .blocks
+        .find(
+          block =>
+            block.id === id
+        );
+
+    }
+
+    function renderLoop(
+      timestamp
+    ) {
+
+      if (!startTime) {
+
+        startTime =
+          timestamp;
+
+      }
+
+      const elapsed =
+        timestamp
+        -
+        startTime;
+
+      ctx.fillStyle =
+        Math.floor(
+          elapsed
+        ) % 2 === 0
+          ?
+          '#00ff00'
+          :
+          '#ff0000';
+
+      ctx.fillRect(
+        0,
+        0,
+        2,
+        2
+      );
+
+      const progress =
+        Math.min(
+          (
+            elapsed
+            /
+            totalDuration
+          )
+          *
+          100,
+          100
+        );
+
+      progressBar.style.width =
+        `${progress}%`;
+
+      const selection1 =
+        getBlock(
+          'selection1'
+        );
+
+      const selection2 =
+        getBlock(
+          'selection2'
+        );
+
+      const selection3 =
+        getBlock(
+          'selection3'
+        );
+
+      const notice =
+        getBlock(
+          'notice'
+        );
+
+      const outro =
+        getBlock(
+          'outro'
+        );
+
+      const currentSeconds =
+        elapsed
+        /
+        1000;
+
+      if (
+        currentSeconds
+        <
+        selection1.startSeconds
+      ) {
+
+        showScene(
+          sceneIntro
+        );
+
+      }
+
+      else if (
+        currentSeconds
+        <
+        selection2.startSeconds
+      ) {
+
+        showScene(
+          sceneSelection1
+        );
+
+      }
+
+      else if (
+        selection3
+        &&
+        currentSeconds
+        <
+        selection3.startSeconds
+      ) {
+
+        showScene(
+          sceneSelection2
+        );
+
+      }
+
+      else if (
+        selection3
+        &&
+        currentSeconds
+        <
+        notice.startSeconds
+      ) {
+
+        showScene(
+          sceneSelection3
+        );
+
+      }
+
+      else if (
+        !selection3
+        &&
+        currentSeconds
+        <
+        notice.startSeconds
+      ) {
+
+        showScene(
+          sceneSelection2
+        );
+
+      }
+
+      else if (
+        currentSeconds
+        <
+        outro.startSeconds
+      ) {
+
+        showScene(
+          sceneNotice
+        );
+
+      }
+
+      else {
+
+        showScene(
+          sceneOutro
+        );
+
+      }
+
+      updateSubtitle(
+        elapsed
+      );
+
+      if (
+        elapsed
+        <
+        totalDuration
+        +
+        500
+      ) {
+
+        requestAnimationFrame(
+          renderLoop
+        );
+
+      }
+
+    }
+
+    function showFatalError(
+      error
+    ) {
+
+      console.error(
+        error
+      );
+
+      window.RENDER_ERROR =
+        String(
+          error?.message
+          ??
+          error
+        );
+
+      fatalError.style.display =
+        'flex';
+
+      fatalError.textContent =
+        `ERROR DE COMBINADA TEMPLATE:\n${window.RENDER_ERROR}`;
+
+    }
+
+    window.addEventListener(
+      'DOMContentLoaded',
+      async () => {
+
+        try {
+
+          if (
+            document.fonts
+          ) {
+
+            await document
+              .fonts
+              .ready;
+
+          }
+
+          const [
+            loadedData,
+            loadedManifest
+          ] =
+            await Promise.all(
+              [
+                loadJson(
+                  './combinada-data.json'
+                ),
+
+                loadJson(
+                  './combinada-audio/narration-manifest.json'
+                )
+              ]
+            );
+
+          validateData(
+            loadedData
+          );
+
+          validateManifest(
+            loadedManifest
+          );
+
+          configureTimeline(
+            loadedManifest
+          );
+
+          applyData(
+            loadedData
+          );
+
+          await buildSubtitles(
+            loadedManifest
+          );
+
+          requestAnimationFrame(
+            () => {
+
+              requestAnimationFrame(
+                () => {
+
+                  window.RENDER_READY =
+                    true;
+
+                  console.log(
+                    '--- DATAFUT COMBINADA TEMPLATE READY ---'
+                  );
+
+                  requestAnimationFrame(
+                    renderLoop
+                  );
+
+                }
+              );
+
+            }
+          );
+
+        }
+
+        catch (
+          error
+        ) {
+
+          showFatalError(
+            error
+          );
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>

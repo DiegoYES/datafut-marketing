@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>DataFut Promo Short</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Space+Grotesk:wght@500;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #080c14;
+      font-family: 'Outfit', sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    /* Ambient Background Glow & Tech Grid */
+    .bg-grid {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.2), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.2), transparent 50%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      z-index: 1;
+    }
+
+    /* Top HUD Header */
+    .hud-header {
+      position: absolute;
+      top: 70px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(16, 185, 129, 0.5);
+      padding: 14px 28px;
+      border-radius: 40px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+
+    .brand-logo-dot {
+      width: 16px;
+      height: 16px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #10b981;
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ffffff;
+    }
+
+    .live-badge {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.6);
+      color: #34d399;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Scenes Container */
+    .scene {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 60px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transform: scale(0.95);
+      z-index: 2;
+    }
+
+    .scene.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* SCENE 1: HOOK */
+    .hook-title {
+      font-size: 68px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 20%, #a7f3d0 60%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 35px;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+    }
+
+    .hook-subtitle {
+      font-size: 34px;
+      color: #cbd5e1;
+      text-align: center;
+      max-width: 840px;
+      line-height: 1.5;
+      margin-bottom: 60px;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .pill {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 22px 36px;
+      border-radius: 24px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #38bdf8;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* IMAGE CARD CONTAINERS FOR SCENES 2 & 3 */
+    .image-card-container {
+      width: 940px;
+      height: 1180px;
+      border-radius: 36px;
+      overflow: hidden;
+      border: 3px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 50px rgba(16, 185, 129, 0.2);
+      background: #0f172a;
+      position: relative;
+    }
+
+    .image-card-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .scene-caption {
+      margin-top: 45px;
+      font-size: 38px;
+      font-weight: 800;
+      text-align: center;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 22px 45px;
+      border-radius: 24px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    }
+
+    /* SCENE 4: HIGHLIGHT PERCENTAGE CARD */
+    .percentage-hero-card {
+      width: 920px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 3px solid #10b981;
+      border-radius: 40px;
+      padding: 70px 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 0 70px rgba(16, 185, 129, 0.35), inset 0 0 30px rgba(16, 185, 129, 0.15);
+      position: relative;
+    }
+
+    .match-header-tag {
+      font-size: 28px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .match-title {
+      font-size: 52px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .market-badge {
+      background: rgba(56, 189, 248, 0.15);
+      border: 2px solid #38bdf8;
+      color: #38bdf8;
+      padding: 16px 36px;
+      border-radius: 24px;
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 35px;
+    }
+
+    .big-percentage {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 150px;
+      font-weight: 900;
+      color: #10b981;
+      text-shadow: 0 0 50px rgba(16, 185, 129, 0.6);
+      line-height: 1;
+      margin-bottom: 25px;
+    }
+
+    .consistency-tag {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 16px 32px;
+      border-radius: 30px;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 35px;
+      text-align: center;
+    }
+
+    .success-check {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 32px;
+      color: #34d399;
+      font-weight: 800;
+    }
+
+    /* SCENE 5: CALL TO ACTION */
+    .cta-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 105px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      background: linear-gradient(135deg, #10b981, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+      filter: drop-shadow(0 10px 30px rgba(16, 185, 129, 0.4));
+    }
+
+    .cta-sub {
+      font-size: 40px;
+      color: #cbd5e1;
+      text-align: center;
+      margin-bottom: 70px;
+      max-width: 840px;
+      line-height: 1.4;
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-size: 46px;
+      font-weight: 900;
+      padding: 30px 80px;
+      border-radius: 60px;
+      box-shadow: 0 18px 45px rgba(16, 185, 129, 0.45);
+      letter-spacing: 1px;
+    }
+
+    .cta-footer {
+      margin-top: 70px;
+      font-size: 28px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    /* Progress bar at bottom */
+    .timeline-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 10px;
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+      width: 0%;
+      z-index: 100;
+    }
+
+    /* Hidden heartbeat canvas to keep Chromium rendering every frame */
+    #heartbeatCanvas {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 2px;
+      height: 2px;
+      opacity: 0.01;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <!-- HUD Header -->
+  <div class="hud-header">
+    <div class="brand-tag">
+      <div class="brand-logo-dot"></div>
+      <div class="brand-name">DATAFUT</div>
+    </div>
+    <div class="live-badge">ANÁLISIS ESTADÍSTICO</div>
+  </div>
+
+  <!-- SCENE 1: HOOK (0s - 3s) -->
+  <div class="scene active" id="scene1">
+    <div class="hook-title">¿Cómo analizar fútbol con datos reales? ⚽📊</div>
+    <div class="hook-subtitle">Descubre frecuencias históricas y estadísticas avanzadas antes de cada partido.</div>
+    <div class="feature-pills">
+      <div class="pill"><span>⚡</span> Muestras históricas reales</div>
+      <div class="pill"><span>🧠</span> Algoritmo de consistencia</div>
+      <div class="pill"><span>📈</span> Transparencia y auditoría</div>
+    </div>
+  </div>
+
+  <!-- SCENE 2: HOMEPAGE (3s - 6s) -->
+  <div class="scene" id="scene2">
+    <div class="image-card-container">
+      <img src="file:///C:/DataFut-Marketing/raw/01-inicio.png" alt="Inicio DataFut">
+    </div>
+    <div class="scene-caption">1. Explora lecturas y partidos destacados</div>
+  </div>
+
+  <!-- SCENE 3: MATCH CENTER (6s - 9s) -->
+  <div class="scene" id="scene3">
+    <div class="image-card-container">
+      <img src="file:///C:/DataFut-Marketing/raw/02-partido.png" alt="Match Center">
+    </div>
+    <div class="scene-caption">2. Accede al Match Center por partido</div>
+  </div>
+
+  <!-- SCENE 4: PREDICTION & 82.6% (9s - 12s) -->
+  <div class="scene" id="scene4">
+    <div class="percentage-hero-card">
+      <div class="match-header-tag">Strømsgodset vs Egersund • 1. Division</div>
+      <div class="match-title">Análisis de Mercado Proyectado</div>
+      <div class="market-badge">Mercado: Más de 0.5 goles</div>
+      <div class="big-percentage" id="percentCounter">0.0%</div>
+      <div class="consistency-tag">Candidato por muestra y consistencia (7 partidos)</div>
+      <div class="success-check">✓ Respaldo Auditado • Habría acertado</div>
+    </div>
+    <div class="scene-caption">3. Analiza el respaldo estadístico del modelo</div>
+  </div>
+
+  <!-- SCENE 5: CALL TO ACTION (12s - 15s) -->
+  <div class="scene" id="scene5">
+    <div class="cta-logo">DATAFUT</div>
+    <div class="cta-sub">Eleva tu nivel de análisis futbolístico con datos transparentes.</div>
+    <div class="cta-button">data-fut.com</div>
+    <div class="cta-footer">Estadísticas avanzadas • Frecuencias históricas • Registro gratis</div>
+  </div>
+
+  <div class="timeline-progress" id="progressBar"></div>
+  <canvas id="heartbeatCanvas"></canvas>
+
+  <script>
+    const totalDuration = 15000;
+    const scene1 = document.getElementById('scene1');
+    const scene2 = document.getElementById('scene2');
+    const scene3 = document.getElementById('scene3');
+    const scene4 = document.getElementById('scene4');
+    const scene5 = document.getElementById('scene5');
+    const percentCounter = document.getElementById('percentCounter');
+    const progressBar = document.getElementById('progressBar');
+    const heartbeatCanvas = document.getElementById('heartbeatCanvas');
+    const ctx = heartbeatCanvas.getContext('2d');
+
+    let startTime = null;
+
+    function renderLoop(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+
+      // Force canvas repaint to guarantee 60fps recording in Playwright
+      ctx.fillStyle = (Math.floor(elapsed) % 2 === 0) ? '#ff0000' : '#00ff00';
+      ctx.fillRect(0, 0, 2, 2);
+
+      const pct = Math.min((elapsed / totalDuration) * 100, 100);
+      progressBar.style.width = pct + '%';
+
+      // Scene timeline switching
+      if (elapsed < 3000) {
+        scene1.className = 'scene active';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 3000 && elapsed < 6000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene active';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 6000 && elapsed < 9000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene active';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 9000 && elapsed < 12000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene active';
+        scene5.className = 'scene';
+
+        // Count up percentage to 82.6%
+        const pProgress = Math.min((elapsed - 9000) / 1500, 1);
+        percentCounter.innerText = (pProgress * 82.6).toFixed(1) + '%';
+      } else if (elapsed >= 12000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene active';
+      }
+
+      if (elapsed < totalDuration + 500) {
+        requestAnimationFrame(renderLoop);
+      }
+    }
+
+    requestAnimationFrame(renderLoop);
+  </script>
+</body>
+</html>

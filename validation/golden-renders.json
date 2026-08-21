@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "purpose": "Referencia local anterior a la estabilizacion del pipeline",
+  "capturedOn": "2026-08-21",
+  "stableSources": [
+    {
+      "path": "render-parlay-video.js",
+      "sha256": "68a4a2305db6f2c13b40502d15a73ef8a6843016c80aece4964ef96a25d15697"
+    },
+    {
+      "path": "parlay-video-template.html",
+      "sha256": "e812825fd06f5c18f53af82ba6b913d72b117ae6301b0e2f6125381fd3de8f96"
+    },
+    {
+      "path": "generate-parlay-voice-dynamic.py",
+      "sha256": "540bdd710154ffcd5ec8cbb8099ec530e5008eae8fff7b13c323f9e99f295675"
+    }
+  ],
+  "renders": [
+    {
+      "id": "2026-08-21__parlay-de-datos__audax-italiano-mas-de-1-5-goles-totales__san-diego-wave-menos-de-3-5-goles-totales",
+      "videoBytes": 8151607,
+      "videoSha256": "0b0631812f216ca4b9816c10750cfe3313547dd2ee65b0c6a1b35c638172970b",
+      "dataSha256": "c9029c65be1e72e99966644762bd6ee860f1ceb58c6cd007ff6a3b43b42cb682"
+    },
+    {
+      "id": "2026-08-21__parlay-de-datos__estudiantes-rio-cuarto-menos-de-2-5-goles-totales__audax-italiano-menos-de-10-5-corners-totales",
+      "videoBytes": 8800199,
+      "videoSha256": "5332446e98b75a8491e1e34b7a8ed9e5a7bdb0993f9f6d4aa31ae7a9a8edfa30",
+      "dataSha256": "4fa9b04c426c2c9985991db1a89aae33cc7342832a979cf28e2ec3266eccda82"
+    }
+  ]
+}

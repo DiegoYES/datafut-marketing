@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>DataFut Mobile Promo Short (Fixed Render)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #060911;
+      font-family: 'Space Grotesk', 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    /* Ambient Glowing Grid Background */
+    .bg-grid {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.25), transparent 45%),
+        radial-gradient(circle at 75% 75%, rgba(56, 189, 248, 0.25), transparent 50%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 45px 45px, 45px 45px;
+      z-index: 1;
+    }
+
+    /* Top Mobile HUD Header - VISIBLE FROM FRAME 0 */
+    .hud-header {
+      position: absolute;
+      top: 65px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      padding: 14px 28px;
+      border-radius: 40px;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+    }
+
+    .brand-logo-dot {
+      width: 16px;
+      height: 16px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 14px #10b981;
+    }
+
+    .brand-name {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+    }
+
+    .mobile-badge {
+      background: rgba(56, 189, 248, 0.25);
+      border: 1.5px solid rgba(56, 189, 248, 0.7);
+      color: #38bdf8;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Scenes Container */
+    .scene {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 140px 50px 80px 50px;
+      opacity: 0;
+      transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+      transform: scale(0.96);
+      z-index: 2;
+    }
+
+    /* SCENE 1 IS ACTIVE IMMEDIATELY IN RAW HTML */
+    .scene.active {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+    }
+
+    /* SCENE 1: MOBILE HOOK */
+    .hook-title {
+      font-size: 68px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.25;
+      color: #ffffff;
+      margin-bottom: 35px;
+      text-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .hook-subtitle {
+      font-size: 34px;
+      color: #cbd5e1;
+      text-align: center;
+      max-width: 860px;
+      line-height: 1.5;
+      margin-bottom: 60px;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .pill {
+      background: rgba(30, 41, 59, 0.95);
+      border: 2px solid rgba(16, 185, 129, 0.45);
+      padding: 24px 40px;
+      border-radius: 28px;
+      font-size: 30px;
+      font-weight: 700;
+      color: #38bdf8;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* PHONE FRAME FOR NATIVE MOBILE SCREENSHOTS */
+    .phone-mockup {
+      width: 860px;
+      height: 1380px;
+      border-radius: 48px;
+      overflow: hidden;
+      border: 4px solid rgba(16, 185, 129, 0.5);
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(16, 185, 129, 0.25);
+      background: #0f172a;
+      position: relative;
+    }
+
+    .phone-mockup img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    .scene-caption {
+      margin-top: 35px;
+      font-size: 36px;
+      font-weight: 800;
+      text-align: center;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 20px 45px;
+      border-radius: 26px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    }
+
+    /* SCENE 4: HERO PERCENTAGE MOBILE CARD */
+    .mobile-percentage-card {
+      width: 900px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 3px solid #10b981;
+      border-radius: 44px;
+      padding: 65px 45px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 0 80px rgba(16, 185, 129, 0.4), inset 0 0 35px rgba(16, 185, 129, 0.2);
+    }
+
+    .match-header-tag {
+      font-size: 26px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .match-teams-title {
+      font-size: 52px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 35px;
+      text-align: center;
+    }
+
+    .market-badge {
+      background: rgba(56, 189, 248, 0.18);
+      border: 2px solid #38bdf8;
+      color: #38bdf8;
+      padding: 16px 38px;
+      border-radius: 26px;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 35px;
+    }
+
+    .big-percentage {
+      font-size: 155px;
+      font-weight: 900;
+      color: #10b981;
+      text-shadow: 0 0 60px rgba(16, 185, 129, 0.7);
+      line-height: 1;
+      margin-bottom: 25px;
+    }
+
+    .consistency-tag {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      padding: 18px 34px;
+      border-radius: 32px;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 35px;
+      text-align: center;
+    }
+
+    .data-evidence {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 32px;
+      color: #34d399;
+      font-weight: 800;
+    }
+
+    /* SCENE 5: CALL TO ACTION */
+    .cta-logo {
+      font-size: 108px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #10b981;
+      margin-bottom: 25px;
+      text-shadow: 0 12px 35px rgba(16, 185, 129, 0.45);
+    }
+
+    .cta-sub {
+      font-size: 40px;
+      color: #cbd5e1;
+      text-align: center;
+      margin-bottom: 70px;
+      max-width: 860px;
+      line-height: 1.4;
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-size: 48px;
+      font-weight: 900;
+      padding: 32px 85px;
+      border-radius: 60px;
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .cta-footer {
+      margin-top: 75px;
+      font-size: 28px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    /* Progress Bar */
+    .timeline-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 10px;
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+      width: 0%;
+      z-index: 100;
+    }
+
+    #heartbeatCanvas {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 2px;
+      height: 2px;
+      opacity: 0.01;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <!-- HUD Header - Active immediately -->
+  <div class="hud-header">
+    <div class="brand-tag">
+      <div class="brand-logo-dot"></div>
+      <div class="brand-name">DATAFUT</div>
+    </div>
+    <div class="mobile-badge">RESPONSIVE MÓVIL</div>
+  </div>
+
+  <!-- SCENE 1: HOOK (Active immediately in raw HTML) -->
+  <div class="scene active" id="scene1">
+    <div class="hook-title">¿Analizar fútbol desde tu celular? ⚽📱</div>
+    <div class="hook-subtitle">Estadísticas avanzadas y modelos de consistencia en tu bolsillo.</div>
+    <div class="feature-pills">
+      <div class="pill"><span>📱</span> Diseño 100% móvil y veloz</div>
+      <div class="pill"><span>📊</span> Frecuencias históricas auditadas</div>
+      <div class="pill"><span>⚡</span> Candidatos por muestra y consistencia</div>
+    </div>
+  </div>
+
+  <!-- SCENE 2: MOBILE HOMEPAGE -->
+  <div class="scene" id="scene2">
+    <div class="phone-mockup">
+      <img id="imgHome" src="file:///C:/DataFut-Marketing/raw-mobile/01-inicio.png" alt="DataFut Móvil Inicio">
+    </div>
+    <div class="scene-caption">1. Inicio optimizado para tu teléfono</div>
+  </div>
+
+  <!-- SCENE 3: MOBILE MATCH CENTER -->
+  <div class="scene" id="scene3">
+    <div class="phone-mockup">
+      <img id="imgMatch" src="file:///C:/DataFut-Marketing/raw-mobile/02-partido.png" alt="DataFut Partido Móvil">
+    </div>
+    <div class="scene-caption">2. Match Center completo: Sirius vs Brommapojkarna</div>
+  </div>
+
+  <!-- SCENE 4: MOBILE PREDICTION CARD & 82.6% -->
+  <div class="scene" id="scene4">
+    <div class="mobile-percentage-card">
+      <div class="match-header-tag">Allsvenskan • Suecia</div>
+      <div class="match-teams-title">Sirius IF vs Brommapojkarna</div>
+      <div class="market-badge">Mercado: Local marca</div>
+      <div class="big-percentage" id="percentCounter">0.0%</div>
+      <div class="consistency-tag">Candidato por muestra y consistencia (7 partidos)</div>
+      <div class="data-evidence">✓ Muestra Histórica • Evidencia Auditada</div>
+    </div>
+    <div class="scene-caption">3. Analiza los picks con más del 80% de respaldo</div>
+  </div>
+
+  <!-- SCENE 5: CALL TO ACTION -->
+  <div class="scene" id="scene5">
+    <div class="cta-logo">DATAFUT</div>
+    <div class="cta-sub">Lleva tu análisis futbolístico al siguiente nivel desde tu celular.</div>
+    <div class="cta-button">data-fut.com</div>
+    <div class="cta-footer">Estadísticas avanzadas • Frecuencias históricas • Registro gratis</div>
+  </div>
+
+  <div class="timeline-progress" id="progressBar"></div>
+  <canvas id="heartbeatCanvas"></canvas>
+
+  <script>
+    window.RENDER_READY = false;
+
+    const totalDuration = 15000;
+    const scene1 = document.getElementById('scene1');
+    const scene2 = document.getElementById('scene2');
+    const scene3 = document.getElementById('scene3');
+    const scene4 = document.getElementById('scene4');
+    const scene5 = document.getElementById('scene5');
+    const percentCounter = document.getElementById('percentCounter');
+    const progressBar = document.getElementById('progressBar');
+    const heartbeatCanvas = document.getElementById('heartbeatCanvas');
+    const ctx = heartbeatCanvas.getContext('2d');
+
+    let startTime = null;
+
+    function renderLoop(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+
+      // Force canvas repaint to guarantee smooth frame capture
+      ctx.fillStyle = (Math.floor(elapsed) % 2 === 0) ? '#00ff00' : '#0000ff';
+      ctx.fillRect(0, 0, 2, 2);
+
+      const pct = Math.min((elapsed / totalDuration) * 100, 100);
+      progressBar.style.width = pct + '%';
+
+      // Scene timeline switching
+      if (elapsed < 3000) {
+        scene1.className = 'scene active';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 3000 && elapsed < 6000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene active';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 6000 && elapsed < 9000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene active';
+        scene4.className = 'scene';
+        scene5.className = 'scene';
+      } else if (elapsed >= 9000 && elapsed < 12000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene active';
+        scene5.className = 'scene';
+
+        // Count up to 82.6%
+        const pProgress = Math.min((elapsed - 9000) / 1400, 1);
+        percentCounter.innerText = (pProgress * 82.6).toFixed(1) + '%';
+      } else if (elapsed >= 12000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+        scene5.className = 'scene active';
+      }
+
+      if (elapsed < totalDuration + 500) {
+        requestAnimationFrame(renderLoop);
+      }
+    }
+
+    // Helper to verify all images are fully loaded
+    function preloadImages() {
+      const imgs = Array.from(document.querySelectorAll('img'));
+      const promises = imgs.map(img => {
+        if (img.complete && img.naturalHeight !== 0) {
+          return Promise.resolve();
+        }
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      return Promise.all(promises);
+    }
+
+    // Initialize only after fonts & images are 100% painted
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      await preloadImages();
+
+      // Double RAF to guarantee initial layout is rendered to screen
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.RENDER_READY = true;
+          console.log('--- HTML RENDER_READY SIGNAL EMITTED ---');
+          requestAnimationFrame(renderLoop);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

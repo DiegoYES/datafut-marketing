@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>DataFut Promo Template</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #050811;
+      font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    .bg-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      background-image:
+        radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.35), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.3), transparent 55%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+
+      background-size:
+        100% 100%,
+        100% 100%,
+        50px 50px,
+        50px 50px;
+
+      z-index: 1;
+    }
+
+    .source-header {
+      position: absolute;
+      top: 70px;
+      left: 60px;
+      right: 60px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      z-index: 20;
+    }
+
+    .source-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(16, 185, 129, 0.6);
+
+      padding: 14px 28px;
+      border-radius: 40px;
+
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.35);
+    }
+
+    .source-logo-dot {
+      width: 16px;
+      height: 16px;
+
+      background: #10b981;
+      border-radius: 50%;
+
+      box-shadow: 0 0 16px #10b981;
+    }
+
+    .source-name {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+    }
+
+    .league-badge {
+      max-width: 470px;
+
+      background: rgba(234, 179, 8, 0.2);
+      border: 1.5px solid rgba(234, 179, 8, 0.7);
+
+      color: #fde047;
+
+      padding: 10px 22px;
+      border-radius: 20px;
+
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+
+      text-align: center;
+    }
+
+    .scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      padding: 130px 50px 200px 50px;
+
+      opacity: 0;
+      transform: scale(0.95);
+
+      transition:
+        opacity 0.35s ease-in-out,
+        transform 0.35s ease-in-out;
+
+      z-index: 2;
+    }
+
+    .scene.active {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+    }
+
+    /* ========================================
+       SCENE 1
+       ======================================== */
+
+    .hook-badge {
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #ef4444;
+
+      color: #f87171;
+
+      padding: 14px 36px;
+      border-radius: 30px;
+
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+
+      margin-bottom: 35px;
+
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+
+    .hook-main-title {
+      max-width: 960px;
+
+      font-size: 84px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.15;
+
+      color: #ffffff;
+
+      margin-bottom: 35px;
+
+      text-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+
+      letter-spacing: -1px;
+    }
+
+    .match-teams-card {
+      width: 900px;
+
+      background: rgba(15, 23, 42, 0.95);
+      border: 3px solid rgba(16, 185, 129, 0.5);
+
+      border-radius: 36px;
+
+      padding: 45px 35px;
+
+      display: grid;
+      grid-template-columns: 1fr 100px 1fr;
+      align-items: center;
+      gap: 20px;
+
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+
+      margin-top: 20px;
+    }
+
+    .team-name {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      text-align: center;
+
+      line-height: 1.15;
+
+      overflow-wrap: anywhere;
+    }
+
+    .vs-circle {
+      width: 80px;
+      height: 80px;
+
+      background: linear-gradient(135deg, #10b981, #059669);
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+
+      justify-self: center;
+    }
+
+    /* ========================================
+       SCENE 2
+       ======================================== */
+
+    .hero-stat-card {
+      width: 920px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(15, 23, 42, 0.98),
+          rgba(30, 41, 59, 0.98)
+        );
+
+      border: 3px solid #10b981;
+      border-radius: 44px;
+
+      padding: 55px 40px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      box-shadow: 0 0 80px rgba(16, 185, 129, 0.4);
+    }
+
+    .stat-match-subtitle {
+      font-size: 28px;
+      color: #94a3b8;
+
+      letter-spacing: 2px;
+      text-transform: uppercase;
+
+      font-weight: 700;
+
+      margin-bottom: 18px;
+
+      text-align: center;
+    }
+
+    .stat-teams {
+      max-width: 850px;
+
+      font-size: 44px;
+      font-weight: 900;
+
+      color: #ffffff;
+
+      margin-bottom: 30px;
+
+      text-align: center;
+
+      line-height: 1.15;
+    }
+
+    .market-tag {
+      max-width: 850px;
+
+      background: rgba(56, 189, 248, 0.2);
+      border: 2.5px solid #38bdf8;
+
+      color: #38bdf8;
+
+      padding: 18px 42px;
+      border-radius: 28px;
+
+      font-size: 44px;
+      font-weight: 900;
+
+      margin-bottom: 25px;
+
+      letter-spacing: 1px;
+
+      text-align: center;
+
+      line-height: 1.15;
+    }
+
+    .big-percentage {
+      font-size: 160px;
+      font-weight: 900;
+
+      color: #10b981;
+
+      text-shadow: 0 0 60px rgba(16, 185, 129, 0.7);
+
+      line-height: 1;
+
+      margin-bottom: 20px;
+    }
+
+    .sample-badge {
+      max-width: 850px;
+
+      background: rgba(16, 185, 129, 0.25);
+
+      color: #6ee7b7;
+
+      border: 1.5px solid rgba(16, 185, 129, 0.6);
+
+      padding: 16px 32px;
+      border-radius: 30px;
+
+      font-size: 28px;
+      font-weight: 800;
+
+      text-align: center;
+
+      line-height: 1.25;
+    }
+
+    /* ========================================
+       SCENE 3
+       ======================================== */
+
+    .evidence-hero-container {
+      width: 920px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      gap: 42px;
+    }
+
+    .evidence-stat-card {
+      min-height: 230px;
+
+      background: rgba(15, 23, 42, 0.95);
+
+      border: 3px solid rgba(56, 189, 248, 0.6);
+
+      border-radius: 36px;
+
+      padding: 42px 50px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 30px;
+
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .evidence-team-info {
+      display: flex;
+      flex-direction: column;
+
+      gap: 8px;
+
+      flex: 1;
+
+      min-width: 0;
+    }
+
+    .evidence-team-title {
+      font-size: 38px;
+      font-weight: 900;
+
+      color: #ffffff;
+
+      letter-spacing: 1px;
+
+      line-height: 1.1;
+
+      overflow-wrap: anywhere;
+    }
+
+    .evidence-team-desc {
+      font-size: 28px;
+
+      color: #94a3b8;
+
+      font-weight: 700;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
+
+      line-height: 1.15;
+    }
+
+    .evidence-giant-number {
+      flex-shrink: 0;
+
+      font-size: 128px;
+      font-weight: 900;
+
+      color: #38bdf8;
+
+      text-shadow: 0 0 40px rgba(56, 189, 248, 0.6);
+
+      line-height: 1;
+    }
+
+    /* ========================================
+       SCENE 4
+       ======================================== */
+
+    .question-title {
+      max-width: 920px;
+
+      font-size: 80px;
+      font-weight: 900;
+
+      text-align: center;
+
+      color: #fde047;
+
+      margin-bottom: 40px;
+
+      text-shadow: 0 8px 30px rgba(234, 179, 8, 0.4);
+
+      line-height: 1.1;
+    }
+
+    .cta-box {
+      width: 880px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(15, 23, 42, 0.98),
+          rgba(30, 41, 59, 0.98)
+        );
+
+      border: 3px solid #10b981;
+
+      border-radius: 44px;
+
+      padding: 60px 40px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      box-shadow: 0 25px 60px rgba(16, 185, 129, 0.35);
+    }
+
+    .cta-source-label {
+      font-size: 28px;
+
+      color: #94a3b8;
+
+      letter-spacing: 2px;
+      text-transform: uppercase;
+
+      margin-bottom: 20px;
+
+      font-weight: 700;
+
+      text-align: center;
+    }
+
+    .cta-url {
+      font-size: 56px;
+      font-weight: 900;
+
+      color: #10b981;
+
+      margin-bottom: 30px;
+
+      letter-spacing: 1px;
+
+      text-align: center;
+    }
+
+    .cta-subtext {
+      max-width: 780px;
+
+      font-size: 32px;
+
+      color: #cbd5e1;
+
+      text-align: center;
+
+      line-height: 1.4;
+    }
+
+    /* ========================================
+       SUBTITLES
+       ======================================== */
+
+    .subtitle-layer {
+      position: absolute;
+
+      left: 70px;
+      right: 70px;
+      bottom: 105px;
+
+      z-index: 80;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      pointer-events: none;
+    }
+
+    .subtitle-box {
+      max-width: 920px;
+
+      padding: 16px 28px;
+
+      border-radius: 22px;
+
+      background: rgba(5, 8, 17, 0.88);
+
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+      opacity: 0;
+
+      transform: translateY(14px) scale(0.98);
+
+      transition:
+        opacity 0.16s ease,
+        transform 0.16s ease;
+    }
+
+    .subtitle-box.visible {
+      opacity: 1;
+
+      transform: translateY(0) scale(1);
+    }
+
+    .subtitle-text {
+      color: #ffffff;
+
+      font-size: 34px;
+      font-weight: 900;
+
+      line-height: 1.22;
+
+      text-align: center;
+
+      letter-spacing: 0.2px;
+
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    /* ========================================
+       DISCLAIMER
+       ======================================== */
+
+    .disclaimer {
+      position: absolute;
+
+      left: 70px;
+      right: 70px;
+      bottom: 38px;
+
+      z-index: 90;
+
+      font-size: 18px;
+      font-weight: 600;
+
+      line-height: 1.3;
+
+      color: rgba(203, 213, 225, 0.78);
+
+      text-align: center;
+
+      letter-spacing: 0.2px;
+
+      pointer-events: none;
+    }
+
+    /* ========================================
+       PROGRESS
+       ======================================== */
+
+    .timeline-progress {
+      position: absolute;
+
+      bottom: 0;
+      left: 0;
+
+      height: 12px;
+
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+
+      width: 0%;
+
+      z-index: 100;
+    }
+
+    #heartbeatCanvas {
+      position: absolute;
+
+      bottom: 0;
+      right: 0;
+
+      width: 2px;
+      height: 2px;
+
+      opacity: 0.01;
+
+      z-index: 999;
+    }
+
+    /* ========================================
+       LOAD ERROR
+       ======================================== */
+
+    .fatal-error {
+      position: absolute;
+
+      inset: 0;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 80px;
+
+      background: #050811;
+
+      z-index: 1000;
+
+      font-size: 42px;
+      font-weight: 800;
+
+      color: #ef4444;
+
+      text-align: center;
+
+      line-height: 1.3;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-grid"></div>
+
+  <div class="source-header">
+
+    <div class="source-tag">
+      <div class="source-logo-dot"></div>
+      <div class="source-name">DATAFUT</div>
+    </div>
+
+    <div class="league-badge" id="leagueBadge">
+      CARGANDO...
+    </div>
+
+  </div>
+
+  <!-- ======================================
+       SCENE 1
+       ====================================== -->
+
+  <div class="scene active" id="scene1">
+
+    <div class="hook-badge" id="hookBadge">
+      CARGANDO...
+    </div>
+
+    <div class="hook-main-title" id="hookTitle">
+      CARGANDO...
+    </div>
+
+    <div class="match-teams-card">
+
+      <div class="team-name" id="homeTeam">
+        LOCAL
+      </div>
+
+      <div class="vs-circle">
+        VS
+      </div>
+
+      <div class="team-name" id="awayTeam">
+        VISITANTE
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================
+       SCENE 2
+       ====================================== -->
+
+  <div class="scene" id="scene2">
+
+    <div class="hero-stat-card">
+
+      <div class="stat-match-subtitle" id="matchSubtitle">
+        Partido de hoy
+      </div>
+
+      <div class="stat-teams" id="statTeams">
+        Local vs Visitante
+      </div>
+
+      <div class="market-tag" id="marketTag">
+        MERCADO
+      </div>
+
+      <div class="big-percentage" id="percentCounter">
+        0.0%
+      </div>
+
+      <div class="sample-badge" id="sampleBadge">
+        CARGANDO...
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================
+       SCENE 3
+       ====================================== -->
+
+  <div class="scene" id="scene3">
+
+    <div class="evidence-hero-container">
+
+      <div class="evidence-stat-card">
+
+        <div class="evidence-team-info">
+
+          <div
+            class="evidence-team-title"
+            id="evidenceTeam1"
+          >
+            EQUIPO
+          </div>
+
+          <div
+            class="evidence-team-desc"
+            id="evidenceLabel1"
+          >
+            ESTADÍSTICA
+          </div>
+
+        </div>
+
+        <div
+          class="evidence-giant-number"
+          id="evidenceValue1"
+        >
+          0.00
+        </div>
+
+      </div>
+
+      <div class="evidence-stat-card">
+
+        <div class="evidence-team-info">
+
+          <div
+            class="evidence-team-title"
+            id="evidenceTeam2"
+          >
+            EQUIPO
+          </div>
+
+          <div
+            class="evidence-team-desc"
+            id="evidenceLabel2"
+          >
+            ESTADÍSTICA
+          </div>
+
+        </div>
+
+        <div
+          class="evidence-giant-number"
+          id="evidenceValue2"
+        >
+          0.00
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================
+       SCENE 4
+       ====================================== -->
+
+  <div class="scene" id="scene4">
+
+    <div
+      class="question-title"
+      id="ctaQuestion"
+    >
+      ¿SE CUMPLIRÁ HOY? 👀
+    </div>
+
+    <div class="cta-box">
+
+      <div
+        class="cta-source-label"
+        id="ctaLabel"
+      >
+        Más análisis en
+      </div>
+
+      <div
+        class="cta-url"
+        id="ctaUrl"
+      >
+        data-fut.com
+      </div>
+
+      <div
+        class="cta-subtext"
+        id="ctaSubtext"
+      >
+        Consulta todas las estadísticas y frecuencias históricas gratis.
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================
+       SUBTITLES
+       ====================================== -->
+
+  <div
+    class="subtitle-layer"
+    id="subtitleLayer"
+  >
+
+    <div
+      class="subtitle-box"
+      id="subtitleBox"
+    >
+
+      <div
+        class="subtitle-text"
+        id="subtitleText"
+      ></div>
+
+    </div>
+
+  </div>
+
+  <div class="disclaimer" id="disclaimer">
+    Estimaciones basadas en datos históricos. No garantizan resultados.
+  </div>
+
+  <div
+    class="timeline-progress"
+    id="progressBar"
+  ></div>
+
+  <canvas id="heartbeatCanvas"></canvas>
+
+  <div
+    class="fatal-error"
+    id="fatalError"
+  ></div>
+
+  <script>
+
+    // ========================================================
+    // GLOBAL STATE
+    // ========================================================
+
+    window.RENDER_READY = false;
+    window.RENDER_ERROR = null;
+
+    let totalDuration = 15000;
+    let narrationManifest = null;
+    let promoData = null;
+    let startTime = null;
+
+    let subtitleCues = [];
+    let lastSubtitleText = null;
+
+    // ========================================================
+    // DOM
+    // ========================================================
+
+    const scene1 =
+      document.getElementById('scene1');
+
+    const scene2 =
+      document.getElementById('scene2');
+
+    const scene3 =
+      document.getElementById('scene3');
+
+    const scene4 =
+      document.getElementById('scene4');
+
+    const scenes = [
+      scene1,
+      scene2,
+      scene3,
+      scene4
+    ];
+
+    const percentCounter =
+      document.getElementById('percentCounter');
+
+    const progressBar =
+      document.getElementById('progressBar');
+
+    const heartbeatCanvas =
+      document.getElementById('heartbeatCanvas');
+
+    const fatalError =
+      document.getElementById('fatalError');
+
+    const subtitleBox =
+      document.getElementById('subtitleBox');
+
+    const subtitleText =
+      document.getElementById('subtitleText');
+
+    const ctx =
+      heartbeatCanvas.getContext('2d');
+
+    window.RENDER_DURATION_MS =
+      totalDuration;
+
+    // ========================================================
+    // BASIC HELPERS
+    // ========================================================
+
+    function setText(id, value) {
+
+      const element =
+        document.getElementById(id);
+
+      if (!element) {
+        throw new Error(
+          `No existe el elemento #${id}`
+        );
+      }
+
+      element.textContent =
+        value ?? '';
+    }
+
+    // ========================================================
+    // PROMO DATA VALIDATION
+    // ========================================================
+
+    function validatePromoData(data) {
+
+      if (!data) {
+        throw new Error(
+          'promo-data.json está vacío.'
+        );
+      }
+
+      const requiredStrings = [
+        'league',
+        'homeTeam',
+        'awayTeam',
+        'market',
+        'sampleText',
+        'hookBadge',
+        'hookTitle',
+        'ctaQuestion',
+        'ctaLabel',
+        'ctaUrl',
+        'ctaSubtext'
+      ];
+
+      for (const key of requiredStrings) {
+
+        if (
+          typeof data[key] !== 'string' ||
+          data[key].trim() === ''
+        ) {
+
+          throw new Error(
+            `Campo requerido inválido: ${key}`
+          );
+        }
+      }
+
+      if (
+        typeof data.percentage !== 'number' ||
+        Number.isNaN(data.percentage)
+      ) {
+
+        throw new Error(
+          'percentage debe ser un número.'
+        );
+      }
+
+      if (
+        !Array.isArray(data.evidence) ||
+        data.evidence.length < 2
+      ) {
+
+        throw new Error(
+          'evidence debe contener al menos 2 elementos.'
+        );
+      }
+
+      for (let index = 0; index < 2; index++) {
+
+        const item =
+          data.evidence[index];
+
+        if (
+          !item ||
+          typeof item.team !== 'string' ||
+          typeof item.label !== 'string' ||
+          typeof item.value !== 'string'
+        ) {
+
+          throw new Error(
+            `Evidencia ${index + 1} inválida.`
+          );
+        }
+      }
+    }
+
+    // ========================================================
+    // MANIFEST VALIDATION
+    // ========================================================
+
+    function validateNarrationManifest(manifest) {
+
+      if (!manifest) {
+        throw new Error(
+          'narration-manifest.json está vacío.'
+        );
+      }
+
+      if (
+        !Array.isArray(manifest.blocks) ||
+        manifest.blocks.length !== 4
+      ) {
+
+        throw new Error(
+          'narration-manifest.json debe contener exactamente 4 bloques.'
+        );
+      }
+
+      const expectedIds = [
+        'intro',
+        'market',
+        'evidence',
+        'outro'
+      ];
+
+      manifest.blocks.forEach(
+        (block, index) => {
+
+          if (
+            !block ||
+            block.id !== expectedIds[index]
+          ) {
+
+            throw new Error(
+              `Bloque ${index + 1} inválido. Se esperaba "${expectedIds[index]}".`
+            );
+          }
+
+          const numericFields = [
+            'startSeconds',
+            'durationSeconds',
+            'endSeconds'
+          ];
+
+          for (const field of numericFields) {
+
+            if (
+              typeof block[field] !== 'number' ||
+              Number.isNaN(block[field])
+            ) {
+
+              throw new Error(
+                `Bloque "${block.id}": ${field} debe ser numérico.`
+              );
+            }
+          }
+
+          if (
+            typeof block.subtitles !== 'string' ||
+            block.subtitles.trim() === ''
+          ) {
+
+            throw new Error(
+              `Bloque "${block.id}" no contiene archivo de subtítulos.`
+            );
+          }
+        }
+      );
+
+      if (
+        typeof manifest.totalVideoDurationSeconds !== 'number' ||
+        Number.isNaN(manifest.totalVideoDurationSeconds) ||
+        manifest.totalVideoDurationSeconds <= 0
+      ) {
+
+        throw new Error(
+          'totalVideoDurationSeconds debe ser un número positivo.'
+        );
+      }
+    }
+
+    // ========================================================
+    // FILE LOADERS
+    // ========================================================
+
+    async function loadPromoData() {
+
+      const response =
+        await fetch(
+          './promo-data.json',
+          {
+            cache: 'no-store'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          `No se pudo cargar promo-data.json. HTTP ${response.status}`
+        );
+      }
+
+      return await response.json();
+    }
+
+    async function loadNarrationManifest() {
+
+      const response =
+        await fetch(
+          './promo-audio/narration-manifest.json',
+          {
+            cache: 'no-store'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          `No se pudo cargar narration-manifest.json. HTTP ${response.status}`
+        );
+      }
+
+      return await response.json();
+    }
+
+    async function loadTextFile(filePath) {
+
+      const response =
+        await fetch(
+          filePath,
+          {
+            cache: 'no-store'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          `No se pudo cargar ${filePath}. HTTP ${response.status}`
+        );
+      }
+
+      return await response.text();
+    }
+
+    // ========================================================
+    // APPLY PROMO DATA
+    // ========================================================
+
+    function applyPromoData(data) {
+
+      setText(
+        'leagueBadge',
+        data.league
+      );
+
+      setText(
+        'hookBadge',
+        data.hookBadge
+      );
+
+      setText(
+        'hookTitle',
+        data.hookTitle
+      );
+
+      setText(
+        'homeTeam',
+        data.homeTeam
+      );
+
+      setText(
+        'awayTeam',
+        data.awayTeam
+      );
+
+      setText(
+        'matchSubtitle',
+        `${data.league} • Partido de hoy`
+      );
+
+      setText(
+        'statTeams',
+        `${data.homeTeam} vs ${data.awayTeam}`
+      );
+
+      setText(
+        'marketTag',
+        data.market
+      );
+
+      setText(
+        'sampleBadge',
+        data.sampleText
+      );
+
+      setText(
+        'evidenceTeam1',
+        data.evidence[0].team
+      );
+
+      setText(
+        'evidenceLabel1',
+        data.evidence[0].label
+      );
+
+      setText(
+        'evidenceValue1',
+        data.evidence[0].value
+      );
+
+      setText(
+        'evidenceTeam2',
+        data.evidence[1].team
+      );
+
+      setText(
+        'evidenceLabel2',
+        data.evidence[1].label
+      );
+
+      setText(
+        'evidenceValue2',
+        data.evidence[1].value
+      );
+
+      setText(
+        'ctaQuestion',
+        data.ctaQuestion
+      );
+
+      setText(
+        'ctaLabel',
+        data.ctaLabel
+      );
+
+      setText(
+        'ctaUrl',
+        data.ctaUrl
+      );
+
+      setText(
+        'ctaSubtext',
+        data.ctaSubtext
+      );
+
+      percentCounter.textContent =
+        '0.0%';
+    }
+
+    // ========================================================
+    // DYNAMIC TIMELINE
+    // ========================================================
+
+    function configureTimelineFromManifest(manifest) {
+
+      narrationManifest =
+        manifest;
+
+      totalDuration =
+        Math.round(
+          manifest.totalVideoDurationSeconds * 1000
+        );
+
+      window.RENDER_DURATION_MS =
+        totalDuration;
+
+      console.log(
+        `Duración dinámica del promo: ${(totalDuration / 1000).toFixed(2)}s`
+      );
+    }
+
+    // ========================================================
+    // SRT PARSER
+    // ========================================================
+
+    function parseSrtTimestamp(value) {
+
+      const match =
+        value
+          .trim()
+          .match(
+            /(\d{2}):(\d{2}):(\d{2}),(\d{3})/
+          );
+
+      if (!match) {
+
+        throw new Error(
+          `Timestamp SRT inválido: ${value}`
+        );
+      }
+
+      const hours =
+        Number(match[1]);
+
+      const minutes =
+        Number(match[2]);
+
+      const seconds =
+        Number(match[3]);
+
+      const milliseconds =
+        Number(match[4]);
+
+      return (
+        hours * 3600 +
+        minutes * 60 +
+        seconds +
+        milliseconds / 1000
+      );
+    }
+
+    function parseSrt(text) {
+
+      const normalized =
+        text
+          .replace(/\r\n/g, '\n')
+          .replace(/\r/g, '\n')
+          .trim();
+
+      if (!normalized) {
+        return [];
+      }
+
+      const blocks =
+        normalized.split(
+          /\n\s*\n/
+        );
+
+      const cues = [];
+
+      for (const block of blocks) {
+
+        const lines =
+          block
+            .split('\n')
+            .map(
+              line =>
+                line.trim()
+            )
+            .filter(Boolean);
+
+        if (
+          lines.length < 2
+        ) {
+          continue;
+        }
+
+        let timeLineIndex =
+          0;
+
+        if (
+          /^\d+$/.test(lines[0])
+        ) {
+          timeLineIndex =
+            1;
+        }
+
+        const timeLine =
+          lines[timeLineIndex];
+
+        if (
+          !timeLine ||
+          !timeLine.includes('-->')
+        ) {
+          continue;
+        }
+
+        const [
+          startValue,
+          endValue
+        ] =
+          timeLine
+            .split('-->')
+            .map(
+              item =>
+                item.trim()
+            );
+
+        const cueText =
+          lines
+            .slice(
+              timeLineIndex + 1
+            )
+            .join(' ')
+            .replace(
+              /<[^>]+>/g,
+              ''
+            )
+            .trim();
+
+        if (!cueText) {
+          continue;
+        }
+
+        cues.push(
+          {
+            startSeconds:
+              parseSrtTimestamp(
+                startValue
+              ),
+
+            endSeconds:
+              parseSrtTimestamp(
+                endValue
+              ),
+
+            text:
+              cueText
+          }
+        );
+      }
+
+      return cues;
+    }
+
+    // ========================================================
+    // GLOBAL SUBTITLE TIMELINE
+    // ========================================================
+
+    async function buildGlobalSubtitleTimeline(manifest) {
+
+      const allCues =
+        [];
+
+      for (const block of manifest.blocks) {
+
+        const srtPath =
+          `./promo-audio/${block.subtitles}`;
+
+        const srtText =
+          await loadTextFile(
+            srtPath
+          );
+
+        const localCues =
+          parseSrt(
+            srtText
+          );
+
+        for (const cue of localCues) {
+
+          allCues.push(
+            {
+              blockId:
+                block.id,
+
+              startSeconds:
+                block.startSeconds +
+                cue.startSeconds,
+
+              endSeconds:
+                block.startSeconds +
+                cue.endSeconds,
+
+              text:
+                cue.text
+            }
+          );
+        }
+      }
+
+      allCues.sort(
+        (a, b) =>
+          a.startSeconds -
+          b.startSeconds
+      );
+
+      subtitleCues =
+        allCues;
+
+      console.log(
+        `Subtítulos cargados: ${subtitleCues.length} cues`
+      );
+    }
+
+    // ========================================================
+    // SCENE CONTROL
+    // ========================================================
+
+    function showScene(activeScene) {
+
+      for (const scene of scenes) {
+
+        scene.className =
+          scene === activeScene
+            ? 'scene active'
+            : 'scene';
+      }
+    }
+
+    // ========================================================
+    // SUBTITLE DISPLAY
+    // ========================================================
+
+    function findActiveSubtitle(currentSeconds) {
+
+      for (const cue of subtitleCues) {
+
+        if (
+          currentSeconds >= cue.startSeconds &&
+          currentSeconds < cue.endSeconds
+        ) {
+
+          return cue;
+        }
+      }
+
+      return null;
+    }
+
+    function updateSubtitle(elapsed) {
+
+      const currentSeconds =
+        elapsed / 1000;
+
+      const cue =
+        findActiveSubtitle(
+          currentSeconds
+        );
+
+      if (!cue) {
+
+        if (
+          lastSubtitleText !== null
+        ) {
+
+          subtitleBox
+            .classList
+            .remove(
+              'visible'
+            );
+
+          lastSubtitleText =
+            null;
+        }
+
+        return;
+      }
+
+      if (
+        cue.text !== lastSubtitleText
+      ) {
+
+        subtitleText.textContent =
+          cue.text;
+
+        subtitleBox
+          .classList
+          .add(
+            'visible'
+          );
+
+        lastSubtitleText =
+          cue.text;
+      }
+    }
+
+    // ========================================================
+    // PERCENTAGE ANIMATION
+    // ========================================================
+
+    function updatePercentageCounter(
+      elapsed,
+      marketBlock
+    ) {
+
+      const blockStart =
+        marketBlock.startSeconds * 1000;
+
+      const blockDuration =
+        Math.max(
+          marketBlock.durationSeconds * 1000,
+          1
+        );
+
+      const animationDuration =
+        Math.min(
+          1500,
+          blockDuration * 0.45
+        );
+
+      const percentageProgress =
+        Math.min(
+          Math.max(
+            (
+              elapsed -
+              blockStart
+            ) /
+            animationDuration,
+            0
+          ),
+          1
+        );
+
+      const percentage =
+        percentageProgress *
+        promoData.percentage;
+
+      percentCounter.textContent =
+        `${percentage.toFixed(1)}%`;
+    }
+
+    // ========================================================
+    // RENDER LOOP
+    // ========================================================
+
+    function renderLoop(timestamp) {
+
+      if (!startTime) {
+        startTime =
+          timestamp;
+      }
+
+      const elapsed =
+        timestamp -
+        startTime;
+
+      ctx.fillStyle =
+        Math.floor(elapsed) % 2 === 0
+          ? '#00ff00'
+          : '#ff0000';
+
+      ctx.fillRect(
+        0,
+        0,
+        2,
+        2
+      );
+
+      const progress =
+        Math.min(
+          (
+            elapsed /
+            totalDuration
+          ) * 100,
+          100
+        );
+
+      progressBar.style.width =
+        `${progress}%`;
+
+      const marketBlock =
+        narrationManifest.blocks[1];
+
+      const evidenceBlock =
+        narrationManifest.blocks[2];
+
+      const outroBlock =
+        narrationManifest.blocks[3];
+
+      const marketStart =
+        marketBlock.startSeconds *
+        1000;
+
+      const evidenceStart =
+        evidenceBlock.startSeconds *
+        1000;
+
+      const outroStart =
+        outroBlock.startSeconds *
+        1000;
+
+      if (
+        elapsed < marketStart
+      ) {
+
+        showScene(
+          scene1
+        );
+
+        percentCounter.textContent =
+          '0.0%';
+      }
+
+      else if (
+        elapsed < evidenceStart
+      ) {
+
+        showScene(
+          scene2
+        );
+
+        updatePercentageCounter(
+          elapsed,
+          marketBlock
+        );
+      }
+
+      else if (
+        elapsed < outroStart
+      ) {
+
+        showScene(
+          scene3
+        );
+
+        percentCounter.textContent =
+          `${promoData.percentage.toFixed(1)}%`;
+      }
+
+      else {
+
+        showScene(
+          scene4
+        );
+
+        percentCounter.textContent =
+          `${promoData.percentage.toFixed(1)}%`;
+      }
+
+      updateSubtitle(
+        elapsed
+      );
+
+      if (
+        elapsed <
+        totalDuration + 500
+      ) {
+
+        requestAnimationFrame(
+          renderLoop
+        );
+      }
+    }
+
+    // ========================================================
+    // ERROR
+    // ========================================================
+
+    function showFatalError(error) {
+
+      console.error(error);
+
+      window.RENDER_ERROR =
+        String(
+          error?.message ??
+          error
+        );
+
+      fatalError.style.display =
+        'flex';
+
+      fatalError.textContent =
+        `ERROR DE TEMPLATE:\n${window.RENDER_ERROR}`;
+    }
+
+    // ========================================================
+    // START
+    // ========================================================
+
+    window.addEventListener(
+      'DOMContentLoaded',
+      async () => {
+
+        try {
+
+          if (document.fonts) {
+            await document.fonts.ready;
+          }
+
+          const [
+            loadedPromoData,
+            loadedNarrationManifest
+          ] =
+            await Promise.all(
+              [
+                loadPromoData(),
+                loadNarrationManifest()
+              ]
+            );
+
+          promoData =
+            loadedPromoData;
+
+          validatePromoData(
+            promoData
+          );
+
+          validateNarrationManifest(
+            loadedNarrationManifest
+          );
+
+          configureTimelineFromManifest(
+            loadedNarrationManifest
+          );
+
+          applyPromoData(
+            promoData
+          );
+
+          await buildGlobalSubtitleTimeline(
+            loadedNarrationManifest
+          );
+
+          requestAnimationFrame(
+            () => {
+
+              requestAnimationFrame(
+                () => {
+
+                  window.RENDER_READY =
+                    true;
+
+                  console.log(
+                    '--- DATAFUT GENERIC PROMO TEMPLATE WITH VOICE TIMELINE + SUBTITLES READY ---'
+                  );
+
+                  requestAnimationFrame(
+                    renderLoop
+                  );
+                }
+              );
+            }
+          );
+        }
+
+        catch (error) {
+
+          showFatalError(
+            error
+          );
+        }
+      }
+    );
+
+  </script>
+
+</body>
+</html>

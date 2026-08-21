@@ -1,0 +1,47 @@
+# Dependencies and local tooling
+node_modules/
+.playwright-mcp/
+.local/
+.env
+.env.*
+!.env.example
+
+# Authentication and browser state (never commit)
+datafut-session.json
+datafut-marketing-session.json
+playdoit-public-state.json
+*storage-state*.json
+*session*.json
+
+# Generated media and render artifacts
+renders/
+captures/
+raw/
+raw-*/
+*-audio/
+*.mp3
+*.wav
+*.webm
+*.mp4
+
+# Generated pipeline state and root-level working data
+pipeline-state/
+/*.json
+!/package.json
+!/package-lock.json
+
+# Diagnostic artifacts created inside scripts
+/scripts/*.json
+/scripts/*.png
+/scripts/*.html
+
+# Root-level screenshots
+/*.png
+
+# Python and general temporary files
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

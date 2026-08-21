@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--storage-state",
+        "C:\\DataFut-Marketing\\datafut-marketing-session.json"
+      ]
+    }
+  }
+}

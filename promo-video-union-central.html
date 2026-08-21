@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ojo Con Este Partido - Unión Santa Fe vs Central Córdoba</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #050811;
+      font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    /* High Energy Dark Sports Background with Dynamic Neon Glows */
+    .bg-grid {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.35), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.3), transparent 55%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px;
+      z-index: 1;
+    }
+
+    /* Top Source Tag - DATAFUT AS THE DATA SOURCE */
+    .source-header {
+      position: absolute;
+      top: 70px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .source-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      padding: 14px 28px;
+      border-radius: 40px;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.35);
+    }
+
+    .source-logo-dot {
+      width: 16px;
+      height: 16px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 16px #10b981;
+    }
+
+    .source-name {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+    }
+
+    .league-badge {
+      background: rgba(234, 179, 8, 0.2);
+      border: 1.5px solid rgba(234, 179, 8, 0.7);
+      color: #fde047;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* Scenes Container */
+    .scene {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 130px 50px 80px 50px;
+      opacity: 0;
+      transition: opacity 0.35s ease-in-out, transform 0.35s ease-in-out;
+      transform: scale(0.95);
+      z-index: 2;
+    }
+
+    /* ACTIVE SCENE - VISIBLE FROM FRAME 0 */
+    .scene.active {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+    }
+
+    /* SCENE 1: HOOK (0-2s) */
+    .hook-badge {
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #ef4444;
+      color: #f87171;
+      padding: 14px 36px;
+      border-radius: 30px;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 35px;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+
+    .hook-main-title {
+      font-size: 84px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.15;
+      color: #ffffff;
+      margin-bottom: 35px;
+      text-shadow: 0 6px 30px rgba(16, 185, 129, 0.5);
+      letter-spacing: -1px;
+    }
+
+    .match-teams-card {
+      width: 900px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 3px solid rgba(16, 185, 129, 0.5);
+      border-radius: 36px;
+      padding: 45px 35px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      margin-top: 20px;
+    }
+
+    .team-name {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .vs-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6);
+    }
+
+    /* SCENE 2: MARKET & DATAFUT SUPPORT (5-9s) */
+    .hero-stat-card {
+      width: 920px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 3px solid #10b981;
+      border-radius: 44px;
+      padding: 55px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 0 80px rgba(16, 185, 129, 0.4);
+    }
+
+    .stat-match-subtitle {
+      font-size: 28px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .stat-teams {
+      font-size: 44px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .market-tag {
+      background: rgba(56, 189, 248, 0.2);
+      border: 2.5px solid #38bdf8;
+      color: #38bdf8;
+      padding: 18px 42px;
+      border-radius: 28px;
+      font-size: 44px;
+      font-weight: 900;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+
+    .big-percentage {
+      font-size: 160px;
+      font-weight: 900;
+      color: #10b981;
+      text-shadow: 0 0 60px rgba(16, 185, 129, 0.7);
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .sample-badge {
+      background: rgba(16, 185, 129, 0.25);
+      color: #6ee7b7;
+      border: 1.5px solid rgba(16, 185, 129, 0.6);
+      padding: 16px 32px;
+      border-radius: 30px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    /* SCENE 3: EVIDENCE & KEY NUMBERS (9-13s) */
+    .evidence-hero-container {
+      width: 920px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 42px;
+    }
+
+    .evidence-stat-card {
+      min-height: 230px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 3px solid rgba(56, 189, 248, 0.6);
+      border-radius: 36px;
+      padding: 42px 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    .evidence-team-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .evidence-team-title {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    .evidence-team-desc {
+      font-size: 28px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .evidence-giant-number {
+      font-size: 128px;
+      font-weight: 900;
+      color: #38bdf8;
+      text-shadow: 0 0 40px rgba(56, 189, 248, 0.6);
+      line-height: 1;
+    }
+
+    /* SCENE 4: CLOSING & CTA (13-16s) */
+    .question-title {
+      font-size: 80px;
+      font-weight: 900;
+      text-align: center;
+      color: #fde047;
+      margin-bottom: 40px;
+      text-shadow: 0 8px 30px rgba(234, 179, 8, 0.4);
+    }
+
+    .cta-box {
+      width: 880px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98));
+      border: 3px solid #10b981;
+      border-radius: 44px;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 25px 60px rgba(16, 185, 129, 0.35);
+    }
+
+    .cta-source-label {
+      font-size: 28px;
+      color: #94a3b8;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .cta-url {
+      font-size: 56px;
+      font-weight: 900;
+      color: #10b981;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+    }
+
+    .cta-subtext {
+      font-size: 32px;
+      color: #cbd5e1;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* Progress bar */
+    .timeline-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 12px;
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+      width: 0%;
+      z-index: 100;
+    }
+
+    #heartbeatCanvas {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 2px;
+      height: 2px;
+      opacity: 0.01;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <!-- Header Source Tag -->
+  <div class="source-header">
+    <div class="source-tag">
+      <div class="source-logo-dot"></div>
+      <div class="source-name">DATAFUT</div>
+    </div>
+    <div class="league-badge">PRIMERA DIVISIÓN 🇦🇷</div>
+  </div>
+
+  <!-- SCENE 1: HOOK (0s - 3s) - Active in raw HTML for frame 0 -->
+  <div class="scene active" id="scene1">
+    <div class="hook-badge">ALERTA TÁCTICA ⚽</div>
+    <div class="hook-main-title">OJO CON ESTE PARTIDO 👀</div>
+    <div class="match-teams-card">
+      <div class="team-name">Unión Santa Fe</div>
+      <div class="vs-circle">VS</div>
+      <div class="team-name">Central Córdoba</div>
+    </div>
+  </div>
+
+  <!-- SCENE 2: MARKET & DATAFUT SUPPORT (3s - 7s) -->
+  <div class="scene" id="scene2">
+    <div class="hero-stat-card">
+      <div class="stat-match-subtitle">Liga Argentina • Partido de Hoy</div>
+      <div class="stat-teams">Unión vs Central Córdoba</div>
+      <div class="market-tag">MENOS DE 3.5 GOLES</div>
+      <div class="big-percentage" id="percentCounter">0.0%</div>
+      <div class="sample-badge">Respaldo del modelo • Muestra de 9 partidos</div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: EVIDENCE & KEY NUMBERS (7s - 11s) -->
+  <div class="scene" id="scene3">
+    <div class="evidence-hero-container">
+      <div class="evidence-stat-card">
+        <div class="evidence-team-info">
+          <div class="evidence-team-title">CENTRAL CÓRDOBA</div>
+          <div class="evidence-team-desc">Goles como visitante</div>
+        </div>
+        <div class="evidence-giant-number">0.11</div>
+      </div>
+      <div class="evidence-stat-card">
+        <div class="evidence-team-info">
+          <div class="evidence-team-title">UNIÓN SANTA FE</div>
+          <div class="evidence-team-desc">Goles concedidos en casa</div>
+        </div>
+        <div class="evidence-giant-number">0.67</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 4: CLOSING & CTA (11s - 15s) -->
+  <div class="scene" id="scene4">
+    <div class="question-title">¿SE CUMPLIRÁ HOY? 👀</div>
+    <div class="cta-box">
+      <div class="cta-source-label">Fuente de los datos:</div>
+      <div class="cta-url">data-fut.com</div>
+      <div class="cta-subtext">Consulta todas las estadísticas y frecuencias históricas gratis.</div>
+    </div>
+  </div>
+
+  <div class="timeline-progress" id="progressBar"></div>
+  <canvas id="heartbeatCanvas"></canvas>
+
+  <script>
+    window.RENDER_READY = false;
+
+    const totalDuration = 15000;
+    const scene1 = document.getElementById('scene1');
+    const scene2 = document.getElementById('scene2');
+    const scene3 = document.getElementById('scene3');
+    const scene4 = document.getElementById('scene4');
+    const percentCounter = document.getElementById('percentCounter');
+    const progressBar = document.getElementById('progressBar');
+    const heartbeatCanvas = document.getElementById('heartbeatCanvas');
+    const ctx = heartbeatCanvas.getContext('2d');
+
+    let startTime = null;
+
+    function renderLoop(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+
+      ctx.fillStyle = (Math.floor(elapsed) % 2 === 0) ? '#00ff00' : '#ff0000';
+      ctx.fillRect(0, 0, 2, 2);
+
+      const pct = Math.min((elapsed / totalDuration) * 100, 100);
+      progressBar.style.width = pct + '%';
+
+      // Scene timeline switching
+      if (elapsed < 3000) {
+        scene1.className = 'scene active';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+      } else if (elapsed >= 3000 && elapsed < 7000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene active';
+        scene3.className = 'scene';
+        scene4.className = 'scene';
+
+        // Count up to 73.1%
+        const pProgress = Math.min((elapsed - 3000) / 1200, 1);
+        percentCounter.innerText = (pProgress * 73.1).toFixed(1) + '%';
+      } else if (elapsed >= 7000 && elapsed < 11000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene active';
+        scene4.className = 'scene';
+      } else if (elapsed >= 11000) {
+        scene1.className = 'scene';
+        scene2.className = 'scene';
+        scene3.className = 'scene';
+        scene4.className = 'scene active';
+      }
+
+      if (elapsed < totalDuration + 500) {
+        requestAnimationFrame(renderLoop);
+      }
+    }
+
+    function preloadImages() {
+      const imgs = Array.from(document.querySelectorAll('img'));
+      const promises = imgs.map(img => {
+        if (img.complete && img.naturalHeight !== 0) {
+          return Promise.resolve();
+        }
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      return Promise.all(promises);
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      await preloadImages();
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.RENDER_READY = true;
+          console.log('--- UNIÓN VS CENTRAL CÓRDOBA V5 CLEAN EVIDENCE RENDER_READY SIGNAL EMITTED ---');
+          requestAnimationFrame(renderLoop);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
