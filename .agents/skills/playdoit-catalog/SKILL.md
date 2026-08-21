@@ -1,3 +1,8 @@
+---
+name: playdoit-catalog
+description: Inspect the public PlayDoIt sportsbook to catalog currently visible matches, markets, lines, subjects, periods, and odds. Never decide picks or place bets.
+---
+
 # PlayDoIt Catalog
 
 ## RESPONSABILIDAD ÚNICA

@@ -1,3 +1,8 @@
+---
+name: datafut-discovery
+description: Discover statistical candidates in DataFut within the current PlayDoIt catalog. Never verify availability, build parlays, render, or publish.
+---
+
 # DataFut Discovery
 
 ## RESPONSABILIDAD ÚNICA

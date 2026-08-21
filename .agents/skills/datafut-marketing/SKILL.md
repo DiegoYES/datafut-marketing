@@ -1,3 +1,8 @@
+---
+name: datafut-marketing
+description: Orchestrate the modular DataFut marketing workflow across catalog, discovery, verification, parlay building, human selection, content, and social outputs.
+---
+
 # DataFut Marketing — Orquestador
 
 ## OBJETIVO

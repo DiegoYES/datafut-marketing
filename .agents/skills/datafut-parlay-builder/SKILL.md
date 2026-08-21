@@ -1,3 +1,8 @@
+---
+name: datafut-parlay-builder
+description: Build, quote, and rank parlay finalists from candidates verified with exact live DOM evidence. Never place bets, enter stake, publish, or choose for the user.
+---
+
 # DataFut Parlay Builder
 
 ## RESPONSABILIDAD ÚNICA

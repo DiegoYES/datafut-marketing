@@ -1,3 +1,8 @@
+---
+name: playdoit-verification
+description: Reverify exact DataFut candidates against the current visible PlayDoIt DOM and record auditable evidence. Never substitute markets, build parlays, or bet.
+---
+
 # PlayDoIt Verification
 
 ## RESPONSABILIDAD ÚNICA

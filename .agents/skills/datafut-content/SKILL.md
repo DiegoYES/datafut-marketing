@@ -1,3 +1,8 @@
+---
+name: datafut-content
+description: Legacy DataFut discovery specification stored under the content skill. Use only to audit or repair this misplaced skill; do not invoke it to generate content.
+---
+
 # DataFut Discovery
 
 ## RESPONSABILIDAD ÚNICA

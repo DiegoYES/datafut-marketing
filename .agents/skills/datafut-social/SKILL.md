@@ -1,3 +1,8 @@
+---
+name: datafut-social
+description: Generate social graphics and copy from already frozen DataFut content. Never discover, verify, replace, or alter picks.
+---
+
 # DataFut Social
 
 ## RESPONSABILIDAD ÚNICA
