@@ -1,12 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 const { readJson } = require('./validation');
+const {
+  validateBetslipDomEvidence,
+  validateDomMarketEvidence
+} = require('./dom-evidence');
+const { validateDomSelectorConfig } = require('./dom-selector-config');
 
 function auditPipelineState(projectDir) {
   const stateDir = path.join(projectDir, 'pipeline-state');
   const errors = [];
   const warnings = [];
   const summary = {};
+  const selectorConfigPath = path.join(projectDir, 'config', 'playdoit-dom.json');
+  const selectorConfig = readJson(selectorConfigPath);
+  const selectorValidation = validateDomSelectorConfig(selectorConfig);
+  summary.domSelectors = {
+    status: selectorConfig.status,
+    valid: selectorValidation.valid
+  };
 
   function loadState(fileName) {
     const filePath = path.join(stateDir, fileName);
@@ -56,12 +68,13 @@ function auditPipelineState(projectDir) {
       if (eligibleResults.length < eligibleCount) {
         errors.push('totalEligible supera los resultados AVAILABLE_EXACT disponibles.');
       }
-      const withoutDomEvidence = eligibleResults.filter(
-        result => result.evidenceSource !== 'live_dom' || !result.domEvidence
-      );
-      if (withoutDomEvidence.length > 0) {
+      const invalidDomEvidence = eligibleResults.filter(result => {
+        const validation = validateDomMarketEvidence(result.requested, result.domEvidence);
+        return result.evidenceSource !== 'live_dom' || !validation.valid;
+      });
+      if (invalidDomEvidence.length > 0) {
         errors.push(
-          `${withoutDomEvidence.length} candidato(s) AVAILABLE_EXACT carecen de evidencia DOM individual.`
+          `${invalidDomEvidence.length} candidato(s) AVAILABLE_EXACT carecen de evidencia DOM valida.`
         );
       }
     }
@@ -84,15 +97,22 @@ function auditPipelineState(projectDir) {
       if (parlays.publishable !== true) {
         errors.push('Hay finalistas, pero parlay-options.json no declara publishable=true.');
       }
-      const withoutBetslipEvidence = finalists.filter(
-        finalist => finalist.betslipEvidence !== 'live_dom' || !finalist.domEvidence
-      );
-      if (withoutBetslipEvidence.length > 0) {
+      const invalidBetslipEvidence = finalists.filter(finalist => {
+        const validation = validateBetslipDomEvidence(finalist.candidateIds, finalist.domEvidence);
+        return finalist.betslipEvidence !== 'live_dom' || !validation.valid;
+      });
+      if (invalidBetslipEvidence.length > 0) {
         errors.push(
-          `${withoutBetslipEvidence.length} finalista(s) carecen de lectura DOM demostrable del betslip.`
+          `${invalidBetslipEvidence.length} finalista(s) carecen de lectura DOM valida del betslip.`
         );
       }
     }
+  }
+
+  const hasPublishableCandidates = verified && Number(verified.totalEligible || 0) > 0;
+  const hasFinalists = parlays && Array.isArray(parlays.finalists) && parlays.finalists.length > 0;
+  if ((hasPublishableCandidates || hasFinalists) && !selectorValidation.valid) {
+    errors.push('La configuracion de selectores DOM no esta verificada para automatizacion publicable.');
   }
 
   return { errors, warnings, summary };

@@ -36,6 +36,12 @@ Auditar si las verificaciones y cotizaciones poseen procedencia suficiente para 
 npm run datafut -- audit
 ```
 
+Ejecutar las pruebas de contrato que también deberá respetar cualquier cambio hecho con Gemini:
+
+```powershell
+npm run test:contracts
+```
+
 Validar la entrada sin generar archivos:
 
 ```powershell
@@ -90,3 +96,7 @@ Los archivos actuales pueden contener texto UTF-8 previamente corrompido, por ej
 Una vez congelado y validado el resultado actual, el trabajo pendiente es consolidar los multiples scripts fechados en un solo orquestador configurable y archivar los experimentos sin borrarlos.
 
 El manifiesto de migracion esta en `config/pipeline-manifest.json`. Las etapas de verificacion y builder permanecen bloqueadas hasta que observen directamente el DOM y lean el momio mostrado por el betslip; los scripts basados en API, dumps o multiplicacion quedan marcados como no publicables.
+
+Los selectores reales se registraran en `config/playdoit-dom.json`. Su estado inicial es `UNVERIFIED_SELECTORS`: las pistas historicas no se aceptan como selectores oficiales hasta probarlas contra la interfaz visible. El contrato exigido para mercados y betslip vive en `scripts/lib/dom-evidence.js`.
+
+La lista de comprobaciones para revisar cambios con Gemini u otro modelo esta en `docs/CROSS-MODEL-VALIDATION.md`.

@@ -1,0 +1,75 @@
+{
+  "candidate": {
+    "candidateId": "DF-TEST-001",
+    "match": "Equipo Local vs Equipo Visitante",
+    "subject": "Equipo Local vs Equipo Visitante",
+    "statistic": "goals",
+    "scope": "match",
+    "direction": "under",
+    "line": 2.5,
+    "period": "full_time"
+  },
+  "marketEvidence": {
+    "schemaVersion": 1,
+    "source": "live_dom",
+    "verificationMethod": "dom_observation",
+    "observedAt": "2026-08-21T20:00:00.000Z",
+    "url": "https://www.playdoit.mx/deportes/evento/123",
+    "visible": true,
+    "eventText": "Equipo Local vs Equipo Visitante",
+    "marketText": "Total de goles",
+    "selectionText": "Menos de 2.5",
+    "oddsText": "-115",
+    "selectionId": "odd-123",
+    "observedSemantics": {
+      "subject": "Equipo Local vs Equipo Visitante",
+      "statistic": "goals",
+      "scope": "match",
+      "direction": "under",
+      "line": 2.5,
+      "period": "full_time"
+    },
+    "selectors": {
+      "marketContainer": "[data-testid=\"market-total-goals\"]",
+      "selection": "[data-testid=\"selection-under-2-5\"]"
+    },
+    "rawText": "Total de goles Menos de 2.5 -115",
+    "screenshot": {
+      "path": "captures/evidence/DF-TEST-001.png",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "betslipEvidence": {
+    "schemaVersion": 1,
+    "source": "live_dom",
+    "quoteMethod": "betslip_dom_read",
+    "observedAt": "2026-08-21T20:01:00.000Z",
+    "url": "https://www.playdoit.mx/deportes",
+    "visible": true,
+    "combinedOddsText": "+104",
+    "selectionRows": [
+      {
+        "candidateId": "DF-TEST-001",
+        "rawText": "Equipo Local vs Equipo Visitante Menos de 2.5 -115"
+      },
+      {
+        "candidateId": "DF-TEST-002",
+        "rawText": "Otro Local vs Otro Visitante Mas de 1.5 -120"
+      }
+    ],
+    "selectors": {
+      "betslipContainer": "[data-testid=\"betslip\"]",
+      "selectionRow": "[data-testid=\"betslip-selection\"]",
+      "combinedOdds": "[data-testid=\"combined-odds\"]"
+    },
+    "rawText": "Parlay 2 selecciones Momio +104",
+    "screenshot": {
+      "path": "captures/evidence/PARLAY-TEST-001.png",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "cleanup": {
+      "empty": true,
+      "observedAt": "2026-08-21T20:01:05.000Z"
+    }
+  }
+}

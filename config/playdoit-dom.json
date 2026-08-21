@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "status": "UNVERIFIED_SELECTORS",
+  "targetOrigin": "https://www.playdoit.mx",
+  "selectors": {
+    "marketContainer": [],
+    "selection": [],
+    "betslipContainer": [],
+    "selectionRow": [],
+    "combinedOdds": []
+  },
+  "integrityRule": "No ejecutar verificacion publicable hasta observar y probar selectores unicos en el navegador real.",
+  "historicalHints": {
+    "selection": [
+      ".asb-btn-odd",
+      "[class*=\"odd\"]"
+    ],
+    "betslipContainer": [
+      "[class*=\"betslip\"]",
+      "[class*=\"coupon\"]"
+    ]
+  }
+}

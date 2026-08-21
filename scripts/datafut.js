@@ -6,6 +6,7 @@ const { readJson, validateParlayData } = require('./lib/validation');
 
 const projectDir = path.resolve(__dirname, '..');
 const manifest = readJson(path.join(projectDir, 'config', 'pipeline-manifest.json'));
+const domConfig = readJson(path.join(projectDir, 'config', 'playdoit-dom.json'));
 
 function usage() {
   console.log(`DataFut Marketing
@@ -40,6 +41,7 @@ function showStatus() {
   manifest.stages.forEach(stage => {
     console.log(`- ${stage.id}: ${stage.status.toUpperCase()} - ${stage.note}`);
   });
+  console.log(`- playdoit-dom-selectors: ${domConfig.status}`);
 
   const audit = auditPipelineState(projectDir);
   console.log('\nEstado local:');
