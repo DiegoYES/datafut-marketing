@@ -104,8 +104,9 @@ function getCombinations(arr, k) {
   console.log(` - Triples: ${triples.length}`);
   console.log(` - Total Combinaciones: ${allCombos.length}`);
 
-  // 3. Connect to PlayDoIt live browser for live betslip quoting
-  console.log('\n[PLAYDOIT] Conectando al sportsbook público de PlayDoIt para cotizar cada combinación en vivo...');
+  // 3. Legacy estimate. This script toggles selections, but does not read the
+  // displayed betslip price. The combined price below is multiplication only.
+  console.log('\n[PLAYDOIT] Generando estimaciones no publicables; no se leerá el momio mostrado por el betslip...');
   const publicStatePath = path.join(__dirname, '..', 'playdoit-public-state.json');
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({
@@ -207,8 +208,9 @@ function getCombinations(arr, k) {
         combinedOddsAmerican: quoteResult.combinedAmerican,
         combinedOddsText: quoteResult.combinedOddsText,
         hasSameMatch,
-        betslipEvidence: 'live_dom',
-        quotedAt: new Date().toISOString()
+        betslipEvidence: 'not_observed',
+        quoteMethod: 'calculated_from_individual_odds',
+        estimatedAt: new Date().toISOString()
       });
     } else {
       quoteFailedCount++;
@@ -227,7 +229,7 @@ function getCombinations(arr, k) {
   await browser.close();
 
   console.log(`\n[COTIZACIÓN FINALIZADA]`);
-  console.log(` - Combinaciones cotizadas exitosamente: ${quoteSuccessCount} / ${allCombos.length}`);
+  console.log(` - Combinaciones estimadas: ${quoteSuccessCount} / ${allCombos.length}`);
   console.log(` - QUOTE_FAILED: ${quoteFailedCount}`);
   console.log(` - Confirmación Betslip vacío: ${betslipStatus.empty ? 'CONFIRMADO (VACÍO)' : 'ERROR'}`);
 
@@ -275,6 +277,10 @@ function getCombinations(arr, k) {
   // Save parlay-options.json
   const parlayOutput = {
     generatedAt: new Date().toISOString(),
+    status: 'ESTIMATE_ONLY',
+    publishable: false,
+    quoteMethod: 'calculated_from_individual_odds',
+    integrityNotice: 'Los momios combinados no fueron leidos del DOM del betslip y no son cotizaciones oficiales.',
     eligibleCount: verifiedData.totalEligible,
     poolSize: pool.length,
     pool,
@@ -292,7 +298,7 @@ function getCombinations(arr, k) {
       combinedOddsDecimal: f.combinedOddsDecimal,
       combinedOddsAmerican: f.combinedOddsAmerican,
       betslipEvidence: f.betslipEvidence,
-      quotedAt: f.quotedAt,
+      estimatedAt: f.estimatedAt,
       selections: f.selections.map(s => ({
         candidateId: s.candidateId,
         match: s.match,
@@ -305,8 +311,9 @@ function getCombinations(arr, k) {
     }))
   };
 
-  fs.writeFileSync(path.join(pipelineDir, 'parlay-options.json'), JSON.stringify(parlayOutput, null, 2));
-  console.log(`\n[SUCCESS] parlay-options.json guardado exitosamente en ${path.join(pipelineDir, 'parlay-options.json')}`);
+  const estimatePath = path.join(pipelineDir, 'parlay-options-estimated.json');
+  fs.writeFileSync(estimatePath, JSON.stringify(parlayOutput, null, 2));
+  console.log(`\n[ESTIMATE ONLY] Resultado no publicable guardado en ${estimatePath}`);
 
   console.log('\n========================================================================');
   console.log('                      PRESENTACIÓN DE 5 FINALISTAS                      ');
@@ -315,7 +322,7 @@ function getCombinations(arr, k) {
   finalists.forEach(f => {
     console.log(`\n## Finalista ${f.rank}: ${f.category}`);
     console.log(`Tipo: Parlay ${f.type === 'doble' ? 'Doble' : 'Triple'}`);
-    console.log(`Momio REAL actual PlayDoIt: ${f.combinedOddsText}`);
+    console.log(`Momio ESTIMADO (no leído del betslip): ${f.combinedOddsText}`);
     f.selections.forEach((s, sIdx) => {
       console.log(`\n  Selección ${sIdx + 1}:`);
       console.log(`   - Partido: ${s.match}`);

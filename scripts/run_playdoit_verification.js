@@ -298,7 +298,8 @@ for (const c of candidates) {
   if (matched) {
     verifiedResults.push({
       candidateId: c.candidateId,
-      status: 'AVAILABLE_EXACT',
+      status: 'AVAILABLE_EXACT_CAPTURED',
+      evidenceSource: 'captured_dump',
       requested: {
         match: c.match,
         subject: c.subject,
@@ -333,11 +334,14 @@ for (const c of candidates) {
 
 const verifiedOutput = {
   verifiedAt: new Date().toISOString(),
-  navigationMode: "headed",
-  evidenceSource: "live_dom",
+  navigationMode: "offline_dump",
+  evidenceSource: "captured_dump",
+  publishable: false,
+  integrityNotice: "Este script compara contra un dump capturado; no constituye verificacion live_dom para publicar.",
   totalCandidatesReviewed: verifiedResults.length,
-  availableExactCount: verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT').length,
-  discardedCount: verifiedResults.filter(r => r.status !== 'AVAILABLE_EXACT').length,
+  availableExactCount: 0,
+  availableExactCapturedCount: verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT_CAPTURED').length,
+  discardedCount: verifiedResults.filter(r => r.status !== 'AVAILABLE_EXACT_CAPTURED').length,
   results: verifiedResults
 };
 

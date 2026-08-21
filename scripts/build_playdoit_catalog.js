@@ -20,7 +20,9 @@ function decimalToAmerican(dec) {
   console.log('=== [PHASE 1: PLAYDOIT CATALOG] Starting Live Inspection ===');
   const generatedAt = new Date().toISOString();
   const navigationMode = 'headed';
-  const evidenceSource = 'live_dom';
+  // Markets come from Altenar's public API inside the browser context.
+  // This is current live data, but it is not direct DOM evidence.
+  const evidenceSource = 'live_api';
 
   const publicStatePath = path.join(__dirname, '..', 'playdoit-public-state.json');
   const browser = await chromium.launch({ headless: false });
@@ -357,7 +359,7 @@ function decimalToAmerican(dec) {
     generatedAt,
     navigationMode,
     evidenceSource,
-    catalogStatus: 'VERIFIED',
+    catalogStatus: 'OBSERVED_LIVE_API',
     totalMatchesCataloged: catalogMatches.length,
     matches: catalogMatches
   };

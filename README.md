@@ -24,6 +24,18 @@ FFmpeg no necesita estar instalado globalmente: el renderer utiliza `ffmpeg-stat
 
 ## Comandos seguros
 
+Consultar las etapas canónicas y el estado local:
+
+```powershell
+npm run datafut -- status
+```
+
+Auditar si las verificaciones y cotizaciones poseen procedencia suficiente para publicar:
+
+```powershell
+npm run datafut -- audit
+```
+
 Validar la entrada sin generar archivos:
 
 ```powershell
@@ -50,6 +62,13 @@ Generar un parlay despues de revisar `parlay-data.json`:
 npm run render:parlay
 ```
 
+La interfaz recomendada permite indicar archivo y fecha, y ofrece un ensayo sin efectos:
+
+```powershell
+npm run datafut -- render --input parlay-data.json --date 2026-08-21 --dry-run
+npm run datafut -- render --input parlay-data.json --date 2026-08-21
+```
+
 El ultimo comando valida los datos, genera la narracion y finalmente renderiza el video. Nunca publica contenido ni realiza apuestas.
 
 ## Reglas editoriales protegidas
@@ -69,3 +88,5 @@ Los archivos actuales pueden contener texto UTF-8 previamente corrompido, por ej
 ## Proxima etapa
 
 Una vez congelado y validado el resultado actual, el trabajo pendiente es consolidar los multiples scripts fechados en un solo orquestador configurable y archivar los experimentos sin borrarlos.
+
+El manifiesto de migracion esta en `config/pipeline-manifest.json`. Las etapas de verificacion y builder permanecen bloqueadas hasta que observen directamente el DOM y lean el momio mostrado por el betslip; los scripts basados en API, dumps o multiplicacion quedan marcados como no publicables.

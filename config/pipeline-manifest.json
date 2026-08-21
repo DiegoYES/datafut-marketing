@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "minimumPercentage": 65,
+  "requiredVerificationEvidence": "live_dom",
+  "requiredQuoteMethod": "betslip_dom_read",
+  "stages": [
+    {
+      "id": "catalog",
+      "status": "candidate",
+      "script": "scripts/build_playdoit_catalog.js",
+      "note": "Consulta API publica en vivo desde el navegador; sirve para definir el universo comercial."
+    },
+    {
+      "id": "discovery-verification",
+      "status": "blocked",
+      "script": "scripts/run_catalog_first_pipeline.js",
+      "note": "Contiene partidos y fuentes DataFut fechadas; su evidencia exacta es live_api, no live_dom."
+    },
+    {
+      "id": "parlay-builder",
+      "status": "blocked",
+      "script": "scripts/run_parlay_builder.js",
+      "note": "El script heredado multiplica cuotas individuales; no lee el momio del betslip."
+    },
+    {
+      "id": "content-render",
+      "status": "ready",
+      "script": "scripts/datafut.js render",
+      "note": "Valida una entrada elegida por el usuario y ejecuta voz y video sin publicar."
+    }
+  ],
+  "legacyEntrypoints": [
+    "scripts/orchestrate_pipeline.js",
+    "scripts/master_pipeline_from_scratch.js",
+    "scripts/run_pipeline_2026_08_21.js",
+    "scripts/run_pipeline_morning_2026_08_21.js",
+    "scripts/run_evening_pipeline_2026_08_21.js"
+  ]
+}

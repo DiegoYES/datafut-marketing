@@ -224,7 +224,9 @@ function parseDataFutPick(pick) {
   console.log('>>> FASE 1: EJECUTANDO PLAYDOIT-CATALOG (LIVE DOM)');
   const generatedAt = new Date().toISOString();
   const navigationMode = 'headed';
-  const evidenceSource = 'live_dom';
+  // This pipeline uses live public API responses from inside a browser page.
+  // Keep the provenance honest: it does not inspect rendered DOM markets.
+  const evidenceSource = 'live_api';
 
   const publicStatePath = path.join(__dirname, '..', 'playdoit-public-state.json');
   const browser = await chromium.launch({ headless: false });
@@ -556,7 +558,7 @@ function parseDataFutPick(pick) {
     generatedAt,
     navigationMode,
     evidenceSource,
-    catalogStatus: 'VERIFIED',
+    catalogStatus: 'OBSERVED_LIVE_API',
     totalMatchesCataloged: catalogMatches.length,
     totalStructuredMarkets,
     matches: catalogMatches
@@ -813,7 +815,7 @@ function parseDataFutPick(pick) {
 
           if (exactOdd) {
             matched = true;
-            status = 'AVAILABLE_EXACT';
+            status = 'AVAILABLE_EXACT_API';
             let am = exactOdd.price >= 2.0 ? `+${Math.round((exactOdd.price - 1) * 100)}` : `-${Math.round(100 / (exactOdd.price - 1))}`;
             playdoitData = {
               matchText: evData.event.name || c.match,
@@ -849,7 +851,7 @@ function parseDataFutPick(pick) {
           status,
           reason,
           verifiedAt: new Date().toISOString(),
-          evidenceSource: 'live_dom',
+          evidenceSource: 'live_api',
           requested: c,
           playdoit: playdoitData
         });
@@ -890,12 +892,16 @@ function parseDataFutPick(pick) {
     const vResults = await verifyCandidateBatch(currentBatch);
     vResults.forEach(vr => {
       verifiedResults.push(vr);
-      if (vr.status === 'AVAILABLE_EXACT' && vr.requested.percentage >= 65.0) {
+      if (
+        vr.status === 'AVAILABLE_EXACT' &&
+        vr.evidenceSource === 'live_dom' &&
+        vr.requested.percentage >= 65.0
+      ) {
         eligibleCandidates.push(vr);
       }
     });
 
-    console.log(`[ROUND ${roundNum}] Resultados de verificación: ${vResults.filter(v => v.status === 'AVAILABLE_EXACT').length} AVAILABLE_EXACT en esta ronda.`);
+    console.log(`[ROUND ${roundNum}] Coincidencias API no publicables: ${vResults.filter(v => v.status === 'AVAILABLE_EXACT_API').length}.`);
     console.log(`[TOTAL ELEGIBLES ACUMULADOS]: ${eligibleCandidates.length} / 6 objetivo.`);
 
     if (eligibleCandidates.length >= 6) {
@@ -923,16 +929,20 @@ function parseDataFutPick(pick) {
   const verifiedOutput = {
     verifiedAt: new Date().toISOString(),
     navigationMode: 'headed',
-    evidenceSource: 'live_dom',
+    evidenceSource: 'live_api',
+    publishable: false,
+    integrityNotice: 'La coincidencia procede de API publica en vivo, no de observacion live_dom.',
     totalVerified: verifiedResults.length,
-    totalAvailableExact: verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT').length,
+    totalAvailableExact: 0,
+    totalAvailableExactApi: verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT_API').length,
     totalEligible: eligibleCandidates.length,
     results: verifiedResults
   };
   fs.writeFileSync(path.join(pipelineDir, 'verified-candidates.json'), JSON.stringify(verifiedOutput, null, 2));
 
   // Summary counts for report
-  const countExact = verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT').length;
+  const countExact = 0;
+  const countExactApi = verifiedResults.filter(r => r.status === 'AVAILABLE_EXACT_API').length;
   const countLineMismatch = verifiedResults.filter(r => r.status === 'LINE_MISMATCH').length;
   const countScopeMismatch = verifiedResults.filter(r => r.status === 'SCOPE_MISMATCH').length;
   const countMarketMismatch = verifiedResults.filter(r => r.status === 'MARKET_MISMATCH').length;
@@ -947,6 +957,7 @@ function parseDataFutPick(pick) {
   console.log(`Candidatos descubiertos: ${allRoundsDiscovery.length}`);
   console.log(`Candidatos verificados: ${verifiedResults.length}`);
   console.log(`AVAILABLE_EXACT: ${countExact}`);
+  console.log(`AVAILABLE_EXACT_API (no publicable): ${countExactApi}`);
   console.log(`LINE_MISMATCH: ${countLineMismatch}`);
   console.log(`MARKET_MISMATCH: ${countMarketMismatch}`);
   console.log(`NOT_AVAILABLE: ${countNotAvailable}`);
