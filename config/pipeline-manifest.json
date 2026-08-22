@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "minimumPercentage": 65,
+  "version": 5,
+  "percentageThresholdExclusive": 70,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
   "stages": [

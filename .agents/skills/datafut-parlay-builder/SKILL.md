@@ -74,7 +74,7 @@ C:\DataFut-Marketing\pipeline-state\parlay-options.json
 
 Un candidato solo puede participar si cumple simultáneamente:
 
-percentage >= 65.0
+percentage > 70.0
 
 AND
 
@@ -111,7 +111,7 @@ El momio del sportsbook y el porcentaje DataFut son conceptos distintos.
 
 Primero identificar TODOS los candidatos que cumplen:
 
->=65%
+>70%
 
 AVAILABLE_EXACT
 

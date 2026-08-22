@@ -144,7 +144,7 @@ DataFut sigue siendo la autoridad estadística.
 
 Para cualquier formato oficial:
 
-percentage >= 65.0
+percentage > 70.0
 
 es obligatorio.
 
@@ -162,7 +162,7 @@ No calcular probabilidad conjunta.
 
 Un candidato solo es elegible cuando cumple:
 
-percentage >= 65.0
+percentage > 70.0
 
 AND
 
@@ -339,7 +339,7 @@ Catalog
 
 → Verification
 
-→ presentar opciones >=65%.
+→ presentar opciones >70%.
 
 DETENER.
 

@@ -45,9 +45,10 @@ function collectMojibake(value, currentPath = '$', findings = []) {
   return findings;
 }
 
-function validateParlayData(data) {
+function validateParlayData(data, options = {}) {
   const errors = [];
   const warnings = [];
+  const allowLegacyThreshold = options.allowLegacyThreshold === true;
 
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     return { errors: ['La raiz debe ser un objeto JSON.'], warnings };
@@ -92,8 +93,12 @@ function validateParlayData(data) {
       if (typeof pick.percentage !== 'number' || !Number.isFinite(pick.percentage)) {
         errors.push(`${prefix}.percentage debe ser un numero.`);
       } else {
-        if (pick.percentage < 65) {
-          errors.push(`${prefix}.percentage debe ser al menos 65.`);
+        if (allowLegacyThreshold ? pick.percentage < 65 : pick.percentage <= 70) {
+          errors.push(
+            allowLegacyThreshold
+              ? `${prefix}.percentage debe ser al menos 65 para un render historico.`
+              : `${prefix}.percentage debe ser estrictamente mayor de 70.`
+          );
         }
         if (pick.percentage > 100) {
           errors.push(`${prefix}.percentage no puede superar 100.`);

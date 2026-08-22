@@ -48,7 +48,7 @@ Extraer DataFut con la sesión local y descubrir únicamente intersecciones exac
 npm run datafut -- discover-live --date 2026-08-21
 ```
 
-Este comando deduplica partidos por su identificador de DataFut, ignora encuentros fuera del catálogo y exige coincidencia de estadística, alcance, dirección, línea y periodo. Guarda datos intermedios en `scripts/datafut-live-raw.json` y candidatos no publicables en `pipeline-state/discovery-candidates.json`.
+Este comando deduplica partidos por su identificador de DataFut, ignora encuentros fuera del catálogo y exige coincidencia de estadística, alcance, dirección, línea y periodo. Sólo conserva porcentajes estrictamente mayores de 70% y descarta antes de Verification los overs triviales de goles, tiros, tiros a puerta, córners, tarjetas y faltas. Guarda datos intermedios en `scripts/datafut-live-raw.json` y candidatos no publicables en `pipeline-state/discovery-candidates.json`.
 
 Después de verificar los candidatos en el DOM visible de PlayDoIt, separa las opciones editoriales:
 
@@ -65,6 +65,8 @@ npm run datafut -- replenish
 ```
 
 La reposición conserva los elegibles, recuerda cada mercado exacto ya evaluado y genera una nueva ronda de hasta 10 candidatos sin repetir descartes. El ciclo Discovery → Verification → Replenish se repite hasta reunir 6 elegibles, agotar candidatos, alcanzar 4 rondas o requerir un catálogo nuevo.
+
+Los parlays pueden seguir siendo dobles o triples: el validador, la narración y la plantilla de video soportan ambos tamaños.
 
 Validar la entrada sin generar archivos:
 
@@ -103,7 +105,7 @@ El ultimo comando valida los datos, genera la narracion y finalmente renderiza e
 
 ## Reglas editoriales protegidas
 
-- Cada pick debe tener un respaldo DataFut minimo de 65%.
+- Cada pick debe tener un respaldo DataFut estrictamente mayor de 70%; 70.0% no es elegible.
 - Los porcentajes son individuales; no representan la probabilidad conjunta del parlay.
 - Un parlay debe contener 2 o 3 picks y exactamente 2 evidencias por pick.
 - La seleccion final sigue requiriendo decision humana y revalidacion en PlayDoIt.

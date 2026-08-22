@@ -4,7 +4,7 @@ const {
   buildFormatOptionsFromEligiblePool
 } = require('../scripts/lib/format-options');
 
-function candidate(candidateId, catalogMatchId, match, percentage = 70) {
+function candidate(candidateId, catalogMatchId, match, percentage = 71) {
   return {
     candidateId,
     catalogMatchId,
@@ -16,7 +16,7 @@ function candidate(candidateId, catalogMatchId, match, percentage = 70) {
   };
 }
 
-function result(candidateId, match, percentage = 70) {
+function result(candidateId, match, percentage = 71) {
   return {
     candidateId,
     percentage,
@@ -73,5 +73,14 @@ const accumulated = buildFormatOptionsFromEligiblePool({
 assert.strictEqual(accumulated.eligiblePoolGeneratedAt, 'pool-1');
 assert.strictEqual(accumulated.routes.individual.options.length, 2);
 assert.strictEqual(accumulated.routes.parlay.options.length, 1);
+
+const exactSeventy = buildFormatOptions({
+  generatedAt: 'discovery-70',
+  candidates: [candidate('D', 'MATCH-3', 'Cinco vs Seis', 70)]
+}, {
+  verifiedAt: 'verification-70',
+  results: [result('D', 'Cinco vs Seis', 70)]
+}, 'now');
+assert.strictEqual(exactSeventy.routes.individual.options.length, 0);
 
 console.log('format-options.test.js: OK');

@@ -234,7 +234,7 @@ NO AVAILABLE_EXACT.
 
 ---
 
-# FILTRO 65%
+# FILTRO >70%
 
 Verification puede conservar el porcentaje DataFut como metadata.
 
@@ -242,7 +242,7 @@ No decide el respaldo.
 
 Si por error recibe:
 
-percentage <65%
+percentage <=70%
 
 puede verificar comercialmente, pero debe marcar adicionalmente:
 

@@ -1,5 +1,10 @@
 const assert = require('node:assert/strict');
-const { discoverCandidates, matchCatalogEntry, parsePrediction } = require('../scripts/lib/discovery');
+const {
+  discoverCandidates,
+  isTrivialCandidate,
+  matchCatalogEntry,
+  parsePrediction
+} = require('../scripts/lib/discovery');
 
 const catalog = {
   generatedAt: '2026-08-22T01:25:16.648Z',
@@ -29,7 +34,7 @@ const rawMatches = [{
   picks: [
     {
       rawTitle: 'Más de 1.5 goles',
-      percentage: 67.9,
+      percentage: 70,
       sampleLine: 'mediamuestra 10 · 2/2 fuentes',
       evidenceText: ['Fuente local cumplió 7/10 veces. Fuente visitante cumplió 8/10 veces.']
     },
@@ -38,6 +43,12 @@ const rawMatches = [{
       percentage: 71.4,
       sampleLine: 'mediamuestra 10 · 2/2 fuentes',
       evidenceText: ['Fuente local cumplió 9/10 veces. Fuente visitante cumplió 7/10 veces.']
+    },
+    {
+      rawTitle: 'Más de 2.5 goles',
+      percentage: 70.1,
+      sampleLine: 'mediamuestra 8 · 2/2 fuentes',
+      evidenceText: ['Fuente local cumplió 6/8 veces. Fuente visitante cumplió 6/8 veces.']
     },
     { rawTitle: 'Más de 0.5 goles', percentage: 82.1, evidenceText: [] },
     { rawTitle: 'Menos de 11.5 córners totales', percentage: 71.4, evidenceText: [] },
@@ -68,11 +79,12 @@ const candidates = discoverCandidates(catalog, rawMatches);
 assert.equal(candidates.length, 2);
 assert.deepEqual(candidates.map(candidate => candidate.market), [
   'Menos de 3.5 goles',
-  'Más de 1.5 goles'
+  'Más de 2.5 goles'
 ]);
 assert.deepEqual(candidates[0].sample, { home: 10, away: 10 });
 assert.equal(candidates[0].playdoitOddsText, '-300');
 assert.equal(candidates.some(candidate => candidate.line === 0.5), false);
+assert.equal(candidates.some(candidate => candidate.percentage <= 70), false);
 assert.equal(candidates.some(candidate => candidate.statistic === 'corners'), false);
 assert.equal(candidates.every(candidate => candidate.candidateKey), true);
 assert.deepEqual(candidates.map(candidate => candidate.candidateId), ['DF-R01-001', 'DF-R01-002']);
@@ -85,5 +97,13 @@ const replacement = discoverCandidates(catalog, rawMatches, {
 assert.equal(replacement.length, 1);
 assert.equal(replacement[0].candidateId, 'DF-R02-001');
 assert.equal(replacement[0].candidateKey, candidates[1].candidateKey);
+
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'goals', line: 0.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'shots', line: 2.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'shots_on_target', line: 1.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'corners', line: 1.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'yellow_cards', line: 0.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'fouls', line: 2.5 }), true);
+assert.equal(isTrivialCandidate({ direction: 'under', statistic: 'goals', line: 0.5 }), false);
 
 console.log('OK: Discovery cruza partido, mercado, direccion y linea exactos sin duplicados.');

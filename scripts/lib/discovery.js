@@ -1,6 +1,7 @@
 const TEAM_NOISE = new Set([
   'club', 'fc', 'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'ac', 'sc'
 ]);
+const PERCENTAGE_THRESHOLD_EXCLUSIVE = 70;
 
 function normalizeText(value) {
   return String(value || '')
@@ -94,8 +95,9 @@ function isTrivialCandidate(semantics) {
   if (semantics.statistic === 'goals') return semantics.line <= 0.5;
   if (semantics.statistic === 'shots') return semantics.line <= 2.5;
   if (semantics.statistic === 'shots_on_target') return semantics.line <= 1.5;
-  if (semantics.statistic === 'yellow_cards' && semantics.scope === 'team') return semantics.line <= 0.5;
-  if (semantics.statistic === 'corners' && semantics.scope === 'team') return semantics.line <= 2.5;
+  if (semantics.statistic === 'yellow_cards') return semantics.line <= 0.5;
+  if (semantics.statistic === 'corners') return semantics.line <= 1.5;
+  if (semantics.statistic === 'fouls') return semantics.line <= 2.5;
   return false;
 }
 
@@ -146,7 +148,9 @@ function compareCandidateQuality(left, right) {
 }
 
 function discoverCandidates(catalog, rawMatches, options = {}) {
-  const minimumPercentage = Number(options.minimumPercentage || 65);
+  const percentageThresholdExclusive = Number(
+    options.percentageThresholdExclusive ?? PERCENTAGE_THRESHOLD_EXCLUSIVE
+  );
   const limit = Number(options.limit || 20);
   const round = Number(options.round || 1);
   const excludedKeys = new Set(options.excludedKeys || []);
@@ -158,7 +162,10 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
     if (!catalogMatch) continue;
 
     for (const pick of rawMatch.picks || []) {
-      if (!Number.isFinite(pick.percentage) || pick.percentage < minimumPercentage) continue;
+      if (
+        !Number.isFinite(pick.percentage) ||
+        pick.percentage <= percentageThresholdExclusive
+      ) continue;
       const semantics = parsePrediction(pick.rawTitle, catalogMatch);
       if (!semantics || isTrivialCandidate(semantics)) continue;
       const catalogLine = findCatalogLine(catalogMatch, semantics);
@@ -204,10 +211,12 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
 }
 
 module.exports = {
+  PERCENTAGE_THRESHOLD_EXCLUSIVE,
   candidateKey,
   compareCandidateQuality,
   discoverCandidates,
   findCatalogLine,
+  isTrivialCandidate,
   matchCatalogEntry,
   normalizeTeamName,
   normalizeText,

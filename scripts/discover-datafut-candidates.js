@@ -21,7 +21,7 @@ if (catalog.catalogStatus !== 'VERIFIED' || catalog.evidenceSource !== 'live_dom
 const rawMatches = readJson(rawPath);
 const round = Number(optionValue('--round') || 1);
 const candidates = discoverCandidates(catalog, rawMatches, {
-  minimumPercentage: 65,
+  percentageThresholdExclusive: 70,
   limit: round === 1 ? 20 : 10,
   round
 });
@@ -30,7 +30,7 @@ const output = {
   generatedAt: new Date().toISOString(),
   catalogGeneratedAt: catalog.generatedAt,
   datafutSource: 'authenticated_session_read',
-  minimumPercentage: 65,
+  percentageThresholdExclusive: 70,
   round,
   publishable: false,
   candidates

@@ -6,6 +6,7 @@ const {
   validateDomMarketEvidence
 } = require('./dom-evidence');
 const { validateDomSelectorConfig } = require('./dom-selector-config');
+const { isTrivialCandidate } = require('./discovery');
 
 function auditPipelineState(projectDir) {
   const stateDir = path.join(projectDir, 'pipeline-state');
@@ -61,8 +62,14 @@ function auditPipelineState(projectDir) {
     if (discovery.publishable === true) {
       errors.push('Discovery no puede declararse publicable antes de Verification.');
     }
-    if (candidates.some(candidate => Number(candidate.percentage) < 65)) {
-      errors.push('Discovery contiene candidatos por debajo de 65%.');
+    if (discovery.percentageThresholdExclusive !== 70) {
+      errors.push('Discovery no declara percentageThresholdExclusive=70.');
+    }
+    if (candidates.some(candidate => Number(candidate.percentage) <= 70)) {
+      errors.push('Discovery contiene candidatos con porcentaje menor o igual a 70%.');
+    }
+    if (candidates.some(candidate => isTrivialCandidate(candidate))) {
+      errors.push('Discovery contiene mercados over triviales que debieron filtrarse antes de Verification.');
     }
     if (candidates.some(candidate => candidate.status === 'AVAILABLE_EXACT')) {
       errors.push('Discovery no puede declarar AVAILABLE_EXACT.');
@@ -98,6 +105,9 @@ function auditPipelineState(projectDir) {
         : [];
       if (eligibleResults.length < eligibleCount) {
         errors.push('totalEligible supera los resultados AVAILABLE_EXACT disponibles.');
+      }
+      if (eligibleResults.some(result => Number(result.percentage) <= 70)) {
+        errors.push('Verification declara elegible un candidato con porcentaje menor o igual a 70%.');
       }
       const invalidDomEvidence = eligibleResults.filter(result => {
         const validation = validateDomMarketEvidence(result.requested, result.domEvidence);
@@ -151,6 +161,14 @@ function auditPipelineState(projectDir) {
     };
     if (!catalog || eligiblePool.catalogGeneratedAt !== catalog.generatedAt) {
       errors.push('El pool elegible pertenece a otro Catalog.');
+    }
+    const accumulated = Array.isArray(eligiblePool.candidates) ? eligiblePool.candidates : [];
+    if (accumulated.some(item =>
+      Number(item.discovery?.percentage) <= 70 ||
+      item.verification?.status !== 'AVAILABLE_EXACT' ||
+      item.verification?.evidenceSource !== 'live_dom'
+    )) {
+      errors.push('El pool elegible contiene candidatos que no cumplen >70%, AVAILABLE_EXACT y live_dom.');
     }
   }
 

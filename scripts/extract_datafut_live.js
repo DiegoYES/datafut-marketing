@@ -1,7 +1,11 @@
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
-const { matchCatalogEntry } = require('./lib/discovery');
+const {
+  isTrivialCandidate,
+  matchCatalogEntry,
+  parsePrediction
+} = require('./lib/discovery');
 const { readJson } = require('./lib/validation');
 
 const projectDir = path.resolve(__dirname, '..');
@@ -114,13 +118,26 @@ function canonicalMatchKey(url) {
         return { title: document.title, picks };
       });
 
+      const catalogMatch = catalog.matches.find(match => match.matchId === link.catalogMatchId);
+      if (!catalogMatch) {
+        throw new Error(`No se encontro ${link.catalogMatchId} en el catalogo actual.`);
+      }
+      const prefilteredPicks = matchInfo.picks.filter(pick => {
+        if (!Number.isFinite(pick.percentage) || pick.percentage <= 70) return false;
+        const semantics = parsePrediction(pick.rawTitle, catalogMatch);
+        return semantics && !isTrivialCandidate(semantics);
+      });
+
       rawMatches.push({
         catalogMatchId: link.catalogMatchId,
         url: link.url,
         title: matchInfo.title,
-        picks: matchInfo.picks
+        picks: prefilteredPicks
       });
-      console.log(`${matchInfo.title}: ${matchInfo.picks.length} prediccion(es) nativa(s).`);
+      console.log(
+        `${matchInfo.title}: ${matchInfo.picks.length} prediccion(es) leida(s), ` +
+        `${prefilteredPicks.length} >70% y no trivial(es) conservada(s).`
+      );
     }
 
     fs.writeFileSync(outputPath, `${JSON.stringify(rawMatches, null, 2)}\n`);

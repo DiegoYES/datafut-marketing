@@ -76,7 +76,7 @@ function validateRender(renderDir) {
 
   const metadata = readJson(path.join(renderDir, 'metadata.json'));
   const parlayData = readJson(path.join(renderDir, 'parlay-data.json'));
-  const dataValidation = validateParlayData(parlayData);
+  const dataValidation = validateParlayData(parlayData, { allowLegacyThreshold: true });
   errors.push(...dataValidation.errors.map(error => `parlay-data.json: ${error}`));
   warnings.push(...dataValidation.warnings.map(warning => `parlay-data.json: ${warning}`));
 

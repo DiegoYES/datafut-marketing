@@ -36,7 +36,11 @@ function buildFormatOptions(discovery, verification, generatedAt = new Date().to
     (discovery.candidates || []).map(candidate => [candidate.candidateId, candidate])
   );
   const eligible = (verification.results || [])
-    .filter(result => result.status === 'AVAILABLE_EXACT' && result.editorialEligible === true)
+    .filter(result =>
+      result.status === 'AVAILABLE_EXACT' &&
+      result.editorialEligible === true &&
+      Number(result.percentage) > 70
+    )
     .map(result => candidateView(result, discoveryById));
 
   const individual = eligible.map(candidate => ({

@@ -155,17 +155,21 @@ MERCADO PLAYDOIT DISPONIBLE.
 
 # UMBRAL MÍNIMO
 
-percentage >= 65.0
+percentage > 70.0
 
 obligatorio.
 
-Todo candidato inferior:
+Todo candidato con porcentaje menor o igual a 70.0:
 
 DESCARTAR antes del output.
 
 ---
 
 # MERCADOS TRIVIALES
+
+Este filtro se ejecuta ANTES de escribir candidatos y ANTES de enviar cualquier
+mercado a Verification. No gastar navegación ni contexto comprobando estos
+mercados en PlayDoIt.
 
 Excluir normalmente:
 
@@ -186,6 +190,8 @@ Over 0.5 tarjetas por equipo.
 Over 0.5 corners.
 
 Over 1.5 corners.
+
+Over 0.5, 1.5 o 2.5 faltas.
 
 Over 2.5 corners por equipo:
 
@@ -209,7 +215,7 @@ Under 2.5 corners
 
 si:
 
-percentage >=65%
+percentage >70%
 
 y existe línea exacta en catálogo.
 
@@ -241,7 +247,7 @@ NO deben desplazar candidatos de calidad comparable con cuotas comercialmente m�
 
 # MERCADOS PREFERIDOS
 
-Cuando existan en la intersección Catalog + DataFut y tengan >=65%:
+Cuando existan en la intersección Catalog + DataFut y tengan >70%:
 
 priorizar:
 
@@ -295,7 +301,7 @@ Hasta:
 
 Todos:
 
->=65%.
+>70%.
 
 Todos:
 
@@ -374,7 +380,7 @@ Nunca inventar.
 {
   "generatedAt": "...",
   "catalogGeneratedAt": "...",
-  "minimumPercentage": 65.0,
+  "percentageThresholdExclusive": 70.0,
   "round": 1,
   "candidates": [
     {
@@ -422,7 +428,7 @@ Verification sigue siendo obligatoria.
 
 Discovery responde:
 
-"De los mercados que PlayDoIt realmente comercializa, estos son los que DataFut respalda con >=65%."
+"De los mercados que PlayDoIt realmente comercializa, estos son los que DataFut respalda con >70%."
 
 No responde:
 

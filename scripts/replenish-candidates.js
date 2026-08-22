@@ -52,7 +52,7 @@ for (const candidate of discovery.candidates || []) {
   if (
     result.status === 'AVAILABLE_EXACT' &&
     result.editorialEligible !== false &&
-    Number(candidate.percentage) >= 65
+    Number(candidate.percentage) > 70
   ) {
     eligibleByKey.set(key, {
       candidateKey: key,
@@ -74,7 +74,7 @@ if (eventStarted) {
   status = 'REFRESH_CATALOG_REQUIRED';
 } else if (eligible.length < 6 && currentRound < 4) {
   nextCandidates = discoverCandidates(catalog, rawMatches, {
-    minimumPercentage: 65,
+    percentageThresholdExclusive: 70,
     limit: 10,
     round: currentRound + 1,
     excludedKeys: [...evaluatedKeys]
@@ -118,7 +118,7 @@ if (status === 'NEXT_ROUND_READY') {
     generatedAt: new Date().toISOString(),
     catalogGeneratedAt: catalog.generatedAt,
     datafutSource: 'authenticated_session_read',
-    minimumPercentage: 65,
+    percentageThresholdExclusive: 70,
     round: currentRound + 1,
     replacementForRound: currentRound,
     excludedCandidateKeys: [...evaluatedKeys],
