@@ -16,6 +16,7 @@ Uso:
   npm run datafut -- audit
   npm run datafut -- discover --raw <archivo.json>
   npm run datafut -- discover-live [--date YYYY-MM-DD]
+  npm run datafut -- options
   npm run datafut -- render --input <archivo.json> [--date YYYY-MM-DD] [--dry-run]
 
 El comando render genera archivos locales, pero nunca publica ni realiza apuestas.`);
@@ -78,6 +79,10 @@ function discoverLive(args) {
   ]);
 }
 
+function buildOptions() {
+  run(process.execPath, [path.join('scripts', 'build-format-options.js')]);
+}
+
 function render(args) {
   const inputArg = optionValue(args, '--input');
   if (!inputArg) throw new Error('Falta --input <archivo.json>.');
@@ -126,6 +131,7 @@ try {
   else if (command === 'audit') audit();
   else if (command === 'discover') discover(args);
   else if (command === 'discover-live') discoverLive(args);
+  else if (command === 'options') buildOptions();
   else if (command === 'render') render(args);
   else throw new Error(`Comando desconocido: ${command}`);
 } catch (error) {

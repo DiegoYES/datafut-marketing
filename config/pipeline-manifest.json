@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "minimumPercentage": 65,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
@@ -23,10 +23,22 @@
       "note": "Falta implementar relectura DOM exacta por candidato y enlazar discoveryGeneratedAt."
     },
     {
+      "id": "format-router",
+      "status": "ready",
+      "script": "scripts/datafut.js options",
+      "note": "Separa picks individuales, parlays entre partidos distintos y combinadas del mismo partido; no cotiza ni elige por el usuario."
+    },
+    {
       "id": "parlay-builder",
       "status": "blocked",
       "script": "scripts/run_parlay_builder.js",
       "note": "El script heredado multiplica cuotas individuales; no lee el momio del betslip."
+    },
+    {
+      "id": "combinada-builder",
+      "status": "blocked",
+      "script": null,
+      "note": "Cada combinada requiere comprobar compatibilidad y leer la cuota real en el Bet Builder de PlayDoIt."
     },
     {
       "id": "content-render",

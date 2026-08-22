@@ -50,6 +50,14 @@ npm run datafut -- discover-live --date 2026-08-21
 
 Este comando deduplica partidos por su identificador de DataFut, ignora encuentros fuera del catálogo y exige coincidencia de estadística, alcance, dirección, línea y periodo. Guarda datos intermedios en `scripts/datafut-live-raw.json` y candidatos no publicables en `pipeline-state/discovery-candidates.json`.
 
+Después de verificar los candidatos en el DOM visible de PlayDoIt, separa las opciones editoriales:
+
+```powershell
+npm run datafut -- options
+```
+
+El resultado queda en `pipeline-state/format-options.json`: cada candidato exacto puede presentarse como pick individual; los parlays normales sólo combinan partidos distintos; y los mercados del mismo partido quedan como posibles combinadas hasta comprobar compatibilidad y cuota real en el Bet Builder. El comando no elige, apuesta ni publica.
+
 Validar la entrada sin generar archivos:
 
 ```powershell

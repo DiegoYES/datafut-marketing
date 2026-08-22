@@ -143,6 +143,43 @@ function auditPipelineState(projectDir) {
     }
   }
 
+  const formatOptions = loadState('format-options.json');
+  if (formatOptions) {
+    const individualOptions = formatOptions.routes?.individual?.options || [];
+    const parlayCandidates = formatOptions.routes?.parlay?.options || [];
+    const combinadaCandidates = formatOptions.routes?.combinada?.options || [];
+    summary.formats = {
+      generatedAt: formatOptions.generatedAt,
+      individual: individualOptions.length,
+      parlay: parlayCandidates.length,
+      combinada: combinadaCandidates.length,
+      userSelectionRequired: formatOptions.userSelectionRequired === true,
+      publishable: formatOptions.publishable === true
+    };
+
+    if (!verified || formatOptions.verificationGeneratedAt !== verified.verifiedAt) {
+      errors.push('Las opciones de formato no pertenecen a la Verification actual.');
+    }
+    if (formatOptions.userSelectionRequired !== true) {
+      errors.push('Las opciones de formato deben exigir eleccion humana.');
+    }
+    if (formatOptions.publishable === true) {
+      errors.push('Las opciones de formato no pueden ser publicables antes de la eleccion humana.');
+    }
+    if (parlayCandidates.some(option => {
+      const matchIds = Array.isArray(option.matchIds) ? option.matchIds : [];
+      return matchIds.length < 2 || new Set(matchIds).size !== matchIds.length;
+    })) {
+      errors.push('Una opcion de parlay normal mezcla piernas del mismo partido.');
+    }
+    if (combinadaCandidates.some(option =>
+      option.compatibility === 'COMPATIBLE' &&
+      (option.quoteMethod !== 'betslip_dom_read' || !option.combinedOdds)
+    )) {
+      errors.push('Una combinada se declara compatible sin cuota real leida del Bet Builder.');
+    }
+  }
+
   const hasPublishableCandidates = verified && Number(verified.totalEligible || 0) > 0;
   const hasFinalists = parlays && Array.isArray(parlays.finalists) && parlays.finalists.length > 0;
   if ((hasPublishableCandidates || hasFinalists) && !selectorValidation.valid) {
