@@ -38,6 +38,14 @@ Leer:
 
 C:\DataFut-Marketing\pipeline-state\verified-candidates.json
 
+Cuando exista reposición, leer como pool acumulado:
+
+C:\DataFut-Marketing\pipeline-state\eligible-candidates.json
+
+Cada entrada de ese archivo debe conservar conjuntamente su objeto Discovery
+y su resultado Verification AVAILABLE_EXACT. Nunca perder los elegibles de
+rondas anteriores ni reintroducir candidatos descartados.
+
 Puede consultar también:
 
 C:\DataFut-Marketing\pipeline-state\discovery-candidates.json

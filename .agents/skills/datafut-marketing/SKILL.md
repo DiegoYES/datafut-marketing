@@ -44,6 +44,10 @@ discovery-candidates.json
 
 verified-candidates.json
 
+eligible-candidates.json
+
+replenishment-state.json
+
 parlay-options.json
 
 ---
@@ -218,6 +222,31 @@ Después:
 playdoit-verification.
 
 Repetir.
+
+Este loop es OBLIGATORIO. No pasar al Builder inmediatamente después de una
+sola ronda fallida si todavía existen candidatos DataFut no evaluados.
+
+Después de cada Verification ejecutar:
+
+`npm run datafut -- replenish`
+
+El comando debe conservar los elegibles, registrar las identidades exactas ya
+evaluadas y generar una nueva `discovery-candidates.json` únicamente con
+candidatos nuevos. Después se ejecuta Verification sobre esa nueva ronda.
+
+Los AVAILABLE_EXACT de rondas anteriores se acumulan en
+`eligible-candidates.json`. Ése es el pool que reciben el router de formatos y
+el Builder; no limitarse a los resultados de la última ronda.
+
+Estados terminales válidos:
+
+- TARGET_REACHED;
+- EXHAUSTED;
+- MAX_ROUNDS_REACHED;
+- REFRESH_CATALOG_REQUIRED.
+
+Nunca interpretar un candidato descartado como permiso para terminar el flujo
+si todavía hay reemplazos disponibles.
 
 ---
 

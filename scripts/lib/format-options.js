@@ -115,4 +115,17 @@ function buildFormatOptions(discovery, verification, generatedAt = new Date().to
   };
 }
 
-module.exports = { buildFormatOptions, combinations };
+function buildFormatOptionsFromEligiblePool(pool, generatedAt = new Date().toISOString()) {
+  const entries = Array.isArray(pool.candidates) ? pool.candidates : [];
+  const output = buildFormatOptions({
+    generatedAt: null,
+    candidates: entries.map(entry => entry.discovery)
+  }, {
+    verifiedAt: null,
+    results: entries.map(entry => entry.verification)
+  }, generatedAt);
+  output.eligiblePoolGeneratedAt = pool.generatedAt;
+  return output;
+}
+
+module.exports = { buildFormatOptions, buildFormatOptionsFromEligiblePool, combinations };

@@ -143,6 +143,17 @@ function auditPipelineState(projectDir) {
     }
   }
 
+  const eligiblePool = loadState('eligible-candidates.json');
+  if (eligiblePool) {
+    summary.eligiblePool = {
+      generatedAt: eligiblePool.generatedAt,
+      eligibleCount: Number(eligiblePool.eligibleCount || 0)
+    };
+    if (!catalog || eligiblePool.catalogGeneratedAt !== catalog.generatedAt) {
+      errors.push('El pool elegible pertenece a otro Catalog.');
+    }
+  }
+
   const formatOptions = loadState('format-options.json');
   if (formatOptions) {
     const individualOptions = formatOptions.routes?.individual?.options || [];
@@ -157,8 +168,14 @@ function auditPipelineState(projectDir) {
       publishable: formatOptions.publishable === true
     };
 
-    if (!verified || formatOptions.verificationGeneratedAt !== verified.verifiedAt) {
-      errors.push('Las opciones de formato no pertenecen a la Verification actual.');
+    const linkedToEligiblePool =
+      eligiblePool &&
+      formatOptions.eligiblePoolGeneratedAt === eligiblePool.generatedAt;
+    const linkedToCurrentVerification =
+      verified &&
+      formatOptions.verificationGeneratedAt === verified.verifiedAt;
+    if (!linkedToEligiblePool && !linkedToCurrentVerification) {
+      errors.push('Las opciones de formato no pertenecen al pool elegible ni a la Verification actual.');
     }
     if (formatOptions.userSelectionRequired !== true) {
       errors.push('Las opciones de formato deben exigir eleccion humana.');

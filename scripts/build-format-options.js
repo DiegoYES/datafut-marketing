@@ -1,18 +1,27 @@
 const fs = require('fs');
 const path = require('path');
 const { readJson } = require('./lib/validation');
-const { buildFormatOptions } = require('./lib/format-options');
+const { buildFormatOptions, buildFormatOptionsFromEligiblePool } = require('./lib/format-options');
 
 const projectDir = path.resolve(__dirname, '..');
 const stateDir = path.join(projectDir, 'pipeline-state');
 const discovery = readJson(path.join(stateDir, 'discovery-candidates.json'));
 const verification = readJson(path.join(stateDir, 'verified-candidates.json'));
+const eligiblePath = path.join(stateDir, 'eligible-candidates.json');
 
 if (verification.discoveryGeneratedAt !== discovery.generatedAt) {
   throw new Error('Verification no pertenece al Discovery actual. Ejecuta una ronda coherente.');
 }
 
-const output = buildFormatOptions(discovery, verification);
+const eligiblePool = fs.existsSync(eligiblePath) ? readJson(eligiblePath) : null;
+const useEligiblePool =
+  eligiblePool &&
+  eligiblePool.catalogGeneratedAt === discovery.catalogGeneratedAt &&
+  Array.isArray(eligiblePool.candidates) &&
+  eligiblePool.candidates.length > 0;
+const output = useEligiblePool
+  ? buildFormatOptionsFromEligiblePool(eligiblePool)
+  : buildFormatOptions(discovery, verification);
 const outputPath = path.join(stateDir, 'format-options.json');
 fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`);
 

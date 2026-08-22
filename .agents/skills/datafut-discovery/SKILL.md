@@ -325,6 +325,14 @@ línea
 +
 periodo.
 
+La identidad exacta anterior debe registrarse como `candidateKey` estable. El
+`candidateId` puede cambiar por ronda, pero `candidateKey` no. Discovery debe
+recibir y respetar todas las claves ya evaluadas por el orquestador.
+
+En reposición, no devolver simplemente los primeros mercados encontrados.
+Ordenar los candidatos restantes priorizando utilidad comercial, porcentaje,
+muestra y claridad editorial; después aplicar el límite de 10.
+
 ---
 
 # DIVERSIDAD

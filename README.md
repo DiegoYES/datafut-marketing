@@ -58,6 +58,14 @@ npm run datafut -- options
 
 El resultado queda en `pipeline-state/format-options.json`: cada candidato exacto puede presentarse como pick individual; los parlays normales sólo combinan partidos distintos; y los mercados del mismo partido quedan como posibles combinadas hasta comprobar compatibilidad y cuota real en el Bet Builder. El comando no elige, apuesta ni publica.
 
+Si Verification descarta candidatos y todavía no hay hasta 6 elegibles, ejecutar la reposición:
+
+```powershell
+npm run datafut -- replenish
+```
+
+La reposición conserva los elegibles, recuerda cada mercado exacto ya evaluado y genera una nueva ronda de hasta 10 candidatos sin repetir descartes. El ciclo Discovery → Verification → Replenish se repite hasta reunir 6 elegibles, agotar candidatos, alcanzar 4 rondas o requerir un catálogo nuevo.
+
 Validar la entrada sin generar archivos:
 
 ```powershell

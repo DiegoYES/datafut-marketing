@@ -8,15 +8,22 @@ const catalogPath = path.join(projectDir, 'pipeline-state', 'playdoit-catalog.js
 const rawPath = path.resolve(projectDir, process.argv[2] || 'scripts/datafut-live-raw.json');
 const outputPath = path.join(projectDir, 'pipeline-state', 'discovery-candidates.json');
 
+function optionValue(name) {
+  const index = process.argv.indexOf(name);
+  return index >= 0 ? process.argv[index + 1] : null;
+}
+
 const catalog = readJson(catalogPath);
 if (catalog.catalogStatus !== 'VERIFIED' || catalog.evidenceSource !== 'live_dom') {
   throw new Error('Discovery requiere un catalogo VERIFIED con evidencia live_dom.');
 }
 
 const rawMatches = readJson(rawPath);
+const round = Number(optionValue('--round') || 1);
 const candidates = discoverCandidates(catalog, rawMatches, {
   minimumPercentage: 65,
-  limit: 20
+  limit: round === 1 ? 20 : 10,
+  round
 });
 
 const output = {
@@ -24,7 +31,7 @@ const output = {
   catalogGeneratedAt: catalog.generatedAt,
   datafutSource: 'authenticated_session_read',
   minimumPercentage: 65,
-  round: 1,
+  round,
   publishable: false,
   candidates
 };

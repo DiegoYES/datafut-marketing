@@ -1,5 +1,8 @@
 const assert = require('assert');
-const { buildFormatOptions } = require('../scripts/lib/format-options');
+const {
+  buildFormatOptions,
+  buildFormatOptionsFromEligiblePool
+} = require('../scripts/lib/format-options');
 
 function candidate(candidateId, catalogMatchId, match, percentage = 70) {
   return {
@@ -59,5 +62,16 @@ const crossMatch = buildFormatOptions(crossMatchDiscovery, crossMatchVerificatio
 assert.strictEqual(crossMatch.routes.parlay.options.length, 1);
 assert.strictEqual(crossMatch.routes.parlay.options[0].status, 'REQUIRES_BETSLIP_QUOTE');
 assert.strictEqual(crossMatch.routes.combinada.options.length, 0);
+
+const accumulated = buildFormatOptionsFromEligiblePool({
+  generatedAt: 'pool-1',
+  candidates: [
+    { discovery: crossMatchDiscovery.candidates[0], verification: crossMatchVerification.results[0] },
+    { discovery: crossMatchDiscovery.candidates[1], verification: crossMatchVerification.results[1] }
+  ]
+}, 'now');
+assert.strictEqual(accumulated.eligiblePoolGeneratedAt, 'pool-1');
+assert.strictEqual(accumulated.routes.individual.options.length, 2);
+assert.strictEqual(accumulated.routes.parlay.options.length, 1);
 
 console.log('format-options.test.js: OK');

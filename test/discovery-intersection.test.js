@@ -67,12 +67,23 @@ assert.deepEqual(parsePrediction('Menos de 3.5 goles', catalog.matches[0]), {
 const candidates = discoverCandidates(catalog, rawMatches);
 assert.equal(candidates.length, 2);
 assert.deepEqual(candidates.map(candidate => candidate.market), [
-  'Más de 1.5 goles',
-  'Menos de 3.5 goles'
+  'Menos de 3.5 goles',
+  'Más de 1.5 goles'
 ]);
 assert.deepEqual(candidates[0].sample, { home: 10, away: 10 });
-assert.equal(candidates[1].playdoitOddsText, '-300');
+assert.equal(candidates[0].playdoitOddsText, '-300');
 assert.equal(candidates.some(candidate => candidate.line === 0.5), false);
 assert.equal(candidates.some(candidate => candidate.statistic === 'corners'), false);
+assert.equal(candidates.every(candidate => candidate.candidateKey), true);
+assert.deepEqual(candidates.map(candidate => candidate.candidateId), ['DF-R01-001', 'DF-R01-002']);
+
+const replacement = discoverCandidates(catalog, rawMatches, {
+  round: 2,
+  limit: 10,
+  excludedKeys: [candidates[0].candidateKey]
+});
+assert.equal(replacement.length, 1);
+assert.equal(replacement[0].candidateId, 'DF-R02-001');
+assert.equal(replacement[0].candidateKey, candidates[1].candidateKey);
 
 console.log('OK: Discovery cruza partido, mercado, direccion y linea exactos sin duplicados.');

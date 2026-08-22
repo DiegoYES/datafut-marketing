@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "minimumPercentage": 65,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
@@ -21,6 +21,12 @@
       "status": "blocked",
       "script": null,
       "note": "Falta implementar relectura DOM exacta por candidato y enlazar discoveryGeneratedAt."
+    },
+    {
+      "id": "replenishment",
+      "status": "ready",
+      "script": "scripts/datafut.js replenish",
+      "note": "Acumula elegibles, excluye identidades ya evaluadas y prepara hasta cuatro rondas sin repetir descartes."
     },
     {
       "id": "format-router",

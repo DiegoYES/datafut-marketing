@@ -116,9 +116,40 @@ function commercialPriority(oddsText) {
   return 'normal';
 }
 
+function candidateKey(candidate) {
+  return [
+    candidate.catalogMatchId,
+    normalizeText(candidate.subject),
+    candidate.statistic,
+    candidate.scope,
+    candidate.direction,
+    Number(candidate.line),
+    candidate.period
+  ].join('|');
+}
+
+function compareCandidateQuality(left, right) {
+  const commercialRank = { normal: 0, low: 1, very_low: 2, unknown: 3 };
+  const priorityDifference =
+    (commercialRank[left.commercialPriority] ?? 3) -
+    (commercialRank[right.commercialPriority] ?? 3);
+  if (priorityDifference !== 0) return priorityDifference;
+
+  const percentageDifference = Number(right.percentage) - Number(left.percentage);
+  if (percentageDifference !== 0) return percentageDifference;
+
+  const leftSample = Number(left.sample?.home || 0) + Number(left.sample?.away || 0);
+  const rightSample = Number(right.sample?.home || 0) + Number(right.sample?.away || 0);
+  if (rightSample !== leftSample) return rightSample - leftSample;
+
+  return candidateKey(left).localeCompare(candidateKey(right));
+}
+
 function discoverCandidates(catalog, rawMatches, options = {}) {
   const minimumPercentage = Number(options.minimumPercentage || 65);
   const limit = Number(options.limit || 20);
+  const round = Number(options.round || 1);
+  const excludedKeys = new Set(options.excludedKeys || []);
   const candidates = [];
   const seen = new Set();
 
@@ -133,20 +164,12 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
       const catalogLine = findCatalogLine(catalogMatch, semantics);
       if (!catalogLine) continue;
 
-      const key = [
-        catalogMatch.matchId,
-        semantics.subject,
-        semantics.statistic,
-        semantics.scope,
-        semantics.direction,
-        semantics.line,
-        semantics.period
-      ].join('|');
-      if (seen.has(key)) continue;
+      const key = candidateKey({ catalogMatchId: catalogMatch.matchId, ...semantics });
+      if (seen.has(key) || excludedKeys.has(key)) continue;
       seen.add(key);
 
       candidates.push({
-        candidateId: `DF-LIVE-${String(candidates.length + 1).padStart(3, '0')}`,
+        candidateKey: key,
         catalogMatchId: catalogMatch.matchId,
         match: `${catalogMatch.homeTeam} vs ${catalogMatch.awayTeam}`,
         league: catalogMatch.league,
@@ -168,14 +191,21 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
         commercialPriority: commercialPriority(catalogLine.line.oddsText)
       });
 
-      if (candidates.length >= limit) return candidates;
     }
   }
 
-  return candidates;
+  return candidates
+    .sort(compareCandidateQuality)
+    .slice(0, limit)
+    .map((candidate, index) => ({
+      candidateId: `DF-R${String(round).padStart(2, '0')}-${String(index + 1).padStart(3, '0')}`,
+      ...candidate
+    }));
 }
 
 module.exports = {
+  candidateKey,
+  compareCandidateQuality,
   discoverCandidates,
   findCatalogLine,
   matchCatalogEntry,
