@@ -11,12 +11,13 @@
     "validate:golden": "node scripts/validate-golden-renders.js",
     "audit:pipeline": "node scripts/validate-pipeline-state.js",
     "test:contracts": "node test/dom-evidence.test.js",
+    "test:discovery": "node test/discovery-intersection.test.js",
     "validate": "npm run validate:skills && npm run validate:catalog && npm run validate:data && npm run validate:renders && npm run validate:golden",
     "datafut": "node scripts/datafut.js",
     "render:voice": "py generate-parlay-voice-dynamic.py",
     "render:video": "node render-parlay-video.js",
     "render:parlay": "npm run validate:data && npm run render:voice && npm run render:video",
-    "test": "npm run test:contracts && npm run validate"
+    "test": "npm run test:contracts && npm run test:discovery && npm run validate"
   },
   "keywords": [],
   "author": "",

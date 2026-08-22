@@ -41,6 +41,34 @@ function auditPipelineState(projectDir) {
     }
   }
 
+  const discovery = loadState('discovery-candidates.json');
+  if (discovery) {
+    const candidates = Array.isArray(discovery.candidates) ? discovery.candidates : [];
+    summary.discovery = {
+      generatedAt: discovery.generatedAt,
+      catalogGeneratedAt: discovery.catalogGeneratedAt,
+      datafutSource: discovery.datafutSource,
+      candidates: candidates.length,
+      publishable: discovery.publishable === true
+    };
+
+    if (!catalog || discovery.catalogGeneratedAt !== catalog.generatedAt) {
+      errors.push('Discovery no esta vinculado al catalogo PlayDoIt actual.');
+    }
+    if (discovery.datafutSource !== 'authenticated_session_read') {
+      errors.push('Discovery no declara datafutSource="authenticated_session_read".');
+    }
+    if (discovery.publishable === true) {
+      errors.push('Discovery no puede declararse publicable antes de Verification.');
+    }
+    if (candidates.some(candidate => Number(candidate.percentage) < 65)) {
+      errors.push('Discovery contiene candidatos por debajo de 65%.');
+    }
+    if (candidates.some(candidate => candidate.status === 'AVAILABLE_EXACT')) {
+      errors.push('Discovery no puede declarar AVAILABLE_EXACT.');
+    }
+  }
+
   const verified = loadState('verified-candidates.json');
   if (verified) {
     const eligibleCount = Number(verified.totalEligible || 0);
@@ -52,6 +80,9 @@ function auditPipelineState(projectDir) {
     };
 
     if (eligibleCount > 0) {
+      if (!discovery || verified.discoveryGeneratedAt !== discovery.generatedAt) {
+        errors.push('Verification pertenece a otra ronda o no enlaza el Discovery actual.');
+      }
       if (verified.evidenceSource !== 'live_dom') {
         errors.push('Hay candidatos elegibles sin evidencia global live_dom.');
       }
@@ -91,6 +122,9 @@ function auditPipelineState(projectDir) {
     };
 
     if (finalists.length > 0) {
+      if (!verified || parlays.verificationGeneratedAt !== verified.verifiedAt) {
+        errors.push('Parlay Builder pertenece a otra verificacion o no declara su procedencia.');
+      }
       if (parlays.quoteMethod !== 'betslip_dom_read') {
         errors.push('Los finalistas no declaran quoteMethod="betslip_dom_read".');
       }

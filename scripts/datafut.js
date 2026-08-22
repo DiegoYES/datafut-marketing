@@ -14,6 +14,8 @@ function usage() {
 Uso:
   npm run datafut -- status
   npm run datafut -- audit
+  npm run datafut -- discover --raw <archivo.json>
+  npm run datafut -- discover-live [--date YYYY-MM-DD]
   npm run datafut -- render --input <archivo.json> [--date YYYY-MM-DD] [--dry-run]
 
 El comando render genera archivos locales, pero nunca publica ni realiza apuestas.`);
@@ -57,6 +59,23 @@ function audit() {
   result.warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
   result.errors.forEach(error => console.error(`ERROR DE INTEGRIDAD: ${error}`));
   if (result.errors.length > 0) process.exitCode = 1;
+}
+
+function discover(args) {
+  const rawArg = optionValue(args, '--raw');
+  if (!rawArg) throw new Error('Falta --raw <archivo.json>.');
+  run(process.execPath, [path.join('scripts', 'discover-datafut-candidates.js'), rawArg]);
+}
+
+function discoverLive(args) {
+  const dateArg = optionValue(args, '--date');
+  const extractArgs = [path.join('scripts', 'extract_datafut_live.js')];
+  if (dateArg) extractArgs.push('--date', dateArg);
+  run(process.execPath, extractArgs);
+  run(process.execPath, [
+    path.join('scripts', 'discover-datafut-candidates.js'),
+    path.join('scripts', 'datafut-live-raw.json')
+  ]);
 }
 
 function render(args) {
@@ -105,6 +124,8 @@ try {
   if (!command || ['help', '--help', '-h'].includes(command)) usage();
   else if (command === 'status') showStatus();
   else if (command === 'audit') audit();
+  else if (command === 'discover') discover(args);
+  else if (command === 'discover-live') discoverLive(args);
   else if (command === 'render') render(args);
   else throw new Error(`Comando desconocido: ${command}`);
 } catch (error) {

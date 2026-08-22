@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "minimumPercentage": 65,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
@@ -7,14 +7,20 @@
     {
       "id": "catalog",
       "status": "candidate",
-      "script": "scripts/build_playdoit_catalog.js",
-      "note": "Consulta API publica en vivo desde el navegador; sirve para definir el universo comercial."
+      "script": "npm run validate:catalog",
+      "note": "El catalogo debe capturarse desde DOM visible; el validador impide aceptar fuentes distintas de live_dom."
     },
     {
-      "id": "discovery-verification",
+      "id": "discovery",
+      "status": "ready",
+      "script": "scripts/datafut.js discover-live",
+      "note": "Usa la sesion DataFut, deduplica partidos y conserva solo intersecciones exactas con el catalogo actual."
+    },
+    {
+      "id": "verification",
       "status": "blocked",
-      "script": "scripts/run_catalog_first_pipeline.js",
-      "note": "Contiene partidos y fuentes DataFut fechadas; su evidencia exacta es live_api, no live_dom."
+      "script": null,
+      "note": "Falta implementar relectura DOM exacta por candidato y enlazar discoveryGeneratedAt."
     },
     {
       "id": "parlay-builder",

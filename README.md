@@ -42,6 +42,14 @@ Ejecutar las pruebas de contrato que también deberá respetar cualquier cambio 
 npm run test:contracts
 ```
 
+Extraer DataFut con la sesión local y descubrir únicamente intersecciones exactas con el catálogo DOM actual:
+
+```powershell
+npm run datafut -- discover-live --date 2026-08-21
+```
+
+Este comando deduplica partidos por su identificador de DataFut, ignora encuentros fuera del catálogo y exige coincidencia de estadística, alcance, dirección, línea y periodo. Guarda datos intermedios en `scripts/datafut-live-raw.json` y candidatos no publicables en `pipeline-state/discovery-candidates.json`.
+
 Validar la entrada sin generar archivos:
 
 ```powershell
@@ -93,7 +101,7 @@ Los archivos actuales pueden contener texto UTF-8 previamente corrompido, por ej
 
 ## Proxima etapa
 
-Una vez congelado y validado el resultado actual, el trabajo pendiente es consolidar los multiples scripts fechados en un solo orquestador configurable y archivar los experimentos sin borrarlos.
+Catalog y Discovery ya están separados y enlazados por `catalogGeneratedAt`. El trabajo pendiente empieza en Verification: debe releer cada candidato en el DOM visible de PlayDoIt y declarar `discoveryGeneratedAt` antes de que Builder pueda consumirlo.
 
 El manifiesto de migracion esta en `config/pipeline-manifest.json`. Las etapas de verificacion y builder permanecen bloqueadas hasta que observen directamente el DOM y lean el momio mostrado por el betslip; los scripts basados en API, dumps o multiplicacion quedan marcados como no publicables.
 
