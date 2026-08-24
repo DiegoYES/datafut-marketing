@@ -1,4 +1,7 @@
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const os = require('node:os');
 const path = require('path');
 const { readJson } = require('../scripts/lib/validation');
 const {
@@ -6,6 +9,7 @@ const {
   validateDomMarketEvidence
 } = require('../scripts/lib/dom-evidence');
 const { validateDomSelectorConfig } = require('../scripts/lib/dom-selector-config');
+const { validatePngArtifact } = require('../scripts/lib/pipeline-audit');
 
 const fixture = readJson(path.join(__dirname, 'fixtures', 'playdoit-dom-evidence.json'));
 
@@ -45,6 +49,65 @@ test('rechaza evidencia API presentada como verificacion exacta', () => {
   assert.match(result.errors.join('\n'), /source debe ser "live_dom"/);
 });
 
+test('rechaza tarjetas de equipo disfrazadas como total del partido', () => {
+  const candidate = {
+    candidateId: 'DF-SCOPE-001',
+    match: 'Everton vs Universidad de Concepción',
+    subject: 'Everton vs Universidad de Concepción',
+    statistic: 'yellow_cards',
+    scope: 'match',
+    direction: 'over',
+    line: 3.5,
+    period: 'full_time'
+  };
+  const evidence = structuredClone(fixture.marketEvidence);
+  evidence.eventText = candidate.match;
+  evidence.marketText = 'Total de tarjetas U. de Concepción';
+  evidence.selectionText = 'Más de 3,5';
+  evidence.oddsText = '+120';
+  evidence.rawText = `${evidence.marketText} ${evidence.selectionText} ${evidence.oddsText}`;
+  evidence.observedSemantics = {
+    subject: candidate.subject,
+    statistic: candidate.statistic,
+    scope: candidate.scope,
+    direction: candidate.direction,
+    line: candidate.line,
+    period: candidate.period
+  };
+  const result = validateDomMarketEvidence(candidate, evidence);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join('\n'), /scope|subject/);
+});
+
+test('acepta la abreviatura visible cuando conserva alcance de equipo', () => {
+  const candidate = {
+    candidateId: 'DF-SCOPE-002',
+    match: 'Everton vs Universidad de Concepción',
+    subject: 'Universidad de Concepción',
+    statistic: 'yellow_cards',
+    scope: 'team',
+    direction: 'over',
+    line: 3.5,
+    period: 'full_time'
+  };
+  const evidence = structuredClone(fixture.marketEvidence);
+  evidence.eventText = candidate.match;
+  evidence.marketText = 'Total de tarjetas U. de Concepción';
+  evidence.selectionText = 'Más de 3,5';
+  evidence.oddsText = '+120';
+  evidence.rawText = `${evidence.marketText} ${evidence.selectionText} ${evidence.oddsText}`;
+  evidence.observedSemantics = {
+    subject: candidate.subject,
+    statistic: candidate.statistic,
+    scope: candidate.scope,
+    direction: candidate.direction,
+    line: candidate.line,
+    period: candidate.period
+  };
+  const result = validateDomMarketEvidence(candidate, evidence);
+  assert.equal(result.valid, true, result.errors.join('\n'));
+});
+
 test('acepta una lectura DOM completa del betslip', () => {
   const result = validateBetslipDomEvidence(
     ['DF-TEST-001', 'DF-TEST-002'],
@@ -79,6 +142,18 @@ test('rechaza evidencia sin captura hasheada o sin limpieza', () => {
   assert.match(result.errors.join('\n'), /betslip vacio/);
 });
 
+test('rechaza texto renombrado como archivo PNG', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'datafut-evidence-'));
+  const screenshotPath = path.join(tempDir, 'fake.png');
+  const buffer = Buffer.from('BETSLIP_FABRICADO_POR_EL_SCRIPT', 'utf8');
+  fs.writeFileSync(screenshotPath, buffer);
+  const result = validatePngArtifact(tempDir, {
+    path: 'fake.png',
+    sha256: crypto.createHash('sha256').update(buffer).digest('hex')
+  });
+  assert.equal(result, false);
+});
+
 test('mantiene bloqueada la configuracion de selectores historicos', () => {
   const config = readJson(path.join(__dirname, '..', 'config', 'playdoit-dom.json'));
   const result = validateDomSelectorConfig(config);
@@ -101,6 +176,7 @@ test('acepta solamente selectores especificos con prueba de navegador', () => {
     verification: {
       observedAt: '2026-08-21T20:00:00.000Z',
       screenshotSha256: 'c'.repeat(64),
+      screenshotPath: 'captures/evidence/selectors.png',
       browser: 'in-app-browser'
     }
   };
@@ -123,6 +199,7 @@ test('rechaza selectores genericos aunque se marquen como verificados', () => {
     verification: {
       observedAt: '2026-08-21T20:00:00.000Z',
       screenshotSha256: 'd'.repeat(64),
+      screenshotPath: 'captures/evidence/selectors.png',
       browser: 'in-app-browser'
     }
   };

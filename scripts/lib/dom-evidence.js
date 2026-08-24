@@ -1,4 +1,6 @@
 const SHA256_PATTERN = /^[a-f0-9]{64}$/i;
+const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const { classifyMarket, normalizeText, parseSelection, sameText } = require('./playdoit-semantics');
 
 function isNonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
@@ -18,7 +20,16 @@ function validateScreenshot(screenshot, prefix, errors) {
   }
   if (!isNonEmptyString(screenshot.sha256) || !SHA256_PATTERN.test(screenshot.sha256)) {
     errors.push(`${prefix}.screenshot.sha256 debe ser un SHA-256 hexadecimal.`);
+  } else if (screenshot.sha256.toLowerCase() === EMPTY_SHA256) {
+    errors.push(`${prefix}.screenshot.sha256 no puede corresponder a un archivo vacio.`);
   }
+}
+
+function resolveTeams(candidate, context = {}) {
+  if (context.homeTeam && context.awayTeam) return context;
+  if (candidate.homeTeam && candidate.awayTeam) return candidate;
+  const parts = String(candidate.match || '').split(/\s+vs\.?\s+/i);
+  return parts.length === 2 ? { homeTeam: parts[0], awayTeam: parts[1] } : {};
 }
 
 function validateCommonDomEvidence(evidence, prefix, errors) {
@@ -38,7 +49,7 @@ function validateCommonDomEvidence(evidence, prefix, errors) {
   return true;
 }
 
-function validateDomMarketEvidence(candidate, evidence) {
+function validateDomMarketEvidence(candidate, evidence, context = {}) {
   const errors = [];
   if (!candidate || typeof candidate !== 'object') {
     return { valid: false, errors: ['candidate debe ser un objeto.'] };
@@ -76,6 +87,42 @@ function validateDomMarketEvidence(candidate, evidence) {
   if (isNonEmptyString(candidate.match) && evidence.eventText !== candidate.match) {
     errors.push(`Partido distinto: esperado "${candidate.match}", observado "${evidence.eventText}".`);
   }
+
+  const { homeTeam, awayTeam } = resolveTeams(candidate, context);
+  if (!homeTeam || !awayTeam) {
+    errors.push('No se pudieron resolver homeTeam y awayTeam para derivar la semantica DOM.');
+  } else {
+    const derivedMarket = classifyMarket(evidence.marketText, homeTeam, awayTeam);
+    const derivedSelection = parseSelection(evidence.selectionText);
+    if (!derivedMarket.valid) {
+      errors.push(`El marketText no demuestra un alcance exacto: ${derivedMarket.reason}.`);
+    } else {
+      ['subject', 'statistic', 'scope', 'period'].forEach(key => {
+        if (!sameText(derivedMarket[key], candidate[key])) {
+          errors.push(`Semantica derivada distinta en ${key}: esperado ${candidate[key]}, derivado ${derivedMarket[key]}.`);
+        }
+        if (observed && !sameText(derivedMarket[key], observed[key])) {
+          errors.push(`observedSemantics.${key} contradice el marketText literal.`);
+        }
+      });
+    }
+    if (!derivedSelection.valid) {
+      errors.push('selectionText no contiene direccion y linea reconocibles.');
+    } else {
+      if (derivedSelection.direction !== candidate.direction) {
+        errors.push(`Direccion derivada distinta: esperada ${candidate.direction}, derivada ${derivedSelection.direction}.`);
+      }
+      if (Number(derivedSelection.line) !== Number(candidate.line)) {
+        errors.push(`Linea derivada distinta: esperada ${candidate.line}, derivada ${derivedSelection.line}.`);
+      }
+    }
+  }
+
+  ['marketText', 'selectionText', 'oddsText'].forEach(key => {
+    if (isNonEmptyString(evidence[key]) && !normalizeText(evidence.rawText).includes(normalizeText(evidence[key]))) {
+      errors.push(`domEvidence.rawText no contiene ${key}.`);
+    }
+  });
 
   return { valid: errors.length === 0, errors };
 }

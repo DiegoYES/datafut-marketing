@@ -9,15 +9,13 @@
     "selectionRow": [],
     "combinedOdds": []
   },
-  "integrityRule": "No ejecutar verificacion publicable hasta observar y probar selectores unicos en el navegador real.",
+  "integrityRule": "No ejecutar verificacion publicable hasta observar selectores unicos en el DOM real y conservar una captura PNG verificable.",
   "historicalHints": {
     "selection": [
-      ".asb-btn-odd",
-      "[class*=\"odd\"]"
+      ".asb-btn-odd"
     ],
     "betslipContainer": [
-      "[class*=\"betslip\"]",
-      "[class*=\"coupon\"]"
+      ".asb-betslip-container"
     ]
   }
 }

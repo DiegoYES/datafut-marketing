@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "percentageThresholdExclusive": 70,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
@@ -7,8 +7,8 @@
     {
       "id": "catalog",
       "status": "candidate",
-      "script": "npm run validate:catalog",
-      "note": "El catalogo debe capturarse desde DOM visible; el validador impide aceptar fuentes distintas de live_dom."
+      "script": "npm run datafut -- catalog-preview",
+      "note": "El comando actual produce solo una vista previa live_api NOT_VERIFIED. El catalogo oficial requiere una captura DOM independiente."
     },
     {
       "id": "discovery",
@@ -19,8 +19,8 @@
     {
       "id": "verification",
       "status": "blocked",
-      "script": null,
-      "note": "Falta implementar relectura DOM exacta por candidato y enlazar discoveryGeneratedAt."
+      "script": "npm run datafut -- verify",
+      "note": "Falla de forma cerrada hasta implementar relectura DOM exacta; nunca convierte API en AVAILABLE_EXACT."
     },
     {
       "id": "replenishment",
@@ -37,8 +37,8 @@
     {
       "id": "parlay-builder",
       "status": "blocked",
-      "script": "scripts/run_parlay_builder.js",
-      "note": "El script heredado multiplica cuotas individuales; no lee el momio del betslip."
+      "script": "npm run datafut -- parlays",
+      "note": "Solo genera estimaciones separadas y deja el output oficial bloqueado hasta leer el momio real del DOM del betslip."
     },
     {
       "id": "combinada-builder",

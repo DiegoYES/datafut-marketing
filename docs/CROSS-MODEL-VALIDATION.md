@@ -20,8 +20,13 @@ npm run datafut -- render --input parlay-data.json --date YYYY-MM-DD --dry-run
 ## Reglas que ningun modelo puede relajar
 
 - `live_api` y `captured_dump` no equivalen a `live_dom`.
+- Ejecutar `fetch(GetEventDetails)` dentro de `page.evaluate` sigue siendo `live_api`, no DOM.
 - Multiplicar cuotas individuales no equivale a leer el momio del betslip.
 - Una captura con un overlay creado por el proyecto no es evidencia del boleto nativo.
+- Un archivo `.png` fabricado con `Buffer.from(texto)` no es una captura: se comprueban firma PNG, tamaño y SHA-256 del archivo real.
+- `observedSemantics` no es autoridad: sujeto, estadística, alcance, periodo, dirección y línea se derivan nuevamente de `marketText` y `selectionText`.
+- `Total de tarjetas U. de Concepción` es alcance de equipo aunque el nombre completo del visitante esté abreviado.
+- No sustituir la configuración real por un objeto hardcodeado dentro de una prueba.
 - No marcar `publishable=true` sin evidencia valida para cada candidato y finalista.
 - No actualizar `validation/golden-renders.json` automaticamente.
 - No usar selectores amplios como `[class*="odd"]` o `[class*="betslip"]` como prueba oficial.
@@ -38,7 +43,7 @@ Para cada selector propuesto se debe comprobar:
 3. que el texto crudo contiene partido, mercado, seleccion y cuota esperados;
 4. que el betslip contiene exactamente 2 o 3 filas;
 5. que el momio combinado se lee de un nodo distinto de las cuotas individuales;
-6. que existe captura del estado y SHA-256;
+6. que existe una captura PNG real del estado, su ruta y SHA-256;
 7. que el betslip queda vacio al finalizar.
 
 Solo entonces puede cambiarse el estado a `VERIFIED_LIVE_DOM` y añadirse `verification` con fecha, navegador y hash de captura.

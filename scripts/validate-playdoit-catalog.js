@@ -1,5 +1,6 @@
 const path = require('node:path');
 const { readJson } = require('./lib/validation');
+const { classifyMarket, normalizeText } = require('./lib/playdoit-semantics');
 
 const catalogPath = path.resolve(
   process.cwd(),
@@ -50,11 +51,31 @@ for (const [matchIndex, match] of (catalog.matches || []).entries()) {
     continue;
   }
 
+  const seenMarkets = new Set();
+
   for (const [marketIndex, market] of match.markets.entries()) {
     const marketLocation = `${location}.markets[${marketIndex}]`;
     marketCount += 1;
     requireText(market.marketText, `${marketLocation}.marketText`);
     requireText(market.period, `${marketLocation}.period`);
+    const marketKey = [market.marketId, market.subject, market.statistic, market.scope, market.period]
+      .map(normalizeText)
+      .join('|');
+    if (seenMarkets.has(marketKey)) {
+      errors.push(`${marketLocation} duplica un mercado ya catalogado para este partido.`);
+    }
+    seenMarkets.add(marketKey);
+
+    const derived = classifyMarket(market.marketText, match.homeTeam, match.awayTeam);
+    if (
+      !derived.valid ||
+      normalizeText(derived.subject) !== normalizeText(market.subject) ||
+      derived.statistic !== market.statistic ||
+      derived.scope !== market.scope ||
+      derived.period !== market.period
+    ) {
+      errors.push(`${marketLocation} declara semantica que no se deriva de marketText.`);
+    }
 
     const selections = Array.isArray(market.selections) ? market.selections : [];
     const directions = Array.isArray(market.directions) ? market.directions : [];

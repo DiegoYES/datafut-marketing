@@ -8,8 +8,11 @@ const REQUIRED_SELECTOR_GROUPS = [
 
 const UNSAFE_SELECTOR_PATTERNS = [
   /^\*$/,
-  /^\[class\*=\s*["']?(odd|price|selection|market|betslip|coupon)["']?\]$/i
+  /^\[class\*=\s*["']?(odd|price|selection|market|betslip|coupon)["']?\]$/i,
+  /^\.[a-z0-9_-]+$/i
 ];
+
+const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 function validateDomSelectorConfig(config) {
   const errors = [];
@@ -49,6 +52,11 @@ function validateDomSelectorConfig(config) {
     }
     if (!/^[a-f0-9]{64}$/i.test(config.verification.screenshotSha256 || '')) {
       errors.push('verification.screenshotSha256 debe ser un SHA-256 hexadecimal.');
+    } else if (config.verification.screenshotSha256.toLowerCase() === EMPTY_SHA256) {
+      errors.push('verification.screenshotSha256 no puede corresponder a un archivo vacio.');
+    }
+    if (!config.verification.screenshotPath || typeof config.verification.screenshotPath !== 'string') {
+      errors.push('verification.screenshotPath es obligatorio.');
     }
     if (!config.verification.browser || typeof config.verification.browser !== 'string') {
       errors.push('verification.browser es obligatorio.');

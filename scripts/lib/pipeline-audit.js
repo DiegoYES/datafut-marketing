@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { readJson } = require('./validation');
 const {
   validateBetslipDomEvidence,
@@ -12,6 +13,20 @@ const {
   sha256,
   validateDatafutCard
 } = require('./datafut-provenance');
+const { classifyMarket, normalizeText } = require('./playdoit-semantics');
+
+function validatePngArtifact(projectDir, screenshot) {
+  if (!screenshot || typeof screenshot.path !== 'string') return false;
+  const artifactPath = path.resolve(projectDir, screenshot.path);
+  if (artifactPath !== projectDir && !artifactPath.startsWith(`${projectDir}${path.sep}`)) return false;
+  if (!fs.existsSync(artifactPath)) return false;
+  const buffer = fs.readFileSync(artifactPath);
+  if (buffer.length < 1024) return false;
+  const pngSignature = '89504e470d0a1a0a';
+  if (buffer.subarray(0, 8).toString('hex') !== pngSignature) return false;
+  const actualSha = crypto.createHash('sha256').update(buffer).digest('hex');
+  return actualSha === screenshot.sha256;
+}
 
 function auditPipelineState(projectDir) {
   const stateDir = path.join(projectDir, 'pipeline-state');
@@ -45,6 +60,41 @@ function auditPipelineState(projectDir) {
     if (!['live_api', 'live_dom'].includes(catalog.evidenceSource)) {
       warnings.push(`Catalogo con evidencia ${JSON.stringify(catalog.evidenceSource)}.`);
     }
+    if (catalog.catalogStatus === 'VERIFIED') {
+      if (catalog.evidenceSource !== 'live_dom') {
+        errors.push('Catalog VERIFIED no puede proceder de API u otra fuente distinta de live_dom.');
+      }
+      if (
+        catalog.domEvidence?.source !== 'live_dom' ||
+        catalog.domEvidence?.verificationMethod !== 'dom_observation' ||
+        !validatePngArtifact(projectDir, catalog.domEvidence?.screenshot)
+      ) {
+        errors.push('Catalog VERIFIED carece de una captura PNG DOM autentica y verificable.');
+      }
+    }
+
+    for (const match of catalog.matches || []) {
+      const seenMarkets = new Set();
+      for (const market of match.markets || []) {
+        const key = [market.marketId, market.subject, market.statistic, market.scope, market.period]
+          .map(normalizeText)
+          .join('|');
+        if (seenMarkets.has(key)) {
+          errors.push(`Catalog contiene mercado duplicado en ${match.matchId}: ${market.marketText}.`);
+        }
+        seenMarkets.add(key);
+        const derived = classifyMarket(market.marketText, match.homeTeam, match.awayTeam);
+        if (
+          !derived.valid ||
+          normalizeText(derived.subject) !== normalizeText(market.subject) ||
+          derived.statistic !== market.statistic ||
+          derived.scope !== market.scope ||
+          derived.period !== market.period
+        ) {
+          errors.push(`Catalog declara semantica que no se deriva de marketText en ${match.matchId}: ${market.marketText}.`);
+        }
+      }
+    }
   }
 
   const discovery = loadState('discovery-candidates.json');
@@ -61,6 +111,9 @@ function auditPipelineState(projectDir) {
 
     if (!catalog || discovery.catalogGeneratedAt !== catalog.generatedAt) {
       errors.push('Discovery no esta vinculado al catalogo PlayDoIt actual.');
+    }
+    if (catalog?.catalogStatus !== 'VERIFIED' || catalog?.evidenceSource !== 'live_dom') {
+      errors.push('Discovery se genero desde un Catalog que no esta VERIFIED con live_dom.');
     }
     if (discovery.datafutSource !== 'authenticated_session_read') {
       errors.push('Discovery no declara datafutSource="authenticated_session_read".');
@@ -166,8 +219,11 @@ function auditPipelineState(projectDir) {
         );
       }
       const invalidDomEvidence = eligibleResults.filter(result => {
-        const validation = validateDomMarketEvidence(result.requested, result.domEvidence);
-        return result.evidenceSource !== 'live_dom' || !validation.valid;
+        const candidate = discoveryById.get(result.candidateId);
+        const match = (catalog?.matches || []).find(item => item.matchId === candidate?.catalogMatchId);
+        const validation = validateDomMarketEvidence(result.requested, result.domEvidence, match || {});
+        return result.evidenceSource !== 'live_dom' || !validation.valid ||
+          !validatePngArtifact(projectDir, result.domEvidence?.screenshot);
       });
       if (invalidDomEvidence.length > 0) {
         errors.push(
@@ -199,7 +255,8 @@ function auditPipelineState(projectDir) {
       }
       const invalidBetslipEvidence = finalists.filter(finalist => {
         const validation = validateBetslipDomEvidence(finalist.candidateIds, finalist.domEvidence);
-        return finalist.betslipEvidence !== 'live_dom' || !validation.valid;
+        return finalist.betslipEvidence !== 'live_dom' || !validation.valid ||
+          !validatePngArtifact(projectDir, finalist.domEvidence?.screenshot);
       });
       if (invalidBetslipEvidence.length > 0) {
         errors.push(
@@ -219,15 +276,23 @@ function auditPipelineState(projectDir) {
       errors.push('El pool elegible pertenece a otro Catalog.');
     }
     const accumulated = Array.isArray(eligiblePool.candidates) ? eligiblePool.candidates : [];
-    if (accumulated.some(item =>
-      Number(item.discovery?.percentage) <= 70 ||
-      item.verification?.status !== 'AVAILABLE_EXACT' ||
-      item.verification?.evidenceSource !== 'live_dom' ||
-      !validateDatafutCard(item.discovery).valid ||
-      item.verification?.datafutCardId !== item.discovery?.datafutCard?.cardId ||
-      Number(item.verification?.percentage) !== Number(item.discovery?.percentage) ||
-      !sameCandidateSemantics(item.verification?.requested, item.discovery)
-    )) {
+    if (accumulated.some(item => {
+      const match = (catalog?.matches || []).find(entry => entry.matchId === item.discovery?.catalogMatchId);
+      const domValidation = validateDomMarketEvidence(
+        item.verification?.requested,
+        item.verification?.domEvidence,
+        match || {}
+      );
+      return Number(item.discovery?.percentage) <= 70 ||
+        item.verification?.status !== 'AVAILABLE_EXACT' ||
+        item.verification?.evidenceSource !== 'live_dom' ||
+        !validateDatafutCard(item.discovery).valid ||
+        item.verification?.datafutCardId !== item.discovery?.datafutCard?.cardId ||
+        Number(item.verification?.percentage) !== Number(item.discovery?.percentage) ||
+        !sameCandidateSemantics(item.verification?.requested, item.discovery) ||
+        !domValidation.valid ||
+        !validatePngArtifact(projectDir, item.verification?.domEvidence?.screenshot);
+    })) {
       errors.push('El pool elegible contiene candidatos sin cadena integra DataFut → Verification.');
     }
   }
@@ -280,8 +345,17 @@ function auditPipelineState(projectDir) {
   if ((hasPublishableCandidates || hasFinalists) && !selectorValidation.valid) {
     errors.push('La configuracion de selectores DOM no esta verificada para automatizacion publicable.');
   }
+  if (
+    selectorValidation.valid &&
+    !validatePngArtifact(projectDir, {
+      path: selectorConfig.verification?.screenshotPath,
+      sha256: selectorConfig.verification?.screenshotSha256
+    })
+  ) {
+    errors.push('La prueba de selectores no apunta a una captura PNG autentica y verificable.');
+  }
 
   return { errors, warnings, summary };
 }
 
-module.exports = { auditPipelineState };
+module.exports = { auditPipelineState, validatePngArtifact };

@@ -21,7 +21,7 @@
     "render:voice": "py generate-parlay-voice-dynamic.py",
     "render:video": "node render-parlay-video.js",
     "render:parlay": "npm run validate:data && npm run render:voice && npm run render:video",
-    "test": "npm run test:contracts && npm run test:discovery && npm run test:datafut-provenance && npm run test:formats && npm run test:content && npm run validate:repo"
+    "test": "npm run test:contracts && npm run test:discovery && npm run test:datafut-provenance && npm run test:formats && npm run test:content && npm run validate:skills && npm run validate:renders && npm run validate:golden"
   },
   "keywords": [],
   "author": "",

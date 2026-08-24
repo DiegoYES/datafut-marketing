@@ -14,10 +14,13 @@ function usage() {
 Uso:
   npm run datafut -- status
   npm run datafut -- audit
+  npm run datafut -- catalog-preview
   npm run datafut -- discover --raw <archivo.json>
   npm run datafut -- discover-live [--date YYYY-MM-DD]
+  npm run datafut -- verify
   npm run datafut -- replenish [--raw <archivo.json>]
   npm run datafut -- options
+  npm run datafut -- parlays
   npm run datafut -- render --input <archivo.json> [--date YYYY-MM-DD] [--dry-run]
 
 El comando render genera archivos locales, pero nunca publica ni realiza apuestas.`);
@@ -84,6 +87,18 @@ function buildOptions() {
   run(process.execPath, [path.join('scripts', 'build-format-options.js')]);
 }
 
+function buildCatalogPreview() {
+  run(process.execPath, [path.join('scripts', 'build_playdoit_catalog.js')]);
+}
+
+function verify() {
+  run(process.execPath, [path.join('scripts', 'run_playdoit_verification.js')]);
+}
+
+function buildParlays() {
+  run(process.execPath, [path.join('scripts', 'run_parlay_builder.js')]);
+}
+
 function replenish(args) {
   const rawArg = optionValue(args, '--raw') || path.join('scripts', 'datafut-live-raw.json');
   run(process.execPath, [path.join('scripts', 'replenish-candidates.js'), rawArg]);
@@ -135,10 +150,13 @@ try {
   if (!command || ['help', '--help', '-h'].includes(command)) usage();
   else if (command === 'status') showStatus();
   else if (command === 'audit') audit();
+  else if (command === 'catalog-preview') buildCatalogPreview();
   else if (command === 'discover') discover(args);
   else if (command === 'discover-live') discoverLive(args);
+  else if (command === 'verify') verify();
   else if (command === 'replenish') replenish(args);
   else if (command === 'options') buildOptions();
+  else if (command === 'parlays') buildParlays();
   else if (command === 'render') render(args);
   else throw new Error(`Comando desconocido: ${command}`);
 } catch (error) {

@@ -36,6 +36,14 @@ Auditar si las verificaciones y cotizaciones poseen procedencia suficiente para 
 npm run datafut -- audit
 ```
 
+Generar una vista previa comercial desde la API pública, claramente no publicable:
+
+```powershell
+npm run datafut -- catalog-preview
+```
+
+La vista previa queda `NOT_VERIFIED` y no habilita Discovery. Un catálogo oficial necesita observación DOM real; cambiar manualmente la etiqueta a `live_dom` no sirve porque el auditor también exige semántica derivada, ausencia de duplicados y una captura PNG auténtica.
+
 Ejecutar las pruebas de contrato que también deberá respetar cualquier cambio hecho con Gemini:
 
 ```powershell
@@ -52,6 +60,8 @@ Este comando deduplica partidos por su identificador de DataFut, ignora encuentr
 
 Cada candidato queda ligado por SHA-256 a una tarjeta DataFut exacta. El validador reproduce el porcentaje final promediando las dos tasas `con suavizado` de esa tarjeta y bloquea cruces entre mercados totales, locales y visitantes. Un porcentaje parcial encontrado dentro de la explicación nunca puede sustituir el porcentaje final mostrado junto al título.
 
+La semántica de PlayDoIt también se deriva del texto literal observado. Por ejemplo, `Total de tarjetas U. de Concepción — Más de 3.5` siempre se clasifica como mercado de equipo y nunca puede validar `Más de 3.5 tarjetas totales del partido`, aunque línea y cuota coincidan.
+
 Discovery rechaza archivos sueltos o de otra ronda: la extracción autenticada, el catálogo y los candidatos deben compartir fecha y `catalogGeneratedAt`. Los scripts `scratch_*` son diagnósticos y nunca constituyen una fuente oficial del pipeline.
 
 Después de verificar los candidatos en el DOM visible de PlayDoIt, separa las opciones editoriales:
@@ -59,6 +69,8 @@ Después de verificar los candidatos en el DOM visible de PlayDoIt, separa las o
 ```powershell
 npm run datafut -- options
 ```
+
+Mientras no exista el adaptador DOM real, `npm run datafut -- verify` falla de forma cerrada y genera cero elegibles. Del mismo modo, `npm run datafut -- parlays` conserva cálculos únicamente en `parlay-options-estimated.json` y deja `parlay-options.json` sin finalistas publicables.
 
 El resultado queda en `pipeline-state/format-options.json`: cada candidato exacto puede presentarse como pick individual; los parlays normales sólo combinan partidos distintos; y los mercados del mismo partido quedan como posibles combinadas hasta comprobar compatibilidad y cuota real en el Bet Builder. El comando no elige, apuesta ni publica.
 

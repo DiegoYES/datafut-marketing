@@ -1,6 +1,7 @@
 const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const { classifyMarket } = require('./lib/playdoit-semantics');
 
 const pipelineDir = path.join(__dirname, '..', 'pipeline-state');
 if (!fs.existsSync(pipelineDir)) {
@@ -17,15 +18,14 @@ function decimalToAmerican(dec) {
 }
 
 (async () => {
-  console.log('=== [PHASE 1: PLAYDOIT CATALOG] Starting Live Inspection ===');
+  console.log('=== [PHASE 1: PLAYDOIT CATALOG] Building API preview (not publishable) ===');
   const generatedAt = new Date().toISOString();
-  const navigationMode = 'headed';
-  // Markets come from Altenar's public API inside the browser context.
-  // This is current live data, but it is not direct DOM evidence.
+  const targetDate = '2026-08-24';
+  const navigationMode = 'headless';
   const evidenceSource = 'live_api';
 
   const publicStatePath = path.join(__dirname, '..', 'playdoit-public-state.json');
-  const browser = await chromium.launch({ headless: false });
+  const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     storageState: fs.existsSync(publicStatePath) ? publicStatePath : undefined,
     viewport: { width: 1440, height: 900 }
@@ -34,20 +34,25 @@ function decimalToAmerican(dec) {
 
   console.log('Navigating to PlayDoIt sportsbook...');
   await page.goto('https://www.playdoit.mx/', { waitUntil: 'networkidle', timeout: 45000 });
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(4000);
 
-  // Target event IDs identified in PlayDoIt live database
   const targetMatches = [
-    { matchId: 'PD-001', eventId: 16807924, homeTeam: 'LDU Quito', awayTeam: 'Mirassol', league: 'CONMEBOL Libertadores' },
-    { matchId: 'PD-002', eventId: 17281413, homeTeam: 'Macará', awayTeam: 'Santos', league: 'CONMEBOL Sudamericana' },
-    { matchId: 'PD-003', eventId: 17414465, homeTeam: 'Leones FC', awayTeam: 'Real Cundinamarca', league: 'Colombia Primera B' },
-    { matchId: 'PD-004', eventId: 16286846, homeTeam: 'Athletic Club', awayTeam: 'CRB', league: 'Brasileirão Série B' },
-    { matchId: 'PD-005', eventId: 17413618, homeTeam: 'Real Cartagena', awayTeam: 'Bogotá FC', league: 'Colombia Primera B' },
-    { matchId: 'PD-006', eventId: 16286848, homeTeam: 'Novorizontino', awayTeam: 'América Mineiro', league: 'Brasileirão Série B' },
-    { matchId: 'PD-007', eventId: 16807923, homeTeam: 'Corinthians', awayTeam: 'Rosario Central', league: 'CONMEBOL Libertadores' }
+    { matchId: 'PD-24-001', eventId: 17300607, homeTeam: 'Tigre', awayTeam: 'Central Córdoba', league: 'Argentina Liga Profesional', startTime: '2026-08-24T16:00:00-06:00' },
+    { matchId: 'PD-24-002', eventId: 16325502, homeTeam: 'Athletic Club SJDR', awayTeam: 'Novorizontino', league: 'Brasileirão Série B', startTime: '2026-08-24T16:30:00-06:00' },
+    { matchId: 'PD-24-003', eventId: 16325505, homeTeam: 'Sport Recife', awayTeam: 'América Mineiro', league: 'Brasileirão Série B', startTime: '2026-08-24T16:30:00-06:00' },
+    { matchId: 'PD-24-004', eventId: 16333086, homeTeam: 'Botafogo', awayTeam: 'Athletico Paranaense', league: 'Brasileirão Série A', startTime: '2026-08-24T17:00:00-06:00' },
+    { matchId: 'PD-24-005', eventId: 16335537, homeTeam: 'Everton', awayTeam: 'Universidad de Concepción', league: 'Chile Copa Chile', startTime: '2026-08-24T17:30:00-06:00' },
+    { matchId: 'PD-24-006', eventId: 16337705, homeTeam: 'Libertad', awayTeam: 'Macará', league: 'Ecuador LigaPro', startTime: '2026-08-24T18:00:00-06:00' },
+    { matchId: 'PD-24-007', eventId: 17300610, homeTeam: 'Lanús', awayTeam: 'Argentinos Juniors', league: 'Argentina Liga Profesional', startTime: '2026-08-24T18:15:00-06:00' },
+    { matchId: 'PD-24-008', eventId: 17300611, homeTeam: 'Talleres', awayTeam: 'Rosario Central', league: 'Argentina Liga Profesional', startTime: '2026-08-24T18:15:00-06:00' },
+    { matchId: 'PD-24-009', eventId: 17414572, homeTeam: 'Leones FC', awayTeam: 'Real Cartagena', league: 'Colombia Primera B', startTime: '2026-08-24T16:00:00-06:00' },
+    { matchId: 'PD-24-010', eventId: 17443004, homeTeam: 'Orsomarso', awayTeam: 'Real Cundinamarca', league: 'Colombia Primera B', startTime: '2026-08-24T16:00:00-06:00' },
+    { matchId: 'PD-24-011', eventId: 17467446, homeTeam: 'Patriotas', awayTeam: 'Atlético de Cali', league: 'Colombia Primera B', startTime: '2026-08-24T16:30:00-06:00' },
+    { matchId: 'PD-24-012', eventId: 17453065, homeTeam: 'Internacional de Palmira', awayTeam: 'Barranquilla', league: 'Colombia Primera B', startTime: '2026-08-24T18:45:00-06:00' },
+    { matchId: 'PD-24-013', eventId: 17412275, homeTeam: 'Ferro Carril Oeste', awayTeam: 'All Boys', league: 'Argentina Primera Nacional', startTime: '2026-08-24T17:00:00-06:00' }
   ];
 
-  console.log(`Querying markets for ${targetMatches.length} confirmed live/upcoming matches...`);
+  console.log(`Querying markets for ${targetMatches.length} confirmed 2026-08-24 matches...`);
 
   const rawMatchData = await page.evaluate(async (matches) => {
     const results = [];
@@ -98,8 +103,8 @@ function decimalToAmerican(dec) {
 
   await browser.close();
 
-  // Process and structure catalog matches
   const catalogMatches = [];
+  let totalMarketCount = 0;
 
   for (const raw of rawMatchData) {
     if (raw.error || !raw.markets || raw.markets.length === 0) {
@@ -111,245 +116,62 @@ function decimalToAmerican(dec) {
     const away = raw.awayTeam;
     const matchName = `${home} vs ${away}`;
     const structuredMarkets = [];
+    const seenMarketKeys = new Set();
 
     for (const mkt of raw.markets) {
       const mName = mkt.name.trim();
-      const mNameLow = mName.toLowerCase();
+      const semantics = classifyMarket(mName, home, away);
+      if (!semantics.valid) continue;
 
-      // Determine period
-      let period = 'full_time';
-      if (mNameLow.includes('1er tiempo') || mNameLow.includes('1ª mitad') || mNameLow.includes('primer tiempo')) {
-        period = 'first_half';
-      } else if (mNameLow.includes('2do tiempo') || mNameLow.includes('2ª mitad') || mNameLow.includes('segundo tiempo')) {
-        period = 'second_half';
-      }
+      const overLines = [];
+      const underLines = [];
 
-      // 1. Total Goals (Match)
-      if (mName === 'Total' || mName === 'Goles Totales' || (mNameLow.includes('total de goles') && !mNameLow.includes(home.toLowerCase()) && !mNameLow.includes(away.toLowerCase()))) {
-        const overLines = [];
-        const underLines = [];
+      mkt.odds.forEach(o => {
+        const oNameLow = o.name.toLowerCase();
+        const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [NaN])[0]);
+        if (!Number.isFinite(svNum)) return;
+        const dec = o.price;
+        const am = decimalToAmerican(dec);
 
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
-
-        structuredMarkets.push({
-          marketId: mkt.id,
-          marketText: mName,
-          subject: matchName,
-          statistic: 'goals',
-          scope: 'match',
-          period,
-          family: 'goals',
-          directions
-        });
-      }
-
-      // 2. Team Total Goals (Home)
-      else if (mNameLow.includes(home.toLowerCase()) && mNameLow.includes('total de goles')) {
-        const overLines = [];
-        const underLines = [];
-
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
-
-        structuredMarkets.push({
-          marketId: mkt.id,
-          marketText: mName,
-          subject: home,
-          statistic: 'goals',
-          scope: 'team',
-          period,
-          family: 'team_goals',
-          directions
-        });
-      }
-
-      // 3. Team Total Goals (Away)
-      else if (mNameLow.includes(away.toLowerCase()) && mNameLow.includes('total de goles')) {
-        const overLines = [];
-        const underLines = [];
-
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
-
-        structuredMarkets.push({
-          marketId: mkt.id,
-          marketText: mName,
-          subject: away,
-          statistic: 'goals',
-          scope: 'team',
-          period,
-          family: 'team_goals',
-          directions
-        });
-      }
-
-      // 4. Total Corners (Match)
-      else if (mNameLow === 'total de córners' || mNameLow === 'total tiros de esquina' || mNameLow === 'córners totales' || mNameLow === 'corners totales') {
-        const overLines = [];
-        const underLines = [];
-
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
-
-        structuredMarkets.push({
-          marketId: mkt.id,
-          marketText: mName,
-          subject: matchName,
-          statistic: 'corners',
-          scope: 'match',
-          period,
-          family: 'corners_total',
-          directions
-        });
-      }
-
-      // 5. Total Cards (Match)
-      else if (mNameLow === 'total de tarjetas' || mNameLow === 'tarjetas totales' || mNameLow === 'total tarjetas') {
-        const overLines = [];
-        const underLines = [];
-
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
-
-        structuredMarkets.push({
-          marketId: mkt.id,
-          marketText: mName,
-          subject: matchName,
-          statistic: 'yellow_cards',
-          scope: 'match',
-          period,
-          family: 'cards',
-          directions
-        });
-      }
-
-      // 6. Shots / Fouls / Other statistical markets if available
-      else if (mNameLow.includes('tiro') || mNameLow.includes('remate') || mNameLow.includes('falta')) {
-        const overLines = [];
-        const underLines = [];
-
-        mkt.odds.forEach(o => {
-          const oNameLow = o.name.toLowerCase();
-          const svNum = parseFloat(o.sv || (o.name.match(/\d+(\.\d+)?/) || [0])[0]);
-          const dec = o.price;
-          const am = decimalToAmerican(dec);
-
-          if (oNameLow.startsWith('más de') || oNameLow.startsWith('over')) {
-            overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
-            underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: `${dec.toFixed(2)} (${am})`, rawSelection: o.name, oddId: o.id });
-          }
-        });
-
-        let stat = 'shots';
-        if (mNameLow.includes('tiro a puerta') || mNameLow.includes('tiros a puerta')) stat = 'shots_on_target';
-        if (mNameLow.includes('falta')) stat = 'fouls';
-
-        let sc = 'match';
-        let subj = matchName;
-        if (mNameLow.includes(home.toLowerCase())) {
-          sc = 'team';
-          subj = home;
-        } else if (mNameLow.includes(away.toLowerCase())) {
-          sc = 'team';
-          subj = away;
+        if (oNameLow.startsWith('más de') || oNameLow.startsWith('over') || oNameLow.startsWith('mas de')) {
+          overLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: am, rawSelection: o.name, oddId: o.id });
+        } else if (oNameLow.startsWith('menos de') || oNameLow.startsWith('under')) {
+          underLines.push({ line: svNum, oddsDecimal: dec, oddsAmerican: am, oddsText: am, rawSelection: o.name, oddId: o.id });
         }
+      });
 
-        const directions = [];
-        if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
-        if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
+      const directions = [];
+      if (overLines.length > 0) directions.push({ direction: 'over', lines: overLines });
+      if (underLines.length > 0) directions.push({ direction: 'under', lines: underLines });
 
+      if (directions.length > 0) {
+        const marketKey = [mkt.id, semantics.subject, semantics.statistic, semantics.scope, semantics.period].join('|');
+        if (seenMarketKeys.has(marketKey)) continue;
+        seenMarketKeys.add(marketKey);
         structuredMarkets.push({
           marketId: mkt.id,
           marketText: mName,
-          subject: subj,
-          statistic: stat,
-          scope: sc,
-          period,
-          family: stat,
+          subject: semantics.subject,
+          statistic: semantics.statistic,
+          scope: semantics.scope,
+          period: semantics.period,
+          family: semantics.statistic,
           directions
         });
       }
     }
 
+    totalMarketCount += structuredMarkets.length;
     catalogMatches.push({
       matchId: raw.matchId,
       eventId: raw.eventId,
       homeTeam: raw.homeTeam,
       awayTeam: raw.awayTeam,
+      match: matchName,
       league: raw.league,
-      startTime: raw.event.startDate || '',
+      startTime: raw.startTime,
+      eventUrl: `https://www.playdoit.mx/#page=event&eventId=${raw.eventId}&sportId=66`,
+      marketCoverage: 'PARTIAL',
       totalRawMarkets: raw.markets.length,
       markets: structuredMarkets
     });
@@ -357,23 +179,22 @@ function decimalToAmerican(dec) {
 
   const catalogOutput = {
     generatedAt,
+    targetDate,
+    targetWindow: 'highlighted football events after 15:00 CDMX',
+    targetTimezone: 'America/Mexico_City',
     navigationMode,
     evidenceSource,
-    catalogStatus: 'OBSERVED_LIVE_API',
+    catalogStatus: 'NOT_VERIFIED',
+    marketCoverage: 'PARTIAL',
     totalMatchesCataloged: catalogMatches.length,
+    totalStructuredMarkets: totalMarketCount,
+    integrityNotice: 'Vista previa obtenida de la API de Altenar dentro del navegador. No constituye evidencia DOM y Discovery debe detenerse.',
+    scopeNote: 'La semantica se deriva del marketText literal; mercados ambiguos se descartan.',
     matches: catalogMatches
   };
 
   const outputPath = path.join(pipelineDir, 'playdoit-catalog.json');
   fs.writeFileSync(outputPath, JSON.stringify(catalogOutput, null, 2));
 
-  console.log(`\n[SUCCESS] playdoit-catalog.json created with ${catalogMatches.length} matches and saved to ${outputPath}`);
-  catalogMatches.forEach(m => {
-    console.log(` - [${m.matchId}] ${m.homeTeam} vs ${m.awayTeam} (${m.league}): ${m.markets.length} structured markets (from ${m.totalRawMarkets} raw PlayDoIt markets)`);
-    m.markets.forEach(mkt => {
-      const lineDetails = mkt.directions.map(d => `${d.direction}: [${d.lines.map(l => `${l.line} @ ${l.oddsText}`).join(', ')}]`).join(' | ');
-      console.log(`     * ${mkt.marketText} (${mkt.family} / ${mkt.scope}): ${lineDetails}`);
-    });
-  });
-
+  console.log(`\n[NOT VERIFIED] API preview saved with ${catalogMatches.length} matches and ${totalMarketCount} unique markets. DOM capture is still required: ${outputPath}`);
 })();
