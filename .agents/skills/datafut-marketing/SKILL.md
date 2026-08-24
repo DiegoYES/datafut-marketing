@@ -66,6 +66,14 @@ Las imágenes sociales son salidas derivadas.
 
 Cada skill tiene una responsabilidad exclusiva.
 
+Los archivos oficiales SOLO pueden proceder de los comandos oficiales del
+pipeline. Scripts `scratch_*`, auditorías ad hoc, respuestas del modelo y JSON
+escritos manualmente no pueden poblar `pipeline-state` ni alimentar Content.
+
+La extracción DataFut, Catalog y Discovery deben declarar la misma fecha y el
+mismo `catalogGeneratedAt`. Una extracción del día 24 no puede cruzarse con un
+catálogo del día 22.
+
 playdoit-catalog:
 
 define qué existe comercialmente.
@@ -172,7 +180,15 @@ AND
 
 evidenceSource = live_dom.
 
+AND
+
+datafutCardId coincide exactamente entre Discovery y Verification.
+
 AVAILABLE_EXACT no sustituye el filtro DataFut.
+
+El porcentaje tampoco puede copiarse de una fuente parcial dentro de la
+tarjeta. Debe ser el porcentaje final mostrado en el encabezado de ESA MISMA
+tarjeta DataFut.
 
 ---
 

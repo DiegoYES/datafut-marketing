@@ -36,19 +36,22 @@ const rawMatches = [{
       rawTitle: 'Más de 1.5 goles',
       percentage: 70,
       sampleLine: 'mediamuestra 10 · 2/2 fuentes',
-      evidenceText: ['Fuente local cumplió 7/10 veces. Fuente visitante cumplió 8/10 veces.']
+      evidenceText: ['Fuente local cumplió 7/10 veces; con suavizado: 70%. Fuente visitante cumplió 8/10 veces; con suavizado: 70%.'],
+      fullSnippet: 'Más de 1.5 goles 70% mediamuestra 10 · 2/2 fuentes Fuente local cumplió 7/10 veces; con suavizado: 70%. Fuente visitante cumplió 8/10 veces; con suavizado: 70%.'
     },
     {
       rawTitle: 'Menos de 3.5 goles',
       percentage: 71.4,
       sampleLine: 'mediamuestra 10 · 2/2 fuentes',
-      evidenceText: ['Fuente local cumplió 9/10 veces. Fuente visitante cumplió 7/10 veces.']
+      evidenceText: ['Fuente local cumplió 9/10 veces; con suavizado: 71.4%. Fuente visitante cumplió 7/10 veces; con suavizado: 71.4%.'],
+      fullSnippet: 'Menos de 3.5 goles 71.4% mediamuestra 10 · 2/2 fuentes Fuente local cumplió 9/10 veces; con suavizado: 71.4%. Fuente visitante cumplió 7/10 veces; con suavizado: 71.4%.'
     },
     {
       rawTitle: 'Más de 2.5 goles',
       percentage: 70.1,
       sampleLine: 'mediamuestra 8 · 2/2 fuentes',
-      evidenceText: ['Fuente local cumplió 6/8 veces. Fuente visitante cumplió 6/8 veces.']
+      evidenceText: ['Fuente local cumplió 6/8 veces; con suavizado: 70%. Fuente visitante cumplió 6/8 veces; con suavizado: 70.2%.'],
+      fullSnippet: 'Más de 2.5 goles 70.1% mediamuestra 8 · 2/2 fuentes Fuente local cumplió 6/8 veces; con suavizado: 70%. Fuente visitante cumplió 6/8 veces; con suavizado: 70.2%.'
     },
     { rawTitle: 'Más de 0.5 goles', percentage: 82.1, evidenceText: [] },
     { rawTitle: 'Menos de 11.5 córners totales', percentage: 71.4, evidenceText: [] },
@@ -61,7 +64,8 @@ const rawMatches = [{
     rawTitle: 'Menos de 3.5 goles',
     percentage: 71.4,
     sampleLine: 'mediamuestra 10 · 2/2 fuentes',
-    evidenceText: ['Fuente local cumplió 9/10 veces. Fuente visitante cumplió 7/10 veces.']
+    evidenceText: ['Fuente local cumplió 9/10 veces; con suavizado: 71.4%. Fuente visitante cumplió 7/10 veces; con suavizado: 71.4%.'],
+    fullSnippet: 'Menos de 3.5 goles 71.4% mediamuestra 10 · 2/2 fuentes Fuente local cumplió 9/10 veces; con suavizado: 71.4%. Fuente visitante cumplió 7/10 veces; con suavizado: 71.4%.'
   }]
 }];
 

@@ -14,7 +14,18 @@ const eligiblePath = path.join(stateDir, 'eligible-candidates.json');
 const catalog = readJson(path.join(stateDir, 'playdoit-catalog.json'));
 const discovery = readJson(discoveryPath);
 const verification = readJson(verificationPath);
-const rawMatches = readJson(rawPath);
+const rawDocument = readJson(rawPath);
+if (!rawDocument || Array.isArray(rawDocument) || !Array.isArray(rawDocument.matches)) {
+  throw new Error('Reposicion solo acepta una extraccion oficial con metadata y matches[].');
+}
+if (
+  rawDocument.datafutSource !== 'authenticated_session_read' ||
+  rawDocument.catalogGeneratedAt !== catalog.generatedAt ||
+  rawDocument.targetDate !== catalog.targetDate
+) {
+  throw new Error('La extraccion DataFut no coincide con la fuente, catalogo y fecha actuales.');
+}
+const rawMatches = rawDocument.matches;
 
 if (verification.discoveryGeneratedAt !== discovery.generatedAt) {
   throw new Error('Verification no corresponde a la ronda actual de Discovery.');
@@ -52,7 +63,8 @@ for (const candidate of discovery.candidates || []) {
   if (
     result.status === 'AVAILABLE_EXACT' &&
     result.editorialEligible !== false &&
-    Number(candidate.percentage) > 70
+    Number(candidate.percentage) > 70 &&
+    result.datafutCardId === candidate.datafutCard?.cardId
   ) {
     eligibleByKey.set(key, {
       candidateKey: key,
@@ -118,6 +130,8 @@ if (status === 'NEXT_ROUND_READY') {
     generatedAt: new Date().toISOString(),
     catalogGeneratedAt: catalog.generatedAt,
     datafutSource: 'authenticated_session_read',
+    datafutRawPath: discovery.datafutRawPath,
+    datafutRawSha256: discovery.datafutRawSha256,
     percentageThresholdExclusive: 70,
     round: currentRound + 1,
     replacementForRound: currentRound,

@@ -7,6 +7,11 @@ const {
 } = require('./dom-evidence');
 const { validateDomSelectorConfig } = require('./dom-selector-config');
 const { isTrivialCandidate } = require('./discovery');
+const {
+  sameCandidateSemantics,
+  sha256,
+  validateDatafutCard
+} = require('./datafut-provenance');
 
 function auditPipelineState(projectDir) {
   const stateDir = path.join(projectDir, 'pipeline-state');
@@ -45,6 +50,7 @@ function auditPipelineState(projectDir) {
   const discovery = loadState('discovery-candidates.json');
   if (discovery) {
     const candidates = Array.isArray(discovery.candidates) ? discovery.candidates : [];
+    const discoveryById = new Map(candidates.map(candidate => [candidate.candidateId, candidate]));
     summary.discovery = {
       generatedAt: discovery.generatedAt,
       catalogGeneratedAt: discovery.catalogGeneratedAt,
@@ -73,6 +79,41 @@ function auditPipelineState(projectDir) {
     }
     if (candidates.some(candidate => candidate.status === 'AVAILABLE_EXACT')) {
       errors.push('Discovery no puede declarar AVAILABLE_EXACT.');
+    }
+    const invalidDatafutCards = candidates.filter(candidate => !validateDatafutCard(candidate).valid);
+    if (invalidDatafutCards.length > 0) {
+      errors.push(
+        `${invalidDatafutCards.length} candidato(s) no estan ligados a una tarjeta DataFut integra.`
+      );
+    }
+
+    const rawRelativePath = discovery.datafutRawPath;
+    const rawPath = rawRelativePath ? path.resolve(projectDir, rawRelativePath) : null;
+    const insideProject = rawPath && (
+      rawPath === projectDir || rawPath.startsWith(`${projectDir}${path.sep}`)
+    );
+    if (!insideProject || !fs.existsSync(rawPath)) {
+      errors.push('Discovery no enlaza una extraccion DataFut local valida.');
+    } else {
+      const actualRawSha256 = sha256(fs.readFileSync(rawPath));
+      if (actualRawSha256 !== discovery.datafutRawSha256) {
+        errors.push('La extraccion DataFut cambio despues de generar Discovery.');
+      }
+      try {
+        const rawDocument = readJson(rawPath);
+        if (
+          !rawDocument ||
+          Array.isArray(rawDocument) ||
+          rawDocument.datafutSource !== 'authenticated_session_read' ||
+          rawDocument.catalogGeneratedAt !== catalog?.generatedAt ||
+          rawDocument.targetDate !== catalog?.targetDate ||
+          !Array.isArray(rawDocument.matches)
+        ) {
+          errors.push('La extraccion DataFut no coincide con la fuente, catalogo y fecha oficiales.');
+        }
+      } catch (error) {
+        errors.push(`No se pudo validar la extraccion DataFut: ${error.message}`);
+      }
     }
   }
 
@@ -108,6 +149,21 @@ function auditPipelineState(projectDir) {
       }
       if (eligibleResults.some(result => Number(result.percentage) <= 70)) {
         errors.push('Verification declara elegible un candidato con porcentaje menor o igual a 70%.');
+      }
+      const discoveryById = new Map(
+        (discovery?.candidates || []).map(candidate => [candidate.candidateId, candidate])
+      );
+      const brokenDatafutLinks = eligibleResults.filter(result => {
+        const candidate = discoveryById.get(result.candidateId);
+        return !candidate ||
+          result.datafutCardId !== candidate.datafutCard?.cardId ||
+          Number(result.percentage) !== Number(candidate.percentage) ||
+          !sameCandidateSemantics(result.requested, candidate);
+      });
+      if (brokenDatafutLinks.length > 0) {
+        errors.push(
+          `${brokenDatafutLinks.length} candidato(s) AVAILABLE_EXACT perdieron su vinculo con la tarjeta DataFut.`
+        );
       }
       const invalidDomEvidence = eligibleResults.filter(result => {
         const validation = validateDomMarketEvidence(result.requested, result.domEvidence);
@@ -166,9 +222,13 @@ function auditPipelineState(projectDir) {
     if (accumulated.some(item =>
       Number(item.discovery?.percentage) <= 70 ||
       item.verification?.status !== 'AVAILABLE_EXACT' ||
-      item.verification?.evidenceSource !== 'live_dom'
+      item.verification?.evidenceSource !== 'live_dom' ||
+      !validateDatafutCard(item.discovery).valid ||
+      item.verification?.datafutCardId !== item.discovery?.datafutCard?.cardId ||
+      Number(item.verification?.percentage) !== Number(item.discovery?.percentage) ||
+      !sameCandidateSemantics(item.verification?.requested, item.discovery)
     )) {
-      errors.push('El pool elegible contiene candidatos que no cumplen >70%, AVAILABLE_EXACT y live_dom.');
+      errors.push('El pool elegible contiene candidatos sin cadena integra DataFut → Verification.');
     }
   }
 

@@ -14,13 +14,14 @@
     "test:discovery": "node test/discovery-intersection.test.js",
     "test:formats": "node test/format-options.test.js",
     "test:content": "node test/content-threshold.test.js",
+    "test:datafut-provenance": "node test/datafut-provenance.test.js",
     "validate:repo": "npm run validate:skills && npm run validate:catalog && npm run validate:renders && npm run validate:golden",
     "validate": "npm run validate:repo && npm run validate:data",
     "datafut": "node scripts/datafut.js",
     "render:voice": "py generate-parlay-voice-dynamic.py",
     "render:video": "node render-parlay-video.js",
     "render:parlay": "npm run validate:data && npm run render:voice && npm run render:video",
-    "test": "npm run test:contracts && npm run test:discovery && npm run test:formats && npm run test:content && npm run validate:repo"
+    "test": "npm run test:contracts && npm run test:discovery && npm run test:datafut-provenance && npm run test:formats && npm run test:content && npm run validate:repo"
   },
   "keywords": [],
   "author": "",

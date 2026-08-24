@@ -2,6 +2,7 @@ const TEAM_NOISE = new Set([
   'club', 'fc', 'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'ac', 'sc'
 ]);
 const PERCENTAGE_THRESHOLD_EXCLUSIVE = 70;
+const { createDatafutCard, validateDatafutCard } = require('./datafut-provenance');
 
 function normalizeText(value) {
   return String(value || '')
@@ -195,13 +196,19 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
         family: semantics.statistic,
         playdoitOddsText: catalogLine.line.oddsText,
         editorialPriority: pick.percentage >= 80 ? 'high' : pick.percentage >= 70 ? 'medium' : 'normal',
-        commercialPriority: commercialPriority(catalogLine.line.oddsText)
+        commercialPriority: commercialPriority(catalogLine.line.oddsText),
+        datafutCard: createDatafutCard({
+          sourceUrl: rawMatch.url,
+          pick,
+          semantics
+        })
       });
 
     }
   }
 
   return candidates
+    .filter(candidate => validateDatafutCard(candidate).valid)
     .sort(compareCandidateQuality)
     .slice(0, limit)
     .map((candidate, index) => ({

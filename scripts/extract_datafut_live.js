@@ -111,7 +111,8 @@ function canonicalMatchKey(url) {
               ? [lines[evidenceStart + 1]]
               : sourceLine
                 ? [sourceLine]
-                : []
+                : [],
+            fullSnippet: card.innerText.replace(/\s+/g, ' ').trim()
           });
         }
 
@@ -140,7 +141,13 @@ function canonicalMatchKey(url) {
       );
     }
 
-    fs.writeFileSync(outputPath, `${JSON.stringify(rawMatches, null, 2)}\n`);
+    fs.writeFileSync(outputPath, `${JSON.stringify({
+      extractedAt: new Date().toISOString(),
+      datafutSource: 'authenticated_session_read',
+      catalogGeneratedAt: catalog.generatedAt,
+      targetDate,
+      matches: rawMatches
+    }, null, 2)}\n`);
     console.log(`Extraccion guardada: ${path.relative(projectDir, outputPath)}.`);
   } finally {
     await browser.close();

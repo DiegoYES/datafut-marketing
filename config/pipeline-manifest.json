@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "percentageThresholdExclusive": 70,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
@@ -14,7 +14,7 @@
       "id": "discovery",
       "status": "ready",
       "script": "scripts/datafut.js discover-live",
-      "note": "Usa la sesion DataFut, deduplica partidos y conserva solo intersecciones exactas con el catalogo actual."
+      "note": "Usa la sesion DataFut y exige tarjeta hasheada, porcentaje final reproducible e interseccion semantica exacta con el catalogo."
     },
     {
       "id": "verification",

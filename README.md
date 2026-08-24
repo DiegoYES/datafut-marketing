@@ -50,6 +50,10 @@ npm run datafut -- discover-live --date 2026-08-21
 
 Este comando deduplica partidos por su identificador de DataFut, ignora encuentros fuera del catálogo y exige coincidencia de estadística, alcance, dirección, línea y periodo. Sólo conserva porcentajes estrictamente mayores de 70% y descarta antes de Verification los overs triviales de goles, tiros, tiros a puerta, córners, tarjetas y faltas. Guarda datos intermedios en `scripts/datafut-live-raw.json` y candidatos no publicables en `pipeline-state/discovery-candidates.json`.
 
+Cada candidato queda ligado por SHA-256 a una tarjeta DataFut exacta. El validador reproduce el porcentaje final promediando las dos tasas `con suavizado` de esa tarjeta y bloquea cruces entre mercados totales, locales y visitantes. Un porcentaje parcial encontrado dentro de la explicación nunca puede sustituir el porcentaje final mostrado junto al título.
+
+Discovery rechaza archivos sueltos o de otra ronda: la extracción autenticada, el catálogo y los candidatos deben compartir fecha y `catalogGeneratedAt`. Los scripts `scratch_*` son diagnósticos y nunca constituyen una fuente oficial del pipeline.
+
 Después de verificar los candidatos en el DOM visible de PlayDoIt, separa las opciones editoriales:
 
 ```powershell

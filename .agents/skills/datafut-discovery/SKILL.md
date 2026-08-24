@@ -39,6 +39,11 @@ DETENER.
 
 No buscar candidatos a ciegas.
 
+La extracción DataFut debe ser la generada por el comando oficial, declarar
+`datafutSource=authenticated_session_read` y coincidir exactamente con
+`targetDate` y `catalogGeneratedAt`. No aceptar arreglos JSON sueltos, archivos
+de otro día ni salidas de scripts `scratch_*`.
+
 ---
 
 # FUENTE ESTADÍSTICA
@@ -373,6 +378,26 @@ Nunca reutilizar evidencia.
 
 Nunca inventar.
 
+Cada candidato debe conservar un objeto `datafutCard` inmutable con:
+
+- URL exacta;
+- título literal de la tarjeta;
+- porcentaje final mostrado junto al título;
+- texto completo de la tarjeta;
+- las dos tasas `con suavizado`;
+- semántica completa;
+- `cardId` SHA-256.
+
+El porcentaje final debe coincidir, con redondeo a un decimal, con el promedio
+de las dos tasas suavizadas escritas dentro de la misma tarjeta. Una tasa
+parcial como `Fuente local ... 78.6%` NUNCA es el respaldo final por sí sola.
+
+Si la tarjeta dice `tiros a puerta totales`, su `scope` es `match`. Si dice
+`del local` o `del visitante`, su `scope` es `team` y el sujeto es ese equipo.
+Está prohibido transportar porcentaje o evidencia entre ambos alcances.
+
+Si falta cualquiera de estos vínculos, DESCARTAR la tarjeta antes del output.
+
 ---
 
 # OUTPUT
@@ -385,6 +410,13 @@ Nunca inventar.
   "candidates": [
     {
       "candidateId": "DF-001",
+      "datafutCard": {
+        "cardId": "sha256...",
+        "rawTitle": "...",
+        "displayedPercentage": 83.3,
+        "computedPercentage": 83.3,
+        "semantics": {}
+      },
       "catalogMatchId": "PD-001",
       "match": "...",
       "league": "...",

@@ -93,6 +93,16 @@ marketId cuando exista
 
 oddId cuando exista.
 
+Además copiar SIN MODIFICAR:
+
+datafutCardId desde `discovery-candidates.json`.
+
+Verification debe comprobar que `requested` coincide con la misma semántica
+Discovery en sujeto, estadística, alcance, dirección, línea y periodo. También
+debe conservar exactamente el mismo porcentaje. Si cambia cualquiera:
+
+NOT_VERIFIED.
+
 ---
 
 # MATCH EXACTO
@@ -218,6 +228,7 @@ NO AVAILABLE_EXACT.
     {
       "candidateId": "DF-001",
       "percentage": 83.3,
+      "datafutCardId": "sha256...",
       "status": "AVAILABLE_EXACT",
       "evidenceSource": "live_dom",
       "playdoit": {
