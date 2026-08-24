@@ -154,11 +154,10 @@ test('rechaza texto renombrado como archivo PNG', () => {
   assert.equal(result, false);
 });
 
-test('mantiene bloqueada la configuracion de selectores historicos', () => {
+test('acepta la configuracion observada en el DOM real de PlayDoIt', () => {
   const config = readJson(path.join(__dirname, '..', 'config', 'playdoit-dom.json'));
   const result = validateDomSelectorConfig(config);
-  assert.equal(result.valid, false);
-  assert.match(result.errors.join('\n'), /VERIFIED_LIVE_DOM/);
+  assert.equal(result.valid, true, result.errors.join('\n'));
 });
 
 test('acepta solamente selectores especificos con prueba de navegador', () => {
@@ -172,6 +171,13 @@ test('acepta solamente selectores especificos con prueba de navegador', () => {
       betslipContainer: ['[data-testid="sportsbook-betslip"]'],
       selectionRow: ['[data-testid="betslip-selection-row"]'],
       combinedOdds: ['[data-testid="betslip-combined-odds"]']
+    },
+    matchingContract: {
+      event: 'exact_text_or_explicit_alias',
+      marketTitle: 'exact_text',
+      selectionScope: 'descendant_of_matched_market',
+      semanticDerivation: 'from_dom_text_only',
+      betslipCrossCheck: 'exact_event_market_selection_odds'
     },
     verification: {
       observedAt: '2026-08-21T20:00:00.000Z',
@@ -206,6 +212,14 @@ test('rechaza selectores genericos aunque se marquen como verificados', () => {
   const result = validateDomSelectorConfig(config);
   assert.equal(result.valid, false);
   assert.match(result.errors.join('\n'), /demasiado amplio/);
+});
+
+test('rechaza buscar una seleccion fuera del mercado exacto', () => {
+  const config = readJson(path.join(__dirname, '..', 'config', 'playdoit-dom.json'));
+  config.matchingContract.selectionScope = 'global_text_search';
+  const result = validateDomSelectorConfig(config);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join('\n'), /descendant_of_matched_market/);
 });
 
 if (failed > 0) {

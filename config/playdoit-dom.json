@@ -1,15 +1,43 @@
 {
   "version": 1,
-  "status": "UNVERIFIED_SELECTORS",
+  "status": "VERIFIED_LIVE_DOM",
   "targetOrigin": "https://www.playdoit.mx",
   "selectors": {
-    "marketContainer": [],
-    "selection": [],
-    "betslipContainer": [],
-    "selectionRow": [],
-    "combinedOdds": []
+    "marketContainer": [
+      "[class^=\"EventDetailsMarketBoxRoot-\"]"
+    ],
+    "selection": [
+      "[class^=\"EventDetailsMarketBoxRoot-\"] button[class^=\"OddBoxButton-\"]"
+    ],
+    "betslipContainer": [
+      "[class^=\"BetSlipContainer-sc-\"]"
+    ],
+    "selectionRow": [
+      "[class^=\"BetSlipSelectionBoxContainer-\"]"
+    ],
+    "combinedOdds": [
+      "[class^=\"BetSlipHeaderTotalOddsValue-\"]"
+    ]
   },
-  "integrityRule": "No ejecutar verificacion publicable hasta observar selectores unicos en el DOM real y conservar una captura PNG verificable.",
+  "matchingContract": {
+    "event": "exact_text_or_explicit_alias",
+    "marketTitle": "exact_text",
+    "selectionScope": "descendant_of_matched_market",
+    "semanticDerivation": "from_dom_text_only",
+    "betslipCrossCheck": "exact_event_market_selection_odds"
+  },
+  "verification": {
+    "observedAt": "2026-08-24T22:04:51.153Z",
+    "screenshotSha256": "5e9da24a0cd459d620aa071039629fe8e40856fabf2f46d78f0d352d7b32e4d3",
+    "screenshotPath": "captures/evidence/playdoit-everton-udec-team-cards-scope-2026-08-24.png",
+    "browser": "Codex Chrome extension",
+    "eventUrl": "https://www.playdoit.mx/#page=event&eventId=16335537&sportId=66",
+    "observedEvent": "Everton vs U. de Concepcion",
+    "observedMarket": "Total de tarjetas U. de Concepcion",
+    "observedSelection": "Mas de 3.5",
+    "observedOdds": "+120"
+  },
+  "integrityRule": "Una seleccion solo coincide dentro del contenedor cuyo titulo de mercado exacto ya coincidio. Despues debe repetirse sin cambios en el boleto.",
   "historicalHints": {
     "selection": [
       ".asb-btn-odd"

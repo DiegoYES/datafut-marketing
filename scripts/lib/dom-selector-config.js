@@ -14,6 +14,14 @@ const UNSAFE_SELECTOR_PATTERNS = [
 
 const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
+const REQUIRED_MATCHING_CONTRACT = {
+  event: 'exact_text_or_explicit_alias',
+  marketTitle: 'exact_text',
+  selectionScope: 'descendant_of_matched_market',
+  semanticDerivation: 'from_dom_text_only',
+  betslipCrossCheck: 'exact_event_market_selection_odds'
+};
+
 function validateDomSelectorConfig(config) {
   const errors = [];
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
@@ -44,6 +52,12 @@ function validateDomSelectorConfig(config) {
     });
   });
 
+  Object.entries(REQUIRED_MATCHING_CONTRACT).forEach(([field, expected]) => {
+    if (config.matchingContract?.[field] !== expected) {
+      errors.push(`matchingContract.${field} debe ser "${expected}".`);
+    }
+  });
+
   if (!config.verification || typeof config.verification !== 'object') {
     errors.push('verification es obligatorio.');
   } else {
@@ -67,6 +81,7 @@ function validateDomSelectorConfig(config) {
 }
 
 module.exports = {
+  REQUIRED_MATCHING_CONTRACT,
   REQUIRED_SELECTOR_GROUPS,
   validateDomSelectorConfig
 };
