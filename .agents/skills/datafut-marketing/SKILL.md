@@ -102,6 +102,12 @@ genera salidas sociales.
 
 # NUEVO FLUJO PRINCIPAL
 
+Para las etapas DOM usar los contratos de
+[`references/dom-capture-contracts.md`](references/dom-capture-contracts.md).
+Los comandos oficiales son `catalog-dom`, `verify-dom` y `parlays-dom` con su
+respectivo archivo `--observation`. `catalog-preview` y `verify` sin observacion
+no completan el flujo y no deben repetirse esperando otro resultado.
+
 Para PARLAY DE DATOS:
 
 playdoit-catalog

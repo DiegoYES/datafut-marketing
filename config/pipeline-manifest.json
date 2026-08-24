@@ -1,14 +1,14 @@
 {
-  "version": 7,
+  "version": 8,
   "percentageThresholdExclusive": 70,
   "requiredVerificationEvidence": "live_dom",
   "requiredQuoteMethod": "betslip_dom_read",
   "stages": [
     {
       "id": "catalog",
-      "status": "candidate",
-      "script": "npm run datafut -- catalog-preview",
-      "note": "El comando actual produce solo una vista previa live_api NOT_VERIFIED. El catalogo oficial requiere una captura DOM independiente."
+      "status": "ready",
+      "script": "npm run datafut -- catalog-dom --observation <archivo.json>",
+      "note": "Importa exclusivamente una observacion live_dom de Chrome con mercados acotados y capturas PNG hasheadas. catalog-preview sigue siendo solo una vista API no publicable."
     },
     {
       "id": "discovery",
@@ -18,9 +18,9 @@
     },
     {
       "id": "verification",
-      "status": "blocked",
-      "script": "npm run datafut -- verify",
-      "note": "Falla de forma cerrada hasta implementar relectura DOM exacta; nunca convierte API en AVAILABLE_EXACT."
+      "status": "ready",
+      "script": "npm run datafut -- verify-dom --observation <archivo.json>",
+      "note": "Deriva AVAILABLE_EXACT por codigo desde mercado acotado, seleccion exacta, captura PNG y comprobacion limpia en el boleto."
     },
     {
       "id": "replenishment",
@@ -36,9 +36,9 @@
     },
     {
       "id": "parlay-builder",
-      "status": "blocked",
-      "script": "npm run datafut -- parlays",
-      "note": "Solo genera estimaciones separadas y deja el output oficial bloqueado hasta leer el momio real del DOM del betslip."
+      "status": "ready",
+      "script": "npm run datafut -- parlays-dom --observation <archivo.json>",
+      "note": "Importa exclusivamente filas exactas y momio conjunto del boleto DOM, valida limpieza y conserva dobles y triples para eleccion humana."
     },
     {
       "id": "combinada-builder",

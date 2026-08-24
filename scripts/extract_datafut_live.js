@@ -50,6 +50,11 @@ function canonicalMatchKey(url) {
       waitUntil: 'networkidle',
       timeout: 45000
     });
+    if (/\/login\.html(?:$|[?#])/i.test(page.url())) {
+      throw new Error(
+        'La sesion DataFut expiro o ya no es aceptada. Renueva datafut-marketing-session.json antes de Discovery.'
+      );
+    }
 
     const calendarLinks = await page.evaluate(() => Array.from(
       document.querySelectorAll('a[href*="partido.html"]')
@@ -61,6 +66,11 @@ function canonicalMatchKey(url) {
         fullCardText: container.innerText.replace(/\n+/g, ' ').trim()
       };
     }));
+    if (calendarLinks.length === 0) {
+      throw new Error(
+        'El calendario autenticado no expuso enlaces partido.html; no se escribira una extraccion vacia silenciosa.'
+      );
+    }
 
     const relevantLinks = new Map();
     for (const link of calendarLinks) {

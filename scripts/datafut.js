@@ -13,14 +13,18 @@ function usage() {
 
 Uso:
   npm run datafut -- status
+  npm run datafut -- login-datafut
   npm run datafut -- audit
   npm run datafut -- catalog-preview
+  npm run datafut -- catalog-dom --observation <archivo.json>
   npm run datafut -- discover --raw <archivo.json>
   npm run datafut -- discover-live [--date YYYY-MM-DD]
   npm run datafut -- verify
+  npm run datafut -- verify-dom --observation <archivo.json>
   npm run datafut -- replenish [--raw <archivo.json>]
   npm run datafut -- options
   npm run datafut -- parlays
+  npm run datafut -- parlays-dom --observation <archivo.json>
   npm run datafut -- render --input <archivo.json> [--date YYYY-MM-DD] [--dry-run]
 
 El comando render genera archivos locales, pero nunca publica ni realiza apuestas.`);
@@ -87,16 +91,38 @@ function buildOptions() {
   run(process.execPath, [path.join('scripts', 'build-format-options.js')]);
 }
 
+function loginDatafut() {
+  run(process.execPath, [path.join('login-datafut.js')]);
+}
+
 function buildCatalogPreview() {
   run(process.execPath, [path.join('scripts', 'build_playdoit_catalog.js')]);
+}
+
+function importDomCatalog(args) {
+  const observationArg = optionValue(args, '--observation');
+  if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
+  run(process.execPath, [path.join('scripts', 'import-playdoit-dom-catalog.js'), observationArg]);
 }
 
 function verify() {
   run(process.execPath, [path.join('scripts', 'run_playdoit_verification.js')]);
 }
 
+function importDomVerification(args) {
+  const observationArg = optionValue(args, '--observation');
+  if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
+  run(process.execPath, [path.join('scripts', 'import-playdoit-dom-verification.js'), observationArg]);
+}
+
 function buildParlays() {
   run(process.execPath, [path.join('scripts', 'run_parlay_builder.js')]);
+}
+
+function importDomParlays(args) {
+  const observationArg = optionValue(args, '--observation');
+  if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
+  run(process.execPath, [path.join('scripts', 'import-playdoit-betslip-quotes.js'), observationArg]);
 }
 
 function replenish(args) {
@@ -149,14 +175,18 @@ try {
   const [command, ...args] = process.argv.slice(2);
   if (!command || ['help', '--help', '-h'].includes(command)) usage();
   else if (command === 'status') showStatus();
+  else if (command === 'login-datafut') loginDatafut();
   else if (command === 'audit') audit();
   else if (command === 'catalog-preview') buildCatalogPreview();
+  else if (command === 'catalog-dom') importDomCatalog(args);
   else if (command === 'discover') discover(args);
   else if (command === 'discover-live') discoverLive(args);
   else if (command === 'verify') verify();
+  else if (command === 'verify-dom') importDomVerification(args);
   else if (command === 'replenish') replenish(args);
   else if (command === 'options') buildOptions();
   else if (command === 'parlays') buildParlays();
+  else if (command === 'parlays-dom') importDomParlays(args);
   else if (command === 'render') render(args);
   else throw new Error(`Comando desconocido: ${command}`);
 } catch (error) {

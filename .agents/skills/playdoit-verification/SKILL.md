@@ -33,6 +33,17 @@ Guardar:
 
 C:\DataFut-Marketing\pipeline-state\verified-candidates.json
 
+## COMANDO DOM OFICIAL
+
+Capturar cada candidato siguiendo
+[`../datafut-marketing/references/dom-capture-contracts.md`](../datafut-marketing/references/dom-capture-contracts.md)
+y ejecutar:
+
+`npm run datafut -- verify-dom --observation <archivo.json>`
+
+El importador, no el modelo, deriva `AVAILABLE_EXACT`. El comando `verify` sin
+observacion permanece como comprobacion fail-closed.
+
 ---
 
 # REGLA DE ORO

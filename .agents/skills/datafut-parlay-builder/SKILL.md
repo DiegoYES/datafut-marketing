@@ -68,6 +68,17 @@ Guardar:
 
 C:\DataFut-Marketing\pipeline-state\parlay-options.json
 
+## COMANDO DOM OFICIAL
+
+Cotizar dobles y triples siguiendo
+[`../datafut-marketing/references/dom-capture-contracts.md`](../datafut-marketing/references/dom-capture-contracts.md)
+y ejecutar:
+
+`npm run datafut -- parlays-dom --observation <archivo.json>`
+
+El importador rechaza filas que no repitan exactamente la evidencia de
+Verification, exige captura PNG hasheada y limpieza posterior del boleto.
+
 ---
 
 # REQUISITOS ABSOLUTOS DE ENTRADA

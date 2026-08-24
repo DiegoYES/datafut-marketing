@@ -11,6 +11,8 @@
     "validate:golden": "node scripts/validate-golden-renders.js",
     "audit:pipeline": "node scripts/validate-pipeline-state.js",
     "test:contracts": "node test/dom-evidence.test.js",
+    "test:dom-import": "node test/dom-observation-import.test.js",
+    "test:betslip-import": "node test/betslip-observation-import.test.js",
     "test:discovery": "node test/discovery-intersection.test.js",
     "test:formats": "node test/format-options.test.js",
     "test:content": "node test/content-threshold.test.js",
@@ -21,7 +23,7 @@
     "render:voice": "py generate-parlay-voice-dynamic.py",
     "render:video": "node render-parlay-video.js",
     "render:parlay": "npm run validate:data && npm run render:voice && npm run render:video",
-    "test": "npm run test:contracts && npm run test:discovery && npm run test:datafut-provenance && npm run test:formats && npm run test:content && npm run validate:skills && npm run validate:renders && npm run validate:golden"
+    "test": "npm run test:contracts && npm run test:dom-import && npm run test:betslip-import && npm run test:discovery && npm run test:datafut-provenance && npm run test:formats && npm run test:content && npm run validate:skills && npm run validate:renders && npm run validate:golden"
   },
   "keywords": [],
   "author": "",

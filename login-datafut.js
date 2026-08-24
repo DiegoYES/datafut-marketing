@@ -23,19 +23,20 @@ const fs = require('fs');
   console.log('======================================================\n');
 
   // Poll until token cookie exists
-  let tokenFound = false;
+  let authenticated = false;
   for (let i = 0; i < 180; i++) { // wait up to 3 minutes
     const cookies = await context.cookies('https://data-fut.com');
     const tokenCookie = cookies.find(c => c.name === 'token');
-    if (tokenCookie && tokenCookie.value) {
+    const leftLogin = !/\/login\.html(?:$|[?#])/i.test(page.url());
+    if ((tokenCookie && tokenCookie.value) || leftLogin) {
       console.log('¡Token detectado con éxito!');
-      tokenFound = true;
+      authenticated = true;
       break;
     }
     await page.waitForTimeout(1000);
   }
 
-  if (tokenFound) {
+  if (authenticated) {
     await page.waitForTimeout(1000);
     const savePath = 'C:/DataFut-Marketing/datafut-marketing-session.json';
     await context.storageState({ path: savePath });

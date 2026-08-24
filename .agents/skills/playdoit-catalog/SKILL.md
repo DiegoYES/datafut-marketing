@@ -54,6 +54,18 @@ C:\DataFut-Marketing\pipeline-state\playdoit-catalog.json
 
 Este archivo forma parte oficial de la arquitectura modular.
 
+## COMANDO DOM OFICIAL
+
+`catalog-preview` es solamente una vista API `NOT_VERIFIED`.
+
+Para producir Catalog oficial, capturar Chrome siguiendo
+[`../datafut-marketing/references/dom-capture-contracts.md`](../datafut-marketing/references/dom-capture-contracts.md)
+y ejecutar:
+
+`npm run datafut -- catalog-dom --observation <archivo.json>`
+
+Nunca cambiar manualmente `catalogStatus` ni `evidenceSource`.
+
 ---
 
 # OBJETIVO

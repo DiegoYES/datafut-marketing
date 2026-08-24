@@ -1,5 +1,6 @@
 const TEAM_NOISE = new Set([
-  'club', 'fc', 'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'ac', 'sc'
+  'club', 'fc', 'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'ac', 'sc',
+  'u', 'univ', 'universidad', 'de', 'del'
 ]);
 const PERCENTAGE_THRESHOLD_EXCLUSIVE = 70;
 const { createDatafutCard, validateDatafutCard } = require('./datafut-provenance');
