@@ -5,7 +5,7 @@
   "stableSources": [
     {
       "path": "render-parlay-video.js",
-      "sha256": "68a4a2305db6f2c13b40502d15a73ef8a6843016c80aece4964ef96a25d15697"
+      "sha256": "02fa96f33a3aac634038716e45bb76e4ee35dc574c858687abc231718faa2698"
     },
     {
       "path": "parlay-video-template.html",
@@ -13,7 +13,7 @@
     },
     {
       "path": "generate-parlay-voice-dynamic.py",
-      "sha256": "540bdd710154ffcd5ec8cbb8099ec530e5008eae8fff7b13c323f9e99f295675"
+      "sha256": "924b6d2c071e553fb43f06b9cff5d1a94460b96900af577b76ef75e29d7ff6d9"
     }
   ],
   "renders": [

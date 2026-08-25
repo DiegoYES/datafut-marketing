@@ -267,6 +267,9 @@ function auditPipelineState(projectDir) {
   }
 
   const eligiblePool = loadState('eligible-candidates.json');
+  const eligiblePoolEntries = Array.isArray(eligiblePool?.candidates)
+    ? eligiblePool.candidates
+    : [];
   if (eligiblePool) {
     summary.eligiblePool = {
       generatedAt: eligiblePool.generatedAt,
@@ -275,8 +278,7 @@ function auditPipelineState(projectDir) {
     if (!catalog || eligiblePool.catalogGeneratedAt !== catalog.generatedAt) {
       errors.push('El pool elegible pertenece a otro Catalog.');
     }
-    const accumulated = Array.isArray(eligiblePool.candidates) ? eligiblePool.candidates : [];
-    if (accumulated.some(item => {
+    if (eligiblePoolEntries.some(item => {
       const match = (catalog?.matches || []).find(entry => entry.matchId === item.discovery?.catalogMatchId);
       const domValidation = validateDomMarketEvidence(
         item.verification?.requested,
@@ -326,17 +328,59 @@ function auditPipelineState(projectDir) {
     if (formatOptions.publishable === true) {
       errors.push('Las opciones de formato no pueden ser publicables antes de la eleccion humana.');
     }
+    const eligibleById = new Map(eligiblePoolEntries.map(item => [
+      item.discovery?.candidateId,
+      item
+    ]));
+    if (individualOptions.some(option => {
+      const shown = option.candidate || {};
+      const entry = eligibleById.get(shown.candidateId);
+      return !entry ||
+        shown.catalogMatchId !== entry.discovery?.catalogMatchId ||
+        normalizeText(shown.match) !== normalizeText(entry.discovery?.match) ||
+        normalizeText(shown.market) !== normalizeText(entry.discovery?.market) ||
+        Number(shown.percentage) !== Number(entry.discovery?.percentage) ||
+        shown.individualOdds !== entry.verification?.playdoit?.oddsText;
+    })) {
+      errors.push('Una opcion individual no coincide exactamente con el pool elegible.');
+    }
+    const unknownOptionCandidates = [...parlayCandidates, ...combinadaCandidates]
+      .flatMap(option => option.candidateIds || [])
+      .filter(candidateId => !eligibleById.has(candidateId));
+    if (unknownOptionCandidates.length > 0) {
+      errors.push('Las opciones de formato contienen candidatos ajenos al pool elegible.');
+    }
     if (parlayCandidates.some(option => {
       const matchIds = Array.isArray(option.matchIds) ? option.matchIds : [];
       return matchIds.length < 2 || new Set(matchIds).size !== matchIds.length;
     })) {
       errors.push('Una opcion de parlay normal mezcla piernas del mismo partido.');
     }
+    if (parlayCandidates.some(option => {
+      if (option.status !== 'READY_FOR_USER_SELECTION') return false;
+      const key = [...(option.candidateIds || [])].sort().join('|');
+      const finalist = (parlays?.finalists || []).find(item =>
+        [...(item.candidateIds || [])].sort().join('|') === key
+      );
+      return option.quoteMethod !== 'betslip_dom_read' ||
+        !option.combinedOdds ||
+        !finalist ||
+        finalist.quoteMethod !== 'betslip_dom_read' ||
+        finalist.combinedOddsText !== option.combinedOdds;
+    })) {
+      errors.push('Una opcion de parlay READY no coincide con un finalista DOM oficial.');
+    }
     if (combinadaCandidates.some(option =>
       option.compatibility === 'COMPATIBLE' &&
-      (option.quoteMethod !== 'betslip_dom_read' || !option.combinedOdds)
+      (
+        option.quoteMethod !== 'betslip_dom_read' ||
+        option.betslipEvidence !== 'live_dom' ||
+        !option.combinedOdds ||
+        !validateBetslipDomEvidence(option.candidateIds, option.domEvidence).valid ||
+        !validatePngArtifact(projectDir, option.domEvidence?.screenshot)
+      )
     )) {
-      errors.push('Una combinada se declara compatible sin cuota real leida del Bet Builder.');
+      errors.push('Una combinada se declara compatible sin evidencia DOM integra del Bet Builder.');
     }
   }
 

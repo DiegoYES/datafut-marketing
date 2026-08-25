@@ -17,6 +17,13 @@ No cambiar selecciones.
 
 ---
 
+Para parlays, "congelado" significa que `parlay-data.json` fue creado por
+`npm run datafut -- freeze-content` y contiene `provenance.source =
+pipeline_state` con certificacion vigente. Si `npm run validate:data` falla,
+detenerse: no reparar, completar ni reescribir picks desde esta skill.
+
+---
+
 # SALIDAS
 
 Puede generar:

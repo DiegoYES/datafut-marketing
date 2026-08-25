@@ -4,6 +4,8 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const ffmpegPath = require('ffmpeg-static');
+const { readJson } = require('./scripts/lib/validation');
+const { validateCertifiedParlayData } = require('./scripts/lib/certified-content');
 
 (async () => {
   const projectDir = __dirname;
@@ -32,6 +34,15 @@ const ffmpegPath = require('ffmpeg-static');
     projectDir,
     'renders'
   );
+
+  const certifiedData = readJson(dataPath);
+  const certification = validateCertifiedParlayData(certifiedData, projectDir);
+  certification.warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
+  if (certification.errors.length > 0) {
+    throw new Error(
+      `RENDER BLOQUEADO: el contenido no procede del pipeline certificado:\n- ${certification.errors.join('\n- ')}`
+    );
+  }
 
   // =========================================================
   // CONFIGURACIÓN DE MÚSICA

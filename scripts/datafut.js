@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { auditPipelineState } = require('./lib/pipeline-audit');
-const { readJson, validateParlayData } = require('./lib/validation');
+const { readJson } = require('./lib/validation');
+const { validateCertifiedParlayData } = require('./lib/certified-content');
 
 const projectDir = path.resolve(__dirname, '..');
 const manifest = readJson(path.join(projectDir, 'config', 'pipeline-manifest.json'));
@@ -26,6 +27,8 @@ Uso:
   npm run datafut -- options
   npm run datafut -- parlays
   npm run datafut -- parlays-dom --observation <archivo.json>
+  npm run datafut -- finalists
+  npm run datafut -- freeze-content --option <optionId> --date YYYY-MM-DD [--output <archivo.json>]
   npm run datafut -- render --input <archivo.json> [--date YYYY-MM-DD] [--dry-run]
 
 El comando render genera archivos locales, pero nunca publica ni realiza apuestas.`);
@@ -141,13 +144,26 @@ function replenish(args) {
   run(process.execPath, [path.join('scripts', 'replenish-candidates.js'), rawArg]);
 }
 
+function printFinalists() {
+  run(process.execPath, [path.join('scripts', 'print-certified-finalists.js')]);
+}
+
+function freezeContent(args) {
+  const commandArgs = [path.join('scripts', 'freeze-certified-content.js')];
+  for (const name of ['--option', '--date', '--output']) {
+    const value = optionValue(args, name);
+    if (value) commandArgs.push(name, value);
+  }
+  run(process.execPath, commandArgs);
+}
+
 function render(args) {
   const inputArg = optionValue(args, '--input');
   if (!inputArg) throw new Error('Falta --input <archivo.json>.');
 
   const inputPath = path.resolve(projectDir, inputArg);
   const data = readJson(inputPath);
-  const validation = validateParlayData(data);
+  const validation = validateCertifiedParlayData(data, projectDir);
   validation.warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
   if (validation.errors.length > 0) {
     throw new Error(`Entrada invalida:\n- ${validation.errors.join('\n- ')}`);
@@ -199,6 +215,8 @@ try {
   else if (command === 'options') buildOptions();
   else if (command === 'parlays') buildParlays();
   else if (command === 'parlays-dom') importDomParlays(args);
+  else if (command === 'finalists') printFinalists();
+  else if (command === 'freeze-content') freezeContent(args);
   else if (command === 'render') render(args);
   else throw new Error(`Comando desconocido: ${command}`);
 } catch (error) {

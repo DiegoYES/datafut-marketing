@@ -110,6 +110,23 @@ Generar un parlay despues de revisar `parlay-data.json`:
 npm run render:parlay
 ```
 
+Para contenido nuevo no se edita `parlay-data.json` manualmente. Primero listar
+las opciones certificadas y, despues de la eleccion humana, congelar exactamente
+una opcion:
+
+```text
+npm run datafut -- finalists
+npm run datafut -- freeze-content --option PAR-... --date YYYY-MM-DD
+npm run validate:data
+npm run render:parlay
+```
+
+`freeze-content` enlaza cada pick con `candidateId`, `datafutCardId`, el pool
+elegible y la lectura DOM del boleto. Cualquier cambio manual de porcentaje,
+mercado, equipos, muestra, tarjeta o momio invalida la certificacion y bloquea
+voz y video. El comando genera `promo-data.json`, `parlay-data.json` o
+`combinada-data.json` segun el tipo de opcion elegida.
+
 La interfaz recomendada permite indicar archivo y fecha, y ofrece un ensayo sin efectos:
 
 ```powershell

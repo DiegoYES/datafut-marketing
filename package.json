@@ -16,6 +16,7 @@
     "test:discovery": "node test/discovery-intersection.test.js",
     "test:formats": "node test/format-options.test.js",
     "test:content": "node test/content-threshold.test.js",
+    "test:certified-content": "node test/certified-content.test.js",
     "test:datafut-provenance": "node test/datafut-provenance.test.js",
     "test:datafut-dom": "node test/datafut-dom-observation.test.js",
     "validate:repo": "npm run validate:skills && npm run validate:catalog && npm run validate:renders && npm run validate:golden",
@@ -24,7 +25,7 @@
     "render:voice": "py generate-parlay-voice-dynamic.py",
     "render:video": "node render-parlay-video.js",
     "render:parlay": "npm run validate:data && npm run render:voice && npm run render:video",
-    "test": "npm run test:contracts && npm run test:dom-import && npm run test:betslip-import && npm run test:discovery && npm run test:datafut-provenance && npm run test:datafut-dom && npm run test:formats && npm run test:content && npm run validate:skills && npm run validate:renders && npm run validate:golden"
+    "test": "npm run test:contracts && npm run test:dom-import && npm run test:betslip-import && npm run test:discovery && npm run test:datafut-provenance && npm run test:datafut-dom && npm run test:formats && npm run test:content && npm run test:certified-content && npm run validate:skills && npm run validate:renders && npm run validate:golden"
   },
   "keywords": [],
   "author": "",

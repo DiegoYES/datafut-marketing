@@ -4,6 +4,8 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const ffmpegPath = require('ffmpeg-static');
+const { readJson } = require('./scripts/lib/validation');
+const { validateCertifiedContent } = require('./scripts/lib/certified-content');
 
 (async () => {
   const projectDir = __dirname;
@@ -32,6 +34,14 @@ const ffmpegPath = require('ffmpeg-static');
     projectDir,
     'renders'
   );
+
+  const certification = validateCertifiedContent(readJson(dataPath), projectDir);
+  certification.warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
+  if (certification.errors.length > 0) {
+    throw new Error(
+      `RENDER BLOQUEADO: la combinada no procede del pipeline certificado:\n- ${certification.errors.join('\n- ')}`
+    );
+  }
 
   // =========================================================
   // PRESETS DE MÚSICA

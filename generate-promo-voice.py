@@ -248,6 +248,19 @@ ensure_file_exists(
     "promo-data.json"
 )
 
+validation = subprocess.run(
+    ["node", "scripts/validate-certified-content.js", "promo-data.json"],
+    cwd=PROJECT_DIR,
+    capture_output=True,
+    text=True,
+)
+if validation.returncode != 0:
+    raise RuntimeError(
+        "VOZ BLOQUEADA: promo-data.json no tiene procedencia certificada.\n"
+        + validation.stdout
+        + validation.stderr
+    )
+
 with DATA_FILE.open(
     "r",
     encoding="utf-8"

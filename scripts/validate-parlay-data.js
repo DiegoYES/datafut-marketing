@@ -1,12 +1,14 @@
 const path = require('path');
-const { readJson, validateParlayData } = require('./lib/validation');
+const { readJson } = require('./lib/validation');
+const { validateCertifiedParlayData } = require('./lib/certified-content');
 
 const input = process.argv[2] || 'parlay-data.json';
 const inputPath = path.resolve(process.cwd(), input);
+const projectDir = path.resolve(__dirname, '..');
 
 try {
   const data = readJson(inputPath);
-  const { errors, warnings } = validateParlayData(data);
+  const { errors, warnings } = validateCertifiedParlayData(data, projectDir);
 
   warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
 
@@ -17,7 +19,7 @@ try {
   } else {
     console.log(
       `Entrada valida: ${path.relative(process.cwd(), inputPath)} ` +
-      `(${data.picks.length} picks, minimo editorial respetado).`
+      `(${data.picks.length} picks, procedencia oficial certificada).`
     );
   }
 } catch (error) {

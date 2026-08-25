@@ -4,6 +4,8 @@ const fs = require('fs');
 const http = require('http');
 const { spawn } = require('child_process');
 const ffmpegPath = require('ffmpeg-static');
+const { readJson } = require('./scripts/lib/validation');
+const { validateCertifiedParlayData } = require('./scripts/lib/certified-content');
 
 (async () => {
   const projectDir = __dirname;
@@ -12,6 +14,14 @@ const ffmpegPath = require('ffmpeg-static');
   const audioDir = path.join(projectDir, 'parlay-audio');
   const manifestPath = path.join(audioDir, 'narration-manifest.json');
   const rendersDir = path.join(projectDir, 'renders');
+
+  const certification = validateCertifiedParlayData(readJson(dataPath), projectDir);
+  certification.warnings.forEach(warning => console.warn(`ADVERTENCIA: ${warning}`));
+  if (certification.errors.length > 0) {
+    throw new Error(
+      `RENDER BLOQUEADO: el contenido no procede del pipeline certificado:\n- ${certification.errors.join('\n- ')}`
+    );
+  }
 
   if (!fs.existsSync(rendersDir)) fs.mkdirSync(rendersDir, { recursive: true });
 

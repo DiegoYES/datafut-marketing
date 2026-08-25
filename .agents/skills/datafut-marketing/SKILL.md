@@ -339,6 +339,32 @@ El pipeline nunca debe elegir automáticamente qué contenido publicar.
 
 ---
 
+# PRESENTACION CERTIFICADA
+
+Nunca redactar una tabla de finalistas desde memoria, capturas parciales, una
+respuesta previa o archivos `scratch_*`. Ejecutar:
+
+`npm run datafut -- finalists`
+
+Ese comando es la unica fuente permitida para presentar opciones al usuario.
+Copiar sus identidades y valores sin reinterpretarlos. Si el comando falla, no
+presentar picks.
+
+Despues de que el usuario elija una opcion, congelar el contenido solamente con:
+
+`npm run datafut -- freeze-content --option <optionId> --date YYYY-MM-DD`
+
+No escribir `parlay-data.json` manualmente. El archivo congelado debe conservar
+`candidateId`, `datafutCardId`, porcentaje, mercado, muestra, opcion y momio DOM.
+Los validadores y renderizadores abortan si cualquier valor difiere del pool
+oficial, aunque siga superando 70%.
+
+El mismo comando congela picks individuales, parlays o combinadas segun el
+`optionId`. Nunca escribir manualmente `promo-data.json`, `parlay-data.json` ni
+`combinada-data.json`.
+
+---
+
 # PARLAY
 
 Cuando existan hasta 6 elegibles:
@@ -455,3 +481,6 @@ CATALOGAR
 → GENERAR.
 
 Nunca invertir responsabilidades.
+
+Nunca puentear `finalists` o `freeze-content` con tablas o JSON generados por el
+modelo.

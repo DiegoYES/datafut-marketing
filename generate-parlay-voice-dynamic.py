@@ -108,6 +108,19 @@ def generate_tts(text: str, mp3_path: Path, srt_path: Path):
 
 ensure_file_exists(DATA_FILE, "parlay-data.json")
 
+validation = subprocess.run(
+    ["node", "scripts/validate-parlay-data.js", "parlay-data.json"],
+    cwd=PROJECT_DIR,
+    capture_output=True,
+    text=True,
+)
+if validation.returncode != 0:
+    raise RuntimeError(
+        "VOZ BLOQUEADA: parlay-data.json no tiene procedencia certificada.\n"
+        + validation.stdout
+        + validation.stderr
+    )
+
 with DATA_FILE.open("r", encoding="utf-8") as f:
     parlay_data = json.load(f)
 
