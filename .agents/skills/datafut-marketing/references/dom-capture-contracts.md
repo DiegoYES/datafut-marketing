@@ -115,3 +115,15 @@ Nunca ingresar stake, iniciar sesion en PlayDoIt, confirmar apuesta ni calcular 
 ## DataFut autenticado
 
 `discover-live` requiere `datafut-marketing-session.json` vigente. Si DataFut redirige a `login.html`, detenerse y renovar la sesion; una extraccion de cero partidos causada por sesion expirada no es un resultado valido.
+
+Cuando la sesion vigente existe solamente en Chrome, capturar las tarjetas y
+sus dialogos en una observacion con `captureType: "datafut_discovery"`, `source:
+"authenticated_chrome_dom"`, la fecha y `catalogGeneratedAt` actuales. Cada
+tarjeta conserva titulo, porcentaje, muestra, texto completo, exactamente dos
+tasas `con suavizado`, captura PNG y SHA-256. Ejecutar:
+
+`npm run datafut -- discover-dom --observation <archivo.json>`
+
+El importador recalcula el promedio antes de crear `datafutCardId`. Las tarjetas
+rojas se descartan y `tarjetas registradas` no se equipara a tarjetas amarillas
+si PlayDoIt no ofrece literalmente el mismo tipo.

@@ -44,6 +44,10 @@ La extracción DataFut debe ser la generada por el comando oficial, declarar
 `targetDate` y `catalogGeneratedAt`. No aceptar arreglos JSON sueltos, archivos
 de otro día ni salidas de scripts `scratch_*`.
 
+Si la sesion autenticada esta disponible en Chrome, usar el contrato DataFut de
+[`../datafut-marketing/references/dom-capture-contracts.md`](../datafut-marketing/references/dom-capture-contracts.md)
+y ejecutar `npm run datafut -- discover-dom --observation <archivo.json>`.
+
 ---
 
 # FUENTE ESTADÍSTICA

@@ -32,6 +32,7 @@ function matchCatalogEntry(catalog, sourceTitle) {
 
 function parsePrediction(rawTitle, catalogMatch) {
   const normalized = normalizeText(rawTitle);
+  if (/tarjetas? rojas?|rojas?/.test(normalized)) return null;
   const lineMatch = String(rawTitle || '').match(/\b(\d+(?:[.,]\d+)?)\b/);
   if (!lineMatch) return null;
 
@@ -46,6 +47,7 @@ function parsePrediction(rawTitle, catalogMatch) {
   if (/tiros? a puerta|remates? a puerta/.test(normalized)) statistic = 'shots_on_target';
   else if (/tiros?|remates?/.test(normalized)) statistic = 'shots';
   else if (/corners?|tiros? de esquina/.test(normalized)) statistic = 'corners';
+  else if (/tarjetas? registradas?/.test(normalized)) statistic = 'registered_cards';
   else if (/tarjetas?|amarillas?/.test(normalized)) statistic = 'yellow_cards';
   else if (/faltas?/.test(normalized)) statistic = 'fouls';
   else if (/goles?/.test(normalized)) statistic = 'goals';

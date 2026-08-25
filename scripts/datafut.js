@@ -19,6 +19,7 @@ Uso:
   npm run datafut -- catalog-dom --observation <archivo.json>
   npm run datafut -- discover --raw <archivo.json>
   npm run datafut -- discover-live [--date YYYY-MM-DD]
+  npm run datafut -- discover-dom --observation <archivo.json>
   npm run datafut -- verify
   npm run datafut -- verify-dom --observation <archivo.json>
   npm run datafut -- replenish [--raw <archivo.json>]
@@ -81,6 +82,16 @@ function discoverLive(args) {
   const extractArgs = [path.join('scripts', 'extract_datafut_live.js')];
   if (dateArg) extractArgs.push('--date', dateArg);
   run(process.execPath, extractArgs);
+  run(process.execPath, [
+    path.join('scripts', 'discover-datafut-candidates.js'),
+    path.join('scripts', 'datafut-live-raw.json')
+  ]);
+}
+
+function discoverDom(args) {
+  const observationArg = optionValue(args, '--observation');
+  if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
+  run(process.execPath, [path.join('scripts', 'import-datafut-dom-discovery.js'), observationArg]);
   run(process.execPath, [
     path.join('scripts', 'discover-datafut-candidates.js'),
     path.join('scripts', 'datafut-live-raw.json')
@@ -181,6 +192,7 @@ try {
   else if (command === 'catalog-dom') importDomCatalog(args);
   else if (command === 'discover') discover(args);
   else if (command === 'discover-live') discoverLive(args);
+  else if (command === 'discover-dom') discoverDom(args);
   else if (command === 'verify') verify();
   else if (command === 'verify-dom') importDomVerification(args);
   else if (command === 'replenish') replenish(args);
