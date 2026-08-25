@@ -1,7 +1,8 @@
 const assert = require('assert');
 const {
   buildFormatOptions,
-  buildFormatOptionsFromEligiblePool
+  buildFormatOptionsFromEligiblePool,
+  mergeQuotedParlays
 } = require('../scripts/lib/format-options');
 
 function candidate(candidateId, catalogMatchId, match, percentage = 71) {
@@ -62,6 +63,21 @@ const crossMatch = buildFormatOptions(crossMatchDiscovery, crossMatchVerificatio
 assert.strictEqual(crossMatch.routes.parlay.options.length, 1);
 assert.strictEqual(crossMatch.routes.parlay.options[0].status, 'REQUIRES_BETSLIP_QUOTE');
 assert.strictEqual(crossMatch.routes.combinada.options.length, 0);
+
+const quotedCrossMatch = mergeQuotedParlays(crossMatch, {
+  generatedAt: 'parlays-1',
+  finalists: [{
+    candidateIds: ['C', 'A'],
+    combinedOddsText: '+155',
+    quoteMethod: 'betslip_dom_read',
+    quotedAt: 'quote-1'
+  }]
+});
+assert.strictEqual(quotedCrossMatch.routes.parlay.status, 'READY');
+assert.strictEqual(quotedCrossMatch.routes.parlay.options[0].status, 'READY_FOR_USER_SELECTION');
+assert.strictEqual(quotedCrossMatch.routes.parlay.options[0].combinedOdds, '+155');
+assert.strictEqual(quotedCrossMatch.routes.parlay.options[0].quoteMethod, 'betslip_dom_read');
+assert.strictEqual(quotedCrossMatch.parlayOptionsGeneratedAt, 'parlays-1');
 
 const accumulated = buildFormatOptionsFromEligiblePool({
   generatedAt: 'pool-1',

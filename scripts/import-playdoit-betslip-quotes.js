@@ -7,6 +7,7 @@ const {
 const { validateDomSelectorConfig } = require('./lib/dom-selector-config');
 const { readObservation } = require('./lib/dom-observation-import');
 const { validatePngArtifact } = require('./lib/pipeline-audit');
+const { mergeQuotedParlays } = require('./lib/format-options');
 const { readJson } = require('./lib/validation');
 
 const projectDir = path.resolve(__dirname, '..');
@@ -48,4 +49,9 @@ const output = buildParlayOptionsFromObservation(eligibleItems, observation.docu
   verificationGeneratedAt: verification.verifiedAt
 });
 fs.writeFileSync(path.join(stateDir, 'parlay-options.json'), `${JSON.stringify(output, null, 2)}\n`);
+const formatOptionsPath = path.join(stateDir, 'format-options.json');
+if (fs.existsSync(formatOptionsPath)) {
+  const synchronizedFormats = mergeQuotedParlays(readJson(formatOptionsPath), output);
+  fs.writeFileSync(formatOptionsPath, `${JSON.stringify(synchronizedFormats, null, 2)}\n`);
+}
 console.log(`Betslip DOM importado: ${output.finalists.length} finalista(s) listo(s) para eleccion humana.`);

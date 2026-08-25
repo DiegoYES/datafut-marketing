@@ -132,4 +132,33 @@ function buildFormatOptionsFromEligiblePool(pool, generatedAt = new Date().toISO
   return output;
 }
 
-module.exports = { buildFormatOptions, buildFormatOptionsFromEligiblePool, combinations };
+function mergeQuotedParlays(formatOptions, parlayOptions) {
+  const output = JSON.parse(JSON.stringify(formatOptions));
+  const finalists = Array.isArray(parlayOptions?.finalists) ? parlayOptions.finalists : [];
+  const quotedByCandidates = new Map(finalists.map(finalist => [
+    [...(finalist.candidateIds || [])].sort().join('|'),
+    finalist
+  ]));
+  let quotedCount = 0;
+
+  for (const option of output.routes?.parlay?.options || []) {
+    const finalist = quotedByCandidates.get([...(option.candidateIds || [])].sort().join('|'));
+    if (!finalist) continue;
+    option.status = 'READY_FOR_USER_SELECTION';
+    option.quoteMethod = finalist.quoteMethod;
+    option.combinedOdds = finalist.combinedOddsText;
+    option.quotedAt = finalist.quotedAt;
+    quotedCount += 1;
+  }
+
+  if (quotedCount > 0) output.routes.parlay.status = 'READY';
+  output.parlayOptionsGeneratedAt = parlayOptions?.generatedAt || null;
+  return output;
+}
+
+module.exports = {
+  buildFormatOptions,
+  buildFormatOptionsFromEligiblePool,
+  combinations,
+  mergeQuotedParlays
+};
