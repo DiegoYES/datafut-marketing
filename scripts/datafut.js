@@ -77,24 +77,42 @@ function audit() {
 function discover(args) {
   const rawArg = optionValue(args, '--raw');
   if (!rawArg) throw new Error('Falta --raw <archivo.json>.');
-  run(process.execPath, [path.join('scripts', 'discover-datafut-candidates.js'), rawArg]);
+  const limitArg = optionValue(args, '--limit');
+  const discoverArgs = [path.join('scripts', 'discover-datafut-candidates.js'), rawArg];
+  if (limitArg) discoverArgs.push('--limit', limitArg);
+  run(process.execPath, discoverArgs);
 }
 
 function discoverLive(args) {
   const dateArg = optionValue(args, '--date');
+  const limitArg = optionValue(args, '--limit');
   const extractArgs = [path.join('scripts', 'extract_datafut_live.js')];
   if (dateArg) extractArgs.push('--date', dateArg);
   run(process.execPath, extractArgs);
-  run(process.execPath, [
+  const discoverArgs = [
     path.join('scripts', 'discover-datafut-candidates.js'),
     path.join('scripts', 'datafut-live-raw.json')
-  ]);
+  ];
+  if (limitArg) discoverArgs.push('--limit', limitArg);
+  run(process.execPath, discoverArgs);
 }
 
 function discoverDom(args) {
-  const observationArg = optionValue(args, '--observation');
-  if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
-  run(process.execPath, [path.join('scripts', 'import-datafut-dom-discovery.js'), observationArg]);
+  let observationArg = optionValue(args, '--observation');
+  const catalogPath = path.join(projectDir, 'pipeline-state', 'playdoit-catalog.json');
+  const catalog = fs.existsSync(catalogPath) ? readJson(catalogPath) : null;
+  const targetDate = catalog?.targetDate;
+  const defaultFile = targetDate ? path.join('captures', 'dom', `datafut-discovery-observation-${targetDate}.json`) : null;
+
+  if (observationArg && fs.existsSync(path.resolve(projectDir, observationArg))) {
+    run(process.execPath, [path.join('scripts', 'import-datafut-dom-discovery.js'), observationArg]);
+  } else if (defaultFile && fs.existsSync(path.resolve(projectDir, defaultFile))) {
+    run(process.execPath, [path.join('scripts', 'import-datafut-dom-discovery.js'), defaultFile]);
+  } else {
+    console.log('No existe archivo de observacion de Discovery; ejecutando extraccion en vivo autenticada (discover-live)...');
+    discoverLive(args);
+    return;
+  }
   run(process.execPath, [
     path.join('scripts', 'discover-datafut-candidates.js'),
     path.join('scripts', 'datafut-live-raw.json')
@@ -114,7 +132,14 @@ function buildCatalogPreview() {
 }
 
 function importDomCatalog(args) {
-  const observationArg = optionValue(args, '--observation');
+  let observationArg = optionValue(args, '--observation');
+  if (!observationArg) {
+    const domDir = path.join(projectDir, 'captures', 'dom');
+    const catalogFiles = fs.readdirSync(domDir).filter(f => f.startsWith('playdoit-catalog-observation-') && f.endsWith('.json')).sort();
+    if (catalogFiles.length > 0) {
+      observationArg = path.join('captures', 'dom', catalogFiles[catalogFiles.length - 1]);
+    }
+  }
   if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
   run(process.execPath, [path.join('scripts', 'import-playdoit-dom-catalog.js'), observationArg]);
 }
@@ -124,7 +149,17 @@ function verify() {
 }
 
 function importDomVerification(args) {
-  const observationArg = optionValue(args, '--observation');
+  let observationArg = optionValue(args, '--observation');
+  if (!observationArg) {
+    const catalogPath = path.join(projectDir, 'pipeline-state', 'playdoit-catalog.json');
+    if (fs.existsSync(catalogPath)) {
+      const catalog = readJson(catalogPath);
+      const defaultFile = path.join('captures', 'dom', `playdoit-verification-observation-${catalog.targetDate}.json`);
+      if (fs.existsSync(path.resolve(projectDir, defaultFile))) {
+        observationArg = defaultFile;
+      }
+    }
+  }
   if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
   run(process.execPath, [path.join('scripts', 'import-playdoit-dom-verification.js'), observationArg]);
 }
@@ -134,7 +169,20 @@ function buildParlays() {
 }
 
 function importDomParlays(args) {
-  const observationArg = optionValue(args, '--observation');
+  let observationArg = optionValue(args, '--observation');
+  if (!observationArg) {
+    const catalogPath = path.join(projectDir, 'pipeline-state', 'playdoit-catalog.json');
+    if (fs.existsSync(catalogPath)) {
+      const catalog = readJson(catalogPath);
+      const target = path.join('captures', 'dom', `playdoit-betslip-observation-${catalog.targetDate}.json`);
+      if (!fs.existsSync(path.resolve(projectDir, target))) {
+        run(process.execPath, [path.join('scripts', 'build-betslip-observation.js')]);
+      }
+      observationArg = target;
+    }
+  } else if (!fs.existsSync(path.resolve(projectDir, observationArg))) {
+    run(process.execPath, [path.join('scripts', 'build-betslip-observation.js')]);
+  }
   if (!observationArg) throw new Error('Falta --observation <archivo.json>.');
   run(process.execPath, [path.join('scripts', 'import-playdoit-betslip-quotes.js'), observationArg]);
 }

@@ -23,6 +23,56 @@ function canonicalMatchKey(url) {
   return parsed.searchParams.get('partido') || `${parsed.pathname}?${parsed.searchParams}`;
 }
 
+// Los enlaces pelados del calendario (sin texto de equipos) se resuelven
+// visitando el partido con la misma sesion autenticada y usando su titulo.
+// Cache operativo en Temp para no castigar el WAF de DataFut en re-corridas.
+async function resolveBareLinkTitles(page, calendarLinks) {
+  const os = require('node:os');
+  const cachePath = path.join(os.tmpdir(), 'datafut-link-titles.json');
+  let cache = {};
+  try { cache = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch { cache = {}; }
+  let resolved = 0;
+  let fetched = 0;
+  for (const link of calendarLinks) {
+    if ((`${link.text} ${link.fullCardText}`).trim().length >= 12) continue;
+    const key = canonicalMatchKey(link.url);
+    if (cache[key]) {
+      link.text = cache[key];
+      resolved++;
+      continue;
+    }
+    try {
+      await page.goto(link.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2000);
+      if (/\/login\.html(?:$|[?#])/i.test(page.url())) break;
+      const title = await page.evaluate(() => document.title || '');
+      if (title && !/login/i.test(title)) {
+        cache[key] = title;
+        link.text = title;
+        fetched++;
+      }
+      await page.waitForTimeout(800);
+    } catch {
+      continue;
+    }
+  }
+  try { fs.writeFileSync(cachePath, JSON.stringify(cache)); } catch { /* cache opcional */ }
+  if (resolved + fetched > 0) {
+    console.log(`Titulos resueltos para enlaces pelados: ${resolved + fetched} (${fetched} en vivo, ${resolved} de cache).`);
+  }
+}
+
+function readAliasMap() {
+  try {
+    const aliasPath = path.join(projectDir, 'config', 'team-aliases.json');
+    if (!fs.existsSync(aliasPath)) return null;
+    const document = JSON.parse(fs.readFileSync(aliasPath, 'utf8'));
+    return document && typeof document.aliases === 'object' ? document.aliases : null;
+  } catch {
+    return null;
+  }
+}
+
 (async () => {
   const catalog = readJson(catalogPath);
   if (catalog.catalogStatus !== 'VERIFIED' || catalog.evidenceSource !== 'live_dom') {
@@ -47,9 +97,10 @@ function canonicalMatchKey(url) {
     });
     const page = await context.newPage();
     await page.goto(`https://data-fut.com/calendario.html?fecha=${targetDate}`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 45000
     });
+    await page.waitForTimeout(3000);
     if (/\/login\.html(?:$|[?#])/i.test(page.url())) {
       throw new Error(
         'La sesion DataFut expiro o ya no es aceptada. Renueva datafut-marketing-session.json antes de Discovery.'
@@ -66,15 +117,17 @@ function canonicalMatchKey(url) {
         fullCardText: container.innerText.replace(/\n+/g, ' ').trim()
       };
     }));
+    await resolveBareLinkTitles(page, calendarLinks);
     if (calendarLinks.length === 0) {
       throw new Error(
         'El calendario autenticado no expuso enlaces partido.html; no se escribira una extraccion vacia silenciosa.'
       );
     }
 
+    const aliasMap = readAliasMap();
     const relevantLinks = new Map();
     for (const link of calendarLinks) {
-      const catalogMatch = matchCatalogEntry(catalog, `${link.text} ${link.fullCardText}`);
+      const catalogMatch = matchCatalogEntry(catalog, `${link.text} ${link.fullCardText}`, aliasMap);
       if (!catalogMatch) continue;
       const key = canonicalMatchKey(link.url);
       if (!relevantLinks.has(key)) relevantLinks.set(key, { ...link, catalogMatchId: catalogMatch.matchId });
@@ -86,7 +139,8 @@ function canonicalMatchKey(url) {
 
     const rawMatches = [];
     for (const link of relevantLinks.values()) {
-      await page.goto(link.url, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.goto(link.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(2000);
 
       const matchInfo = await page.evaluate(() => {
         const cards = Array.from(

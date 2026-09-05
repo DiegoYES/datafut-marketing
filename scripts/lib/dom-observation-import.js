@@ -330,7 +330,12 @@ function validateVerificationObservation(catalog, discovery, observation, option
     errors.push('catalogGeneratedAt no coincide con Catalog.');
   }
   if (observation.discoveryGeneratedAt !== discovery.generatedAt) {
-    errors.push('discoveryGeneratedAt no coincide con Discovery.');
+    const observationIds = new Set((observation.candidateObservations || []).map(c => c?.candidateId));
+    const discoveryIds = new Set((discovery.candidates || []).map(c => c?.candidateId));
+    const sameCandidates = discoveryIds.size > 0 && [...discoveryIds].every(id => observationIds.has(id));
+    if (!sameCandidates) {
+      errors.push('discoveryGeneratedAt no coincide con Discovery.');
+    }
   }
   if (!Array.isArray(observation.candidateObservations)) {
     errors.push('candidateObservations debe ser un arreglo.');

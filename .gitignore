@@ -12,6 +12,12 @@ datafut-marketing-session.json
 playdoit-public-state.json
 *storage-state*.json
 *session*.json
+chrome_cdp_profile/
+tmp_chrome_profile/
+.playwright-mcp/
+
+# Local evidence backups (machine-local)
+captures-backup-*/
 
 # Generated media and render artifacts
 renders/

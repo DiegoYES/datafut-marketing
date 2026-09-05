@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const crypto = require('node:crypto');
 const path = require('node:path');
 const { candidateKey, discoverCandidates } = require('./lib/discovery');
 const { readJson } = require('./lib/validation');
@@ -52,6 +53,19 @@ const definitiveFailures = new Set([
 
 const evaluatedKeys = new Set(previous.evaluatedKeys || []);
 const eligibleByKey = new Map((previous.eligible || []).map(item => [item.candidateKey, item]));
+
+// IDs reutilizados: si la ronda actual re-emite un candidateId con otro
+// contenido (otra candidateKey), la entrada vieja se descarta; la ronda
+// actual la reevalua desde cero.
+const currentKeyById = new Map(
+  (discovery.candidates || []).map(item => [item.candidateId, item.candidateKey || candidateKey(item)])
+);
+for (const [key, entry] of [...eligibleByKey]) {
+  const currentKey = currentKeyById.get(entry.discovery?.candidateId);
+  if (currentKey !== undefined && currentKey !== key) {
+    eligibleByKey.delete(key);
+  }
+}
 const roundResults = [];
 
 for (const candidate of discovery.candidates || []) {
@@ -77,6 +91,28 @@ for (const candidate of discovery.candidates || []) {
 }
 
 const currentRound = Number(discovery.round || 1);
+
+// Poda: las entradas de rondas anteriores solo sobreviven si su evidencia
+// PNG sigue intacta (las recapturas sobrescriben capturas y las invalidan).
+// Lo confirmado AVAILABLE_EXACT en esta corrida siempre se conserva.
+const confirmedThisRun = new Set(
+  roundResults.filter(item => item.status === 'AVAILABLE_EXACT').map(item => item.candidateKey)
+);
+for (const [key] of [...eligibleByKey]) {
+  if (confirmedThisRun.has(key)) continue;
+  const shot = eligibleByKey.get(key)?.verification?.domEvidence?.screenshot;
+  let intact = false;
+  try {
+    if (shot?.path && shot?.sha256) {
+      const digest = crypto.createHash('sha256').update(fs.readFileSync(path.resolve(projectDir, shot.path))).digest('hex');
+      intact = digest.toLowerCase() === String(shot.sha256).toLowerCase();
+    }
+  } catch {
+    intact = false;
+  }
+  if (!intact) eligibleByKey.delete(key);
+}
+
 const eligible = [...eligibleByKey.values()];
 let status = 'TARGET_REACHED';
 let nextCandidates = [];

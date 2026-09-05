@@ -62,7 +62,37 @@ const eligible = verifiedRecords
     };
   });
 
-const estimated = [...combinations(eligible, 2), ...combinations(eligible, 3)]
+const POOL_SIZE = 6;
+const commercialRank = { normal: 0, low: 1, very_low: 2, unknown: 3 };
+// Politica editorial (cualitativa, no formula cientifica): la cuota no cambia
+// el respaldo, pero una cuota util puede desplazar gaps pequenos de porcentaje
+// (regla de dominancia: ~3 pts no deciden solos). Penalizacion editorial por
+// prioridad comercial al ordenar: normal 0, low 6, very_low 12, unknown 9.
+// Un gap amplio de respaldo (>6 pts) sigue ganando por calidad.
+const commercialPenalty = { normal: 0, low: 6, very_low: 12, unknown: 9 };
+const rankedEligible = [...eligible].sort((a, b) => {
+  const scoreOf = item => Number(item.percentage) - (commercialPenalty[item.commercialPriority] ?? 9);
+  const scoreDifference = scoreOf(b) - scoreOf(a);
+  if (scoreDifference !== 0) return scoreDifference;
+  const sampleOf = item => Number(item.sample?.home || 0) + Number(item.sample?.away || 0);
+  return sampleOf(b) - sampleOf(a);
+});
+
+// Pool final: hasta 6, priorizando partidos distintos y diversidad de
+// familias sin sacrificar calidad (CALIDAD > DIVERSIDAD).
+const pool = [];
+for (const candidate of rankedEligible) {
+  if (pool.length >= POOL_SIZE) break;
+  if (pool.some(item => item.match === candidate.match)) continue;
+  pool.push(candidate);
+}
+for (const candidate of rankedEligible) {
+  if (pool.length >= POOL_SIZE) break;
+  if (pool.some(item => item.candidateId === candidate.candidateId)) continue;
+  pool.push(candidate);
+}
+
+const estimated = [...combinations(pool, 2), ...combinations(pool, 3)]
   .filter(combo => new Set(combo.map(item => item.match)).size === combo.length)
   .map((combo, index) => {
     const combinedDecimal = combo.reduce((value, item) => value * item.priceDecimal, 1);
@@ -124,6 +154,16 @@ const officialOutput = {
   publishable: false,
   quoteMethod: 'not_observed',
   eligibleCount: eligible.length,
+  poolSize: pool.length,
+  pool: pool.map(item => ({
+    candidateId: item.candidateId,
+    match: item.match,
+    market: `${item.market} ${item.selection}`,
+    percentage: item.percentage,
+    individualOdds: item.individualOdds,
+    commercialPriority: item.commercialPriority,
+    family: item.family
+  })),
   finalists: [],
   integrityNotice: 'El Builder oficial queda bloqueado hasta leer filas y momio combinado del DOM real y guardar una captura PNG autentica.'
 };
@@ -132,7 +172,6 @@ fs.writeFileSync(
   `${JSON.stringify(officialOutput, null, 2)}\n`
 );
 
-console.error(
+console.log(
   `[BETSLIP DOM REQUIRED] Se prepararon ${estimated.length} combinaciones para captura; no se generaron finalistas oficiales.`
 );
-process.exitCode = 1;

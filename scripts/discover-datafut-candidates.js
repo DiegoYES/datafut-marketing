@@ -14,6 +14,17 @@ function optionValue(name) {
   return index >= 0 ? process.argv[index + 1] : null;
 }
 
+function readAliasMap() {
+  try {
+    const aliasPath = path.join(projectDir, 'config', 'team-aliases.json');
+    if (!fs.existsSync(aliasPath)) return null;
+    const document = JSON.parse(fs.readFileSync(aliasPath, 'utf8'));
+    return document && typeof document.aliases === 'object' ? document.aliases : null;
+  } catch {
+    return null;
+  }
+}
+
 const catalog = readJson(catalogPath);
 if (catalog.catalogStatus !== 'VERIFIED' || catalog.evidenceSource !== 'live_dom') {
   throw new Error('Discovery requiere un catalogo VERIFIED con evidencia live_dom.');
@@ -35,14 +46,16 @@ if (rawDocument.targetDate !== catalog.targetDate) {
 const rawMatches = rawDocument.matches;
 const rawSha256 = crypto.createHash('sha256').update(fs.readFileSync(rawPath)).digest('hex');
 const round = Number(optionValue('--round') || 1);
+const limitArg = Number(optionValue('--limit'));
 const candidates = discoverCandidates(catalog, rawMatches, {
   percentageThresholdExclusive: 70,
-  limit: round === 1 ? 20 : 10,
-  round
+  limit: Number.isFinite(limitArg) && limitArg > 0 ? Math.min(limitArg, 200) : (round === 1 ? 20 : 10),
+  round,
+  aliasMap: readAliasMap()
 });
 
 const output = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: rawDocument.extractedAt || new Date().toISOString(),
   catalogGeneratedAt: catalog.generatedAt,
   datafutSource: 'authenticated_session_read',
   datafutRawPath: path.relative(projectDir, rawPath).replace(/\\/g, '/'),

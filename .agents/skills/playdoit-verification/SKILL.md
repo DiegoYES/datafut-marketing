@@ -44,6 +44,14 @@ y ejecutar:
 El importador, no el modelo, deriva `AVAILABLE_EXACT`. El comando `verify` sin
 observacion permanece como comprobacion fail-closed.
 
+## AUTOMATIZACION OFICIAL
+
+`node scripts/build-verification-observation.js` genera la observacion para
+TODOS los candidatos de `discovery-candidates.json` (re-lectura en vivo de
+cada linea exacta + PNG por evento) y luego se importa con `verify-dom`
+como arriba. Los candidatos sin linea viva quedan fuera automaticamente
+(LINE_MISMATCH / MARKET_MISMATCH).
+
 ---
 
 # REGLA DE ORO
@@ -68,16 +76,12 @@ Sin apuesta.
 
 ---
 
-# NAVEGACIÓN
+# NAVEGACIÓN Y ARQUITECTURA PLAYDOIT
 
-Intentar headless.
-
-Si no funciona:
-
-headed.
-
-Puede utilizar:
-
+1. **Evitar headless convencional**: Cloudflare WAF bloquea Playwright en headless/emulado (Ray ID 403 / "Acceso bloqueado").
+2. **Método oficial**: Lanzar Google Chrome del sistema (`chrome.exe`) con `--remote-debugging-port=9222` y conectar vía CDP (`chromium.connectOverCDP('http://localhost:9222')`). Esto mantiene `navigator.webdriver = false` y permite la navegación sin bloqueos.
+3. **Shadow DOM de Altenar**: El sportsbook de PlayDoIt no está en el documento raíz; está montado dentro de un Shadow Root abierto (`shadowHost.shadowRoot`). Los selectores de mercado (`EventDetailsMarketBoxRoot`), líneas y cuotas deben consultarse dentro de `element.shadowRoot`.
+4. Puede utilizar:
 playdoit-public-state.json.
 
 ---

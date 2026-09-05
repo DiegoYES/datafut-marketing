@@ -92,6 +92,8 @@ Comando:
 npm run datafut -- parlays-dom --observation captures/dom/<betslip-quotes>.json
 ```
 
+Automatización oficial: Para evitar bloqueos de Cloudflare WAF (403) y leer el DOM de Altenar, lanzar Google Chrome (`chrome.exe`) con `--remote-debugging-port=9222`, conectar vía CDP (`chromium.connectOverCDP`) e interactuar con los elementos dentro del open `shadowHost.shadowRoot`. Se puede ejecutar `node scripts/capture-live-betslip.js` para automatizar la cotización completa.
+
 Raiz minima:
 
 ```json

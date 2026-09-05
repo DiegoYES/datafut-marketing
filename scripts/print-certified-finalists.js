@@ -68,4 +68,37 @@ const output = {
     }))
 };
 
-console.log(JSON.stringify(output, null, 2));
+if (process.argv.includes('--json')) {
+  console.log(JSON.stringify(output, null, 2));
+} else {
+  console.log(`\n================================================================================`);
+  console.log(`                     FINALISTAS CERTIFICADOS DATAFUT`);
+  console.log(`================================================================================\n`);
+  
+  if (output.parlays.length > 0) {
+    console.log(`🎯 PARLAYS (Momio oficial leído de PlayDoIt):`);
+    console.log(`--------------------------------------------------------------------------------`);
+    output.parlays.forEach((p, idx) => {
+      const type = p.candidateIds.length === 2 ? 'Doble' : 'Triple 🔥';
+      console.log(`[${idx + 1}] Opción: ${p.optionId} (${type} | Momio: ${p.combinedOdds})`);
+      p.selections.forEach((s, sIdx) => {
+        console.log(`    ${sIdx + 1}. ${s.match}: ${s.market} (${s.percentage}%)`);
+      });
+      console.log('');
+    });
+  }
+
+  if (output.individual.length > 0) {
+    console.log(`📌 PICKS INDIVIDUALES:`);
+    console.log(`--------------------------------------------------------------------------------`);
+    output.individual.forEach((ind, idx) => {
+      console.log(`[${String.fromCharCode(65 + idx)}] ${ind.optionId} | ${ind.match}: ${ind.market} | ${ind.percentage}% | Momio: ${ind.odds}`);
+    });
+    console.log('');
+  }
+
+  console.log(`================================================================================`);
+  console.log(`Para elegir y congelar usa:`);
+  console.log(`  npm run datafut -- freeze-content --option <optionId> --date ${context.catalog.targetDate}`);
+  console.log(`================================================================================\n`);
+}

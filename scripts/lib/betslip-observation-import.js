@@ -122,6 +122,23 @@ function commercialRank(value) {
   return { normal: 0, low: 1, very_low: 2, unknown: 3 }[value] ?? 3;
 }
 
+// Pisos editoriales de momio combinado (politica del operador, no probabi-
+// lidad): dobles desde -150 hacia arriba, triples desde +100 hacia arriba.
+// Un momio bajo no invalida la cotizacion; solo ordena peor al elegir.
+function americanToDecimal(oddsText) {
+  const n = Number(String(oddsText || '').replace('+', ''));
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n > 0 ? 1 + n / 100 : 1 + 100 / Math.abs(n);
+}
+
+function meetsMomioFloor(quote) {
+  const decimal = americanToDecimal(quote.combinedOddsText);
+  if (!Number.isFinite(decimal)) return false;
+  if (quote.candidateIds.length === 2) return decimal >= 1 + 100 / 150 - 1e-9;
+  if (quote.candidateIds.length === 3) return decimal >= 2 - 1e-9;
+  return false;
+}
+
 function compareQuotes(left, right, candidatesById) {
   const records = quote => quote.candidateIds.map(id => candidatesById.get(id));
   const leftRecords = records(left);
@@ -144,12 +161,15 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
     return [record.verification.candidateId, record];
   }));
   const sorted = [...observation.quotes].sort((a, b) => compareQuotes(a, b, candidatesById));
+  const passing = sorted.filter(meetsMomioFloor);
+  const bestDouble = passing.find(quote => quote.candidateIds.length === 2)
+    || sorted.find(quote => quote.candidateIds.length === 2);
+  const bestTriple = passing.find(quote => quote.candidateIds.length === 3)
+    || sorted.find(quote => quote.candidateIds.length === 3);
   const chosen = [];
-  const bestDouble = sorted.find(quote => quote.candidateIds.length === 2);
-  const bestTriple = sorted.find(quote => quote.candidateIds.length === 3);
   if (bestDouble) chosen.push(bestDouble);
   if (bestTriple && bestTriple !== bestDouble) chosen.push(bestTriple);
-  sorted.forEach(quote => {
+  [...passing, ...sorted].forEach(quote => {
     if (chosen.length < 5 && !chosen.includes(quote)) chosen.push(quote);
   });
   const finalists = chosen.slice(0, 5).map((quote, index) => {
@@ -165,6 +185,7 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
       quoteMethod: 'betslip_dom_read',
       betslipEvidence: 'live_dom',
       quotedAt: quote.observedAt,
+      meetsMomioFloor: meetsMomioFloor(quote),
       selections: records.map(record => ({
         candidateId: record.verification.candidateId,
         match: record.verification.requested.match,

@@ -1,6 +1,7 @@
 const TEAM_NOISE = new Set([
-  'club', 'fc', 'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'ac', 'sc',
-  'u', 'univ', 'universidad', 'de', 'del'
+  'ac', 'atletico', 'club', 'de', 'del', 'deportivo', 'deportes', 'el', 'fc',
+  'f', 'w', 'women', 'femenil', 'femenina', 'cf', 'sc',
+  'u', 'univ', 'universidad', 'la', 'las', 'los', 'mg', 'sjdr', 'sp'
 ]);
 const PERCENTAGE_THRESHOLD_EXCLUSIVE = 70;
 const { createDatafutCard, validateDatafutCard } = require('./datafut-provenance');
@@ -21,12 +22,28 @@ function normalizeTeamName(value) {
     .join(' ');
 }
 
-function matchCatalogEntry(catalog, sourceTitle) {
-  const normalizedTitle = normalizeText(sourceTitle);
+function teamVariants(teamName, matchAliases, aliasMap) {
+  const names = [teamName];
+  if (Array.isArray(matchAliases)) names.push(...matchAliases);
+  if (aliasMap && typeof aliasMap === 'object') {
+    for (const [canonical, list] of Object.entries(aliasMap)) {
+      const candidates = [canonical, ...((Array.isArray(list) ? list : [list]).filter(Boolean))];
+      if (candidates.some(name => normalizeTeamName(name) === normalizeTeamName(teamName))) {
+        names.push(...candidates);
+      }
+    }
+  }
+  return [...new Set(names.map(normalizeTeamName).filter(Boolean))];
+}
+
+function matchCatalogEntry(catalog, sourceTitle, aliasMap) {
+  const normalizedTitle = normalizeTeamName(sourceTitle);
   return catalog.matches.find(match => {
-    const home = normalizeTeamName(match.homeTeam);
-    const away = normalizeTeamName(match.awayTeam);
-    return home && away && normalizedTitle.includes(home) && normalizedTitle.includes(away);
+    const homeOK = teamVariants(match.homeTeam, match.aliases, aliasMap)
+      .some(variant => normalizedTitle.includes(variant));
+    const awayOK = teamVariants(match.awayTeam, match.aliases, aliasMap)
+      .some(variant => normalizedTitle.includes(variant));
+    return homeOK && awayOK;
   }) || null;
 }
 
@@ -123,7 +140,7 @@ function commercialPriority(oddsText) {
 }
 
 function candidateKey(candidate) {
-  return [
+  const keyParts = [
     candidate.catalogMatchId,
     normalizeText(candidate.subject),
     candidate.statistic,
@@ -131,7 +148,47 @@ function candidateKey(candidate) {
     candidate.direction,
     Number(candidate.line),
     candidate.period
-  ].join('|');
+  ];
+  return keyParts.join('|');
+}
+
+// Dominancia de linea: mismo partido, sujeto, estadistica, alcance,
+// direccion y periodo con varias lineas cuyo porcentaje cae dentro de una
+// banda de 5 puntos -> solo sobrevive la de mayor valor editorial: en Over
+// la linea mas alta (mejor momio), en Under la linea mas baja. Fuera de la
+// banda (convicciones genuinamente distintas) se conservan todas.
+function applyLineDominance(candidates) {
+  const groups = new Map();
+  candidates.forEach(candidate => {
+    const key = [
+      candidate.catalogMatchId,
+      normalizeText(candidate.subject),
+      candidate.statistic,
+      candidate.scope,
+      candidate.direction,
+      candidate.period
+    ].join('|');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(candidate);
+  });
+  const survivors = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      survivors.push(group[0]);
+      continue;
+    }
+    const percentages = group.map(item => Number(item.percentage));
+    const spread = Math.max(...percentages) - Math.min(...percentages);
+    if (spread > 5) {
+      survivors.push(...group);
+      continue;
+    }
+    const ranked = [...group].sort((a, b) => (
+      a.direction === 'over' ? Number(b.line) - Number(a.line) : Number(a.line) - Number(b.line)
+    ));
+    survivors.push(ranked[0]);
+  }
+  return survivors;
 }
 
 function compareCandidateQuality(left, right) {
@@ -158,11 +215,12 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
   const limit = Number(options.limit || 20);
   const round = Number(options.round || 1);
   const excludedKeys = new Set(options.excludedKeys || []);
+  const aliasMap = options.aliasMap || null;
   const candidates = [];
   const seen = new Set();
 
   for (const rawMatch of rawMatches) {
-    const catalogMatch = matchCatalogEntry(catalog, rawMatch.title || rawMatch.header);
+    const catalogMatch = matchCatalogEntry(catalog, rawMatch.title || rawMatch.header, aliasMap);
     if (!catalogMatch) continue;
 
     for (const pick of rawMatch.picks || []) {
@@ -210,8 +268,11 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
     }
   }
 
-  return candidates
-    .filter(candidate => validateDatafutCard(candidate).valid)
+  const survivors = applyLineDominance(
+    candidates.filter(candidate => validateDatafutCard(candidate).valid)
+  );
+
+  return survivors
     .sort(compareCandidateQuality)
     .slice(0, limit)
     .map((candidate, index) => ({
@@ -222,6 +283,7 @@ function discoverCandidates(catalog, rawMatches, options = {}) {
 
 module.exports = {
   PERCENTAGE_THRESHOLD_EXCLUSIVE,
+  applyLineDominance,
   candidateKey,
   compareCandidateQuality,
   discoverCandidates,

@@ -230,6 +230,32 @@ y existe línea exacta en catálogo.
 
 ---
 
+# DOMINANCIA DE LÍNEA (MISMO PARTIDO, MISMA JUGADA)
+
+Cuando el mismo partido, sujeto, estadística, alcance, dirección y periodo
+tienen varias líneas NATIVAS cuyos porcentajes caen dentro de una banda de
+5 puntos, solo sobrevive una (la de mayor valor editorial):
+
+- Dirección Over: conservar la línea MÁS ALTA.
+  Ejemplo: Over 7.5 al 78.6% y Over 8.5 al 75% → conservar Over 8.5
+  (respaldo comparable, mejor momio).
+
+- Dirección Under: conservar la línea MÁS BAJA.
+  Ejemplo: Under 7.5 al 78.6% y Under 8.5 al 75% → conservar Under 7.5.
+
+Condiciones estrictas:
+
+- La banda es de 5 puntos máximo entre el % mayor y el menor del grupo.
+- Fuera de la banda (convicciones genuinamente distintas, p. ej. 85% vs
+  71%) se conservan todas: elegir es decisión editorial manual.
+- Las líneas deben existir tal cual en el catálogo (intersección exacta).
+
+Esta regla evita saturar el pool con la misma jugada repetida en varias
+líneas y aplica también para impedir combinaciones inválidas del tipo
+Over 7.5 + Over 8.5 del mismo mercado (misma jugada, sin valor combinado).
+
+---
+
 # CUOTAS EXTREMADAMENTE BAJAS — PREFILTRO EDITORIAL
 
 El catálogo puede contener mercados con cuotas extremadamente bajas.

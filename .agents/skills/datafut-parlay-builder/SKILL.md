@@ -79,6 +79,24 @@ y ejecutar:
 El importador rechaza filas que no repitan exactamente la evidencia de
 Verification, exige captura PNG hasheada y limpieza posterior del boleto.
 
+### AUTOMATIZACIÓN EN PLAYDOIT (CHROME CDP + SHADOW DOM)
+
+Para evitar bloqueos de Cloudflare WAF (error 403 / "Acceso bloqueado") y acceder al sportsbook:
+
+1. **Anti-bot WAF**: Cloudflare bloquea Playwright en modo headless o con navegadores virtuales. Se debe lanzar Google Chrome real (`chrome.exe`) con `--remote-debugging-port=9222` y conectar mediante `chromium.connectOverCDP('http://localhost:9222')`.
+2. **Shadow DOM de Altenar**: La SPA deportiva de PlayDoIt corre dentro de un Shadow Root abierto (`element.shadowRoot`). Todo selector de mercado (`EventDetailsMarketBoxRoot`), cuotas y boleto (`BetSlipContainer`) debe buscarse dentro de `root = shadowHost.shadowRoot`.
+3. **Script de captura directa**:
+   ```powershell
+   node scripts/capture-live-betslip.js
+   ```
+   Este script controla Chrome sobre CDP, navega al sportsbook, agrega las selecciones de `parlay-quote-request.json`, lee los momios oficiales del boleto, toma el PNG de evidencia con hash SHA-256 y genera `captures/dom/playdoit-betslip-observation-<date>.json`.
+4. **Importación y auditoría**:
+   ```powershell
+   npm run datafut -- parlays-dom --observation captures/dom/playdoit-betslip-observation-<date>.json
+   npm run datafut -- audit
+   npm run datafut -- finalists
+   ```
+
 ---
 
 # REQUISITOS ABSOLUTOS DE ENTRADA

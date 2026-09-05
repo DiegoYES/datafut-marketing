@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const {
+  applyLineDominance,
   discoverCandidates,
   isTrivialCandidate,
   matchCatalogEntry,
@@ -111,3 +112,76 @@ assert.equal(isTrivialCandidate({ direction: 'over', statistic: 'fouls', line: 2
 assert.equal(isTrivialCandidate({ direction: 'under', statistic: 'goals', line: 0.5 }), false);
 
 console.log('OK: Discovery cruza partido, mercado, direccion y linea exactos sin duplicados.');
+
+function dominanceCandidate(overrides) {
+  return {
+    catalogMatchId: 'PD-DOM',
+    subject: 'Equipo A vs Equipo B',
+    statistic: 'corners',
+    scope: 'match',
+    direction: 'over',
+    line: 7.5,
+    period: 'full_time',
+    percentage: 82,
+    ...overrides
+  };
+}
+
+const overGroup = [
+  dominanceCandidate({ line: 7.5 }),
+  dominanceCandidate({ line: 8.5 }),
+  dominanceCandidate({ line: 9.5 })
+];
+assert.deepEqual(applyLineDominance(overGroup).map(c => c.line), [9.5]);
+
+const underGroup = [
+  dominanceCandidate({ direction: 'under', line: 8.5 }),
+  dominanceCandidate({ direction: 'under', line: 7.5 }),
+  dominanceCandidate({ direction: 'under', line: 9.5 })
+];
+assert.deepEqual(applyLineDominance(underGroup).map(c => c.line), [7.5]);
+
+const mixedPercentage = [
+  dominanceCandidate({ line: 7.5, percentage: 82 }),
+  dominanceCandidate({ line: 8.5, percentage: 75 })
+];
+assert.equal(applyLineDominance(mixedPercentage).length, 2);
+
+const nearTie = [
+  dominanceCandidate({ line: 7.5, percentage: 78.6 }),
+  dominanceCandidate({ line: 8.5, percentage: 75 })
+];
+assert.deepEqual(applyLineDominance(nearTie).map(c => c.line), [8.5]);
+
+const wideSpread = [
+  dominanceCandidate({ line: 7.5, percentage: 85 }),
+  dominanceCandidate({ line: 10.5, percentage: 71 })
+];
+assert.equal(applyLineDominance(wideSpread).length, 2);
+
+console.log('OK: Dominancia de linea conserva over mas alto y under mas bajo con igual porcentaje.');
+
+const aliasCatalog = {
+  generatedAt: '2026-09-05T00:00:00.000Z',
+  catalogStatus: 'VERIFIED',
+  evidenceSource: 'live_dom',
+  matches: [{
+    matchId: 'PD-TEST-SHANDONG',
+    homeTeam: 'Shandong Taishan FC',
+    awayTeam: 'Sichuan Jiuniu',
+    league: 'China Super League',
+    markets: []
+  }]
+};
+const aliasMap = { 'Shandong Taishan FC': ['Shandong Luneng'] };
+assert.equal(matchCatalogEntry(aliasCatalog, 'Shandong Luneng vs Sichuan Jiuniu · Match Center'), null);
+assert.equal(
+  matchCatalogEntry(aliasCatalog, 'Shandong Luneng vs Sichuan Jiuniu · Match Center', aliasMap).matchId,
+  'PD-TEST-SHANDONG'
+);
+assert.equal(
+  matchCatalogEntry(aliasCatalog, 'Shandong Taishan FC vs Sichuan Jiuniu · Match Center', aliasMap).matchId,
+  'PD-TEST-SHANDONG'
+);
+assert.equal(matchCatalogEntry(aliasCatalog, 'Shanghai SIPG vs Beijing Guoan · Match Center', aliasMap), null);
+

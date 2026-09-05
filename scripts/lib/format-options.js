@@ -143,7 +143,15 @@ function mergeQuotedParlays(formatOptions, parlayOptions) {
 
   for (const option of output.routes?.parlay?.options || []) {
     const finalist = quotedByCandidates.get([...(option.candidateIds || [])].sort().join('|'));
-    if (!finalist) continue;
+    if (!finalist) {
+      if (option.status === 'READY_FOR_USER_SELECTION') {
+        option.status = 'AWAITING_QUOTE';
+        option.quoteMethod = 'not_observed';
+        delete option.combinedOdds;
+        delete option.quotedAt;
+      }
+      continue;
+    }
     option.status = 'READY_FOR_USER_SELECTION';
     option.quoteMethod = finalist.quoteMethod;
     option.combinedOdds = finalist.combinedOddsText;

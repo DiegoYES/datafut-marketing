@@ -64,6 +64,15 @@ y ejecutar:
 
 `npm run datafut -- catalog-dom --observation <archivo.json>`
 
+## AUTOMATIZACION OFICIAL (FECHAS NUEVAS)
+
+`node scripts/build-catalog-observation.js --date YYYY-MM-DD` genera la
+observacion del dia automaticamente: cruza el calendario DataFut con el
+upcoming de PlayDoIt (usando `config/team-aliases.json`), captura mercados
+con semantica demostrable y PNG real por evento. Verificar la salida y
+luego importar con `catalog-dom` como arriba. Con `--events id1,id2` se
+fuerza una lista manual de eventIds.
+
 Nunca cambiar manualmente `catalogStatus` ni `evidenceSource`.
 
 ---
