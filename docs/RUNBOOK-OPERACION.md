@@ -80,6 +80,10 @@ npm run datafut -- render --input parlay-data.json --date YYYY-MM-DD
 9. Pisos de momio en finalistas (betslip-observation-import.js): dobles
    desde -150, triples desde +100. Si un tipo no tiene cotizaciones que
    pasen el piso, no aporta finalistas de ese tipo.
+10. Diversificacion de finalistas: ningun pick aparece en mas de 2 de los
+    5 finalistas en la primera pasada (greedy por cuota); si no se
+    completan 5, el tope se relaja a 3 y luego sin tope. Un solo fallo no
+    debe matar todo el menu.
 
 ## 3. Límites conocidos (no pelear contra ellos)
 

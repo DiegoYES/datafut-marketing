@@ -103,3 +103,42 @@ assert.equal(rejected.valid, false);
 assert.match(rejected.errors.join('\n'), /marketText no coincide/);
 
 console.log('betslip-observation-import.test.js: OK (dobles/triples usan cuota DOM y filas exactas).');
+
+// Diversificacion: el greedy sin tope concentraria A y B en 4-5 finalistas;
+// con la regla ningun pick supera 3 apariciones (tope base 2 + relajacion).
+const divEligible = [
+  eligible('DF-A', 'A1 vs A2', 'Total', 'Mas de 1.5', '-110', 90.0),
+  eligible('DF-B', 'B1 vs B2', 'Total', 'Mas de 1.5', '-110', 89.0),
+  eligible('DF-C', 'C1 vs C2', 'Total', 'Mas de 1.5', '-110', 88.0),
+  eligible('DF-D', 'D1 vs D2', 'Total', 'Mas de 1.5', '-110', 87.0),
+  eligible('DF-E', 'E1 vs E2', 'Total', 'Mas de 1.5', '-110', 86.0),
+  eligible('DF-F', 'F1 vs F2', 'Total', 'Mas de 1.5', '-110', 85.0)
+];
+const byId = id => divEligible.find(item => item.verification.candidateId === id);
+const divObservation = {
+  schemaVersion: 1,
+  captureType: 'playdoit_betslip_quotes',
+  source: 'live_dom',
+  navigationMode: 'chrome_extension',
+  observedAt: '2026-08-24T22:45:00.000Z',
+  verificationGeneratedAt: '2026-08-24T22:40:00.000Z',
+  quotes: [
+    quote(['DF-A', 'DF-B'].map(byId), '+500', '50'),
+    quote(['DF-A', 'DF-B', 'DF-C'].map(byId), '+600', '51'),
+    quote(['DF-A', 'DF-B', 'DF-D'].map(byId), '+590', '52'),
+    quote(['DF-A', 'DF-B', 'DF-E'].map(byId), '+580', '53'),
+    quote(['DF-C', 'DF-D', 'DF-E'].map(byId), '+400', '54'),
+    quote(['DF-C', 'DF-D', 'DF-F'].map(byId), '+390', '55'),
+    quote(['DF-D', 'DF-E', 'DF-F'].map(byId), '+370', '56')
+  ]
+};
+const divOutput = buildParlayOptionsFromObservation(divEligible, divObservation, {
+  selectorConfig,
+  verificationGeneratedAt: divObservation.verificationGeneratedAt
+});
+assert.equal(divOutput.finalists.length, 5);
+const uses = new Map();
+divOutput.finalists.forEach(item => item.candidateIds.forEach(id => uses.set(id, (uses.get(id) || 0) + 1)));
+assert.ok(Math.max(...uses.values()) <= 3, `usos por pick: ${JSON.stringify([...uses])}`);
+
+console.log('betslip-observation-import.test.js: OK (diversificacion con tope y relajacion).');

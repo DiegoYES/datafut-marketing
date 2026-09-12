@@ -474,6 +474,33 @@ Si falta cualquiera de estos vínculos, DESCARTAR la tarjeta antes del output.
 
 ---
 
+# RUTA COMPARADOR (FALLBACK COPAS SIN MATCH CENTER)
+
+Cuando el calendario DataFut no trae pagina partido.html para un encuentro
+de copa (UCL, Libertadores, Sudamericana), usar la ruta Comparador:
+
+1. En calendario.html, cada fila trae el boton quick-compare (clase
+   `btn-quick-compare`, titulo "Abrir en el Comparador"). Lleva a
+   comparador.html con ambos equipos en sus ligas domesticas
+   (`?local=<id>&leagueLocal=<id>&visitante=<id>&leagueVisitante=<id>`).
+2. Verificar que AMBOS headers de equipo cargaron. Si el lado local queda
+   en "Selecciona el local", es throttle HTTP 429: esperar y recargar, no
+   inventar el contexto.
+3. Clic en "Generar análisis", scroll a "Picks del partido", leer tarjetas:
+   mercado exacto, porcentaje, muestra y evidencia ("¿Por qué?").
+4. Aplica TODO lo demas sin cambios: umbral >70.0, interseccion exacta de
+   linea, triviales excluidos, alias explicitos, verification obligatoria.
+   El comparador solo cambia LA FUENTE del respaldo, no las reglas.
+5. Ligas y equipos SIEMPRE por ID (`config/datafut-leagues.json`), jamas
+   por substring de texto (las tildes rompen el matching: usar texto
+   normalizado en minusculas sin diacriticos solo como fallback).
+6. Universo apostable por EQUIPO, no por liga
+   (`scripts/resolve-team-universe.js --teams "..." [--date ...]`): la API
+   y el front nombran distinto; se busca el equipo normalizado en el
+   upcoming y se toma la competicion + eventId + horario que PlayDoIt usa.
+
+---
+
 # NO DISPONIBILIDAD
 
 Discovery NO puede escribir:

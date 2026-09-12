@@ -614,6 +614,11 @@ Pero debe competir editorialmente contra alternativas más útiles.
 
 Presentar hasta 5.
 
+Regla dura de diversidad (la aplica `parlays-dom`, no es aspiracional):
+ningun pick aparece en mas de 2 finalistas en la primera pasada greedy
+por cuota; si no se completan 5, el tope se relaja a 3 y luego sin tope.
+Asi, si un pick falla, quedan vivos finalistas sin el.
+
 Intentar incluir variedad cuando existan opciones válidas:
 
 - dobles;
@@ -626,7 +631,44 @@ No es obligatorio cubrir todas las categorías.
 
 ---
 
-# FORMATO DE PRESENTACIÓN
+# FORMATO DE PRESENTACIÓN (estándar en chat, obligatorio)
+
+Por cada finalista, una línea de título y UN PÁRRAFO SEPARADO POR PICK
+(con línea en blanco entre párrafos; el cliente pega los saltos simples).
+CADA PARLAY SE CIERRA CON UNA LÍNEA SEPARADORA `---` EN LÍNEA PROPIA,
+para que se vea dónde termina uno y empieza el siguiente:
+
+**Parlay Finalista N (Doble/Triple) +MOMIO (decimal)**
+
+Partido vs Partido (HH:MM CDMX):
+
+📌 Mercado exacto (Momio americano | decimal | Respaldo X%). Razón breve.
+
+Ejemplo:
+
+**Parlay Finalista 1 (Doble) +216 (3.16)**
+
+Coritiba vs Mirassol (08:00 CDMX):
+
+📌 Mirassol menos de 4.5 tiros a puerta del visitante (Momio -160 | 1.63 | Respaldo 78.6%). Línea exacta verificada en vivo, muestra de 20.
+
+Reglas: hora siempre CDMX del catálogo; momio individual americano oficial
+más su equivalente decimal entre paréntesis; respaldo = porcentaje DataFut;
+sin etiquetas "Pick 1/2/3"; el mercado se transcribe LITERAL (texto exacto
+de PlayDoIt, prohibido agregar o quitar palabras: "Total de tarjetas" no
+es "tarjetas amarillas", "Total" no es "goles"); cerrar con el aviso de
+integridad.
+
+ANTES de los 5 finalistas, ENTREGAR EL LISTADO COMPLETO de picks
+individuales elegibles (todos, mismo formato de una línea por pick con
+hora CDMX, mercado literal, momio y respaldo).
+
+ORDEN DE ENTREGA OBLIGATORIO: primero el listado completo de picks
+individuales, y DESPUÉS los 5 parlays finalistas. Nunca al revés.
+
+---
+
+# FORMATO DE PRESENTACIÓN (detalle interno)
 
 Para cada finalista:
 
@@ -689,6 +731,27 @@ No ejecutar datafut-content.
 No ejecutar datafut-social.
 
 Esperar explícitamente a que el usuario seleccione una opción.
+
+---
+
+# PUBLICAR EN DATA-FUT (FASE 3.5+)
+
+Con la opción elegida por el humano (`--option <PAR-...>`) y visibilidad
+(`--visibility gratis|premium`):
+
+```
+node scripts/publish-to-datafut.js --option <optionId> --visibility <gratis|premium> --dry-run --boleta-name "<nombre>"
+node scripts/publish-to-datafut.js --option <optionId> --visibility <gratis|premium> --publish --boleta-name "<nombre>"
+```
+
+Reglas duras: puerta de auditoría (solo finalistas oficiales); Por armar
+debe traer EXACTAMENTE las selecciones (si no, aborto); momio total en
+decimal convertido del americano real del boleto; momios individuales
+verificados por pick (inputs "Ej. 1.35"); destacar=Destacada; visible
+hasta = ahora + 24h; verificación fail-closed tras submit (si la
+publicación no aparece, ERROR, nunca reportar éxito sin confirmar).
+Tras editar momios individuales la plataforma recalcula el total: refijar
+el total real siempre. `--publish` SOLO con orden literal del humano.
 
 ---
 

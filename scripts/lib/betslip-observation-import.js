@@ -155,6 +155,13 @@ function compareQuotes(left, right, candidatesById) {
   return left.candidateIds.join('|').localeCompare(right.candidateIds.join('|'));
 }
 
+// Diversificacion editorial de finalistas: ningun pick puede aparecer en
+// mas de MAX_FINALIST_USES_PER_CANDIDATE finalistas en la primera pasada,
+// para que un solo fallo no mate todo el menu recomendado. Si no hay
+// suficientes combinaciones bajo el tope, se relaja a +1 y luego sin tope
+// (fail-safe: nunca se entregan menos finalistas que sin la regla).
+const MAX_FINALIST_USES_PER_CANDIDATE = 2;
+
 function buildParlayOptionsFromObservation(eligibleItems, observation, options = {}) {
   const candidatesById = new Map(eligibleItems.map(item => {
     const record = candidateRecord(item);
@@ -167,11 +174,21 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
   const bestTriple = passing.find(quote => quote.candidateIds.length === 3)
     || sorted.find(quote => quote.candidateIds.length === 3);
   const chosen = [];
-  if (bestDouble) chosen.push(bestDouble);
-  if (bestTriple && bestTriple !== bestDouble) chosen.push(bestTriple);
-  [...passing, ...sorted].forEach(quote => {
-    if (chosen.length < 5 && !chosen.includes(quote)) chosen.push(quote);
-  });
+  const useCounts = new Map();
+  const take = quote => {
+    chosen.push(quote);
+    quote.candidateIds.forEach(id => useCounts.set(id, (useCounts.get(id) || 0) + 1));
+  };
+  const fits = (quote, cap) => quote.candidateIds.every(id => (useCounts.get(id) || 0) < cap);
+  if (bestDouble) take(bestDouble);
+  for (const cap of [MAX_FINALIST_USES_PER_CANDIDATE, MAX_FINALIST_USES_PER_CANDIDATE + 1, Infinity]) {
+    for (const quote of [...passing, ...sorted]) {
+      if (chosen.length >= 5) break;
+      if (chosen.includes(quote)) continue;
+      if (fits(quote, cap)) take(quote);
+    }
+    if (chosen.length >= 5) break;
+  }
   const finalists = chosen.slice(0, 5).map((quote, index) => {
     const records = quote.candidateIds.map(id => candidatesById.get(id));
     return {
@@ -225,7 +242,7 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
     eligibleCount: eligibleItems.length,
     combinationsEvaluated: observation.quotes.length,
     finalists,
-    integrityNotice: 'Los porcentajes son respaldos individuales; ninguna probabilidad conjunta fue calculada. Los momios proceden del boleto DOM.'
+    integrityNotice: 'Los porcentajes son respaldos individuales; ninguna probabilidad conjunta fue calculada. Los momios proceden del boleto DOM. Diversificacion: tope base de 2 apariciones por pick entre finalistas, relajado solo para completar 5.'
   };
 }
 
