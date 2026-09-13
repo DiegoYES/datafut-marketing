@@ -12,7 +12,9 @@ reproducible.
 
 - `datafut-marketing-session.json` vigente. Si Discovery redirige a
   `login.html`: `npm run datafut -- login-datafut` e iniciar sesión en la
-  ventana (timeout 3 min).
+  ventana (timeout 3 min). Alternativa automática: `node
+  scripts/ensure-datafut-session.js` verifica; con `--login` renueva
+  desde `.env` (ver `.env.example`; `.env` gitignorado, solo local).
 - Google Chrome instalado (la captura del boleto usa
   `--remote-debugging-port` + `connectOverCDP`, perfil
   `chrome_cdp_profile/`).
