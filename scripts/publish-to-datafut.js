@@ -249,7 +249,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // "Ej. 1.35". OBLIGATORIOS: sin ellos el submit falla validacion.
     // Mapeo por PAREJA de equipos (home+away), nunca posicional ni por
     // un solo lado (hay homonimos: Cordoba en Jaguares y en Boca).
-    const toks = s => norm(s).replace(/\(.*?\)/g, '').split(' ').filter(w => w.length >= 4);
+    const toks = s => { const w = norm(s).replace(/\(.*?\)/g, '').split(' ').filter(Boolean); const long = w.filter(x => x.length >= 4); return long.length ? long : w; };
     const indivDec = selections.map(s => {
       const sides = s.match.split(' vs ').map(toks);
       return { sides, dec: americanToDecimal(s.oddsText) };
