@@ -8,6 +8,9 @@ esta guía es lo que el modelo NO puede adivinar: tu máquina y tus sesiones.
 
 - Windows 10/11 con Git.
 - **Node.js 22 LTS** (`node --version` debe dar v22.x).
+- **Python 3.10+** (`py --version`) con el paquete `edge-tts` (solo para la
+  narración del video; el script lo instala solo si falta, pero requiere
+  Python y red).
 - **Google Chrome** instalado (la cotización del boleto lo usa por CDP).
 - OpenCode + un modelo agente (Muse Spark u otro).
 - ffmpeg NO se instala aparte: viene con `npm install` (paquete `ffmpeg-static`).
@@ -19,7 +22,12 @@ git clone https://github.com/DiegoYES/datafut-marketing.git
 cd datafut-marketing
 npm install
 npx playwright install chromium
+py -m pip install edge-tts
 ```
+
+> Nota: el repo funciona clonado en CUALQUIER carpeta (sin rutas fijas).
+> Solo no tengas dos copias corriendo captura a la vez en la misma
+> máquina (ambas usan el puerto CDP 9222).
 
 ## 3. Sesiones (una vez por persona, NUNCA se commitean)
 

@@ -3,7 +3,7 @@
 // pipeline-state/parlay-quote-request.json usando Chrome real via CDP.
 // Lee cada momio combinado del DOM en vivo; nunca calcula momios a mano.
 // Uso: node scripts/capture-live-betslip.js
-const { chromium } = require('C:/DataFut-Marketing/node_modules/@playwright/test');
+const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
@@ -41,31 +41,62 @@ function distinctive(matchText, side) {
   });
 
   const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-  const userDataDir = 'C:\\DataFut-Marketing\\chrome_cdp_profile';
+  const userDataDir = path.join(projectDir, 'chrome_cdp_profile');
   if (!fs.existsSync(userDataDir)) fs.mkdirSync(userDataDir, { recursive: true });
+  let browser = null;
+  let page = null;
+  let chromeProc = null;
 
-  const chromeProc = spawn(chromePath, [
-    '--remote-debugging-port=9222',
-    `--user-data-dir=${userDataDir}`,
-    '--no-first-run'
-  ], { detached: true, stdio: 'ignore' });
+  async function ensureSession() {
+    const isBrowserAlive = browser && browser.isConnected();
+    let isPageAlive = false;
+    if (isBrowserAlive && page && !page.isClosed()) {
+      try {
+        await page.evaluate(() => 1);
+        isPageAlive = true;
+      } catch {
+        isPageAlive = false;
+      }
+    }
 
-  await new Promise(r => setTimeout(r, 2500));
+    if (!isBrowserAlive || !isPageAlive) {
+      console.log('  [CDP] Asegurando sesion de Chrome (iniciando o recuperando)...');
+      if (browser) {
+        try { await browser.close(); } catch (e) {}
+      }
+      if (chromeProc) {
+        try { chromeProc.kill(); } catch (e) {}
+      }
+      await new Promise(r => setTimeout(r, 1500));
+
+      chromeProc = spawn(chromePath, [
+        '--remote-debugging-port=9222',
+        `--user-data-dir=${userDataDir}`,
+        '--no-first-run'
+      ], { detached: true, stdio: 'ignore' });
+
+      await new Promise(r => setTimeout(r, 3000));
+      browser = await chromium.connectOverCDP('http://localhost:9222');
+      const defaultContext = browser.contexts()[0];
+      page = defaultContext.pages()[0] || await defaultContext.newPage();
+      await page.setViewportSize({ width: 1440, height: 900 });
+
+      page.on('dialog', async d => { try { await d.dismiss(); } catch (e) {} });
+
+      console.log('  [CDP] Navegando a PlayDoIt...');
+      await page.goto('https://www.playdoit.mx/', { timeout: 45000, waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(4000);
+      await page.evaluate(() => {
+        const dep = Array.from(document.querySelectorAll('*')).find(e => (e.innerText || '').trim() === 'Deportes' && e.offsetHeight > 0);
+        if (dep) dep.click();
+      });
+      await page.waitForTimeout(4000);
+    }
+    return page;
+  }
 
   try {
-    const browser = await chromium.connectOverCDP('http://localhost:9222');
-    const defaultContext = browser.contexts()[0];
-    const page = defaultContext.pages()[0] || await defaultContext.newPage();
-    await page.setViewportSize({ width: 1440, height: 900 });
-
-    console.log('1. Navegando a PlayDoIt y limpiando boleto inicial...');
-    await page.goto('https://www.playdoit.mx/', { timeout: 45000, waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(4000);
-    await page.evaluate(() => {
-      const dep = Array.from(document.querySelectorAll('*')).find(e => (e.innerText || '').trim() === 'Deportes' && e.offsetHeight > 0);
-      if (dep) dep.click();
-    });
-    await page.waitForTimeout(4000);
+    await ensureSession();
 
     async function shadowRoot() {
       return await page.evaluateHandle(() => {
@@ -94,6 +125,7 @@ function distinctive(matchText, side) {
     }
 
     async function clearBetslip() {
+      await ensureSession();
       await openBetslipPanel();
       for (let i = 0; i < 4; i++) {
         await page.evaluate(() => {
@@ -104,15 +136,33 @@ function distinctive(matchText, side) {
           if (clearBtn) { clearBtn.click(); return; }
           const rm = Array.from(root.querySelectorAll('button')).find(e => String(e.className).includes('RemoveSelectionButton') && e.offsetHeight > 0);
           if (rm) rm.click();
-        });
+        }).catch(() => {});
         await page.waitForTimeout(1500);
-        const st = await readBetslipState();
+        const st = await readBetslipState().catch(() => ({ selectionCount: 0 }));
         if (st.selectionCount === 0) return true;
       }
       return false;
     }
 
     async function openMatch(homeTok, awayTok, eventUrl) {
+      await ensureSession();
+      const eidMatch = String(eventUrl || '').match(/eventId=(\d+)/);
+      const eventId = eidMatch ? eidMatch[1] : null;
+      if (eventId) {
+        await page.evaluate((eid) => {
+          window.location.hash = `#page=event&eventId=${eid}&sportId=66`;
+        }, eventId).catch(() => {});
+        for (let i = 0; i < 8; i++) {
+          await page.waitForTimeout(1500);
+          const count = await page.evaluate((eid) => {
+            if (!window.location.hash.includes(`eventId=${eid}`)) return 0;
+            const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
+            const root = shadowHost?.shadowRoot;
+            return root ? root.querySelectorAll('[class*="MarketBoxRoot"]').length : 0;
+          }, eventId).catch(() => 0);
+          if (count > 0) return true;
+        }
+      }
       if (eventUrl) {
         await page.goto(eventUrl, { timeout: 45000, waitUntil: 'domcontentloaded' }).catch(() => {});
         for (let i = 0; i < 6; i++) {
@@ -120,9 +170,8 @@ function distinctive(matchText, side) {
           const boxes = await page.evaluate(() => {
             const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
             const root = shadowHost?.shadowRoot;
-            if (!root) return 0;
-            return Array.from(root.querySelectorAll('[class*="MarketBoxRoot"]')).length;
-          });
+            return root ? root.querySelectorAll('[class*="MarketBoxRoot"]').length : 0;
+          }).catch(() => 0);
           if (boxes > 0) return true;
         }
         return false;
@@ -132,7 +181,7 @@ function distinctive(matchText, side) {
         const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
         const root = shadowHost?.shadowRoot;
         return root ? root.querySelector('input') : document.querySelector('input[placeholder*="Ingrese el nombre"]');
-      });
+      }).catch(() => null);
       if (searchInput) {
         await searchInput.asElement().click();
         await page.keyboard.press('Control+A');
@@ -155,7 +204,7 @@ function distinctive(matchText, side) {
         });
         if (item) { item.click(); return true; }
         return false;
-      }, { h: homeTok, a: awayTok });
+      }, { h: homeTok, a: awayTok }).catch(() => false);
       await page.waitForTimeout(4000);
       return clicked;
     }
@@ -164,34 +213,47 @@ function distinctive(matchText, side) {
       // El slider elige que linea muestra la caja (solo una linea visible a la vez).
       // Barrer valores hasta que aparezca el boton exacto.
       for (const sliderVal of ['3', '2', '1', '0', '4', '5']) {
-        await page.evaluate((v) => {
-          const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
-          const root = shadowHost?.shadowRoot;
-          if (!root) return;
-          const range = root.querySelector('input[type="range"]');
-          if (range) {
-            const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-            setter.call(range, v);
-            range.dispatchEvent(new Event('input', { bubbles: true }));
-            range.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }, sliderVal);
-        await page.waitForTimeout(1200);
-        for (let attempt = 0; attempt < 2; attempt++) {
-          const res = await page.evaluate(({ mk, sel }) => {
+        try {
+          await page.evaluate((v) => {
             const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
             const root = shadowHost?.shadowRoot;
-            if (!root) return 'NO_ROOT';
-            const nl = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(',', '.').trim();
-            const boxes = Array.from(root.querySelectorAll('[class*="MarketBoxRoot"]'));
-            const box = boxes.find(b => nl(((b.innerText || '').split('\n')[0] || '').trim()) === nl(mk));
-            if (!box) return 'NO_BOX';
-            const btn = Array.from(box.querySelectorAll('button')).find(b => nl(b.innerText).includes(nl(sel)));
-            if (btn) { btn.click(); return 'OK'; }
-            const header = box.querySelector('[class*="Header"]') || box.firstElementChild;
-            if (header) { header.click(); return 'EXPANDED'; }
-            return 'NO_BUTTON';
-          }, { mk: marketText, sel: selectionText });
+            if (!root) return;
+            const range = root.querySelector('input[type="range"]');
+            if (range) {
+              const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+              setter.call(range, v);
+              range.dispatchEvent(new Event('input', { bubbles: true }));
+              range.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }, sliderVal);
+        } catch {
+          await page.waitForTimeout(1000);
+        }
+        await page.waitForTimeout(1200);
+        for (let attempt = 0; attempt < 2; attempt++) {
+          let res = 'NO_BUTTON';
+          try {
+            res = await page.evaluate(({ mk, sel }) => {
+              const shadowHost = Array.from(document.querySelectorAll('*')).find(e => !!e.shadowRoot);
+              const root = shadowHost?.shadowRoot;
+              if (!root) return 'NO_ROOT';
+              const nl = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(',', '.').trim();
+              const boxes = Array.from(root.querySelectorAll('[class*="MarketBoxRoot"]'));
+              const box = boxes.find(b => nl(((b.innerText || '').split('\n')[0] || '').trim()) === nl(mk));
+              if (!box) return 'NO_BOX';
+              const btn = Array.from(box.querySelectorAll('button')).find(b => nl(b.innerText).includes(nl(sel)));
+              if (btn) { btn.click(); return 'OK'; }
+              const header = box.querySelector('[class*="Header"]') || box.firstElementChild;
+              if (header) { header.click(); return 'EXPANDED'; }
+              return 'NO_BUTTON';
+            }, { mk: marketText, sel: selectionText });
+          } catch (err) {
+            if (/destroyed/i.test(err.message)) {
+              await page.waitForTimeout(2000);
+              continue;
+            }
+            throw err;
+          }
           if (res === 'OK') return 'OK';
           if (res !== 'EXPANDED') break;
           await page.waitForTimeout(1500);
@@ -251,53 +313,58 @@ function distinctive(matchText, side) {
     for (const combo of pending) {
       qi += 1;
       console.log(`--- Combinacion ${qi}/${quoteRequest.combinations.length}: ${combo.candidateIds.join(' + ')}`);
-      if (!await clearBetslip()) { console.log('  QUOTE_FAILED (boleto inicial no vacio)'); continue; }
-      let ok = true;
-      for (const sel of combo.selections) {
-        const homeTok = distinctive(sel.matchText, 'home');
-        const awayTok = distinctive(sel.matchText, 'away');
-        const opened = await openMatch(homeTok, awayTok, sel.eventUrl);
-        if (!opened) { console.log(`  NO_MATCH_ROW ${sel.matchText}`); ok = false; break; }
-        const res = await clickSelection(sel.marketText, sel.selectionText);
-        console.log(`  ${sel.matchText} | ${sel.marketText} | ${sel.selectionText} -> ${res}`);
-        if (res !== 'OK') { ok = false; break; }
-        await page.waitForTimeout(1500);
-      }
-      if (!ok) { console.log('  QUOTE_FAILED (no se pudo agregar una seleccion)'); continue; }
-      // Abrir boleto y leer momio combinado real
-      await openBetslipPanel();
-      await page.waitForTimeout(800);
-      const state = await readBetslipState();
-      console.log(`  Boleto: ${state.selectionCount} selecciones (paneles: ${state.panels}) | Momio DOM: ${state.combinedOdds}`);
-      (state.selectionTexts || []).forEach(t => console.log(`    > ${t.slice(0, 100)}`));
-      const slipText = (state.selectionTexts || []).join(' | ').toLowerCase();
-      const allPresent = combo.selections.every(s => slipText.includes(s.matchText.toLowerCase().split(' vs ')[0].slice(0, 12)) && slipText.includes(s.selectionText.toLowerCase().replace(',', '.').slice(0, 12)));
-      if (!state.combinedOdds || state.selectionCount !== combo.selections.length || !allPresent) {
-        console.log('  QUOTE_FAILED (momio, conteo o contenido invalido)');
+      try {
+        if (!await clearBetslip()) { console.log('  QUOTE_FAILED (boleto inicial no vacio)'); continue; }
+        let ok = true;
+        for (const sel of combo.selections) {
+          const homeTok = distinctive(sel.matchText, 'home');
+          const awayTok = distinctive(sel.matchText, 'away');
+          const opened = await openMatch(homeTok, awayTok, sel.eventUrl);
+          if (!opened) { console.log(`  NO_MATCH_ROW ${sel.matchText}`); ok = false; break; }
+          const res = await clickSelection(sel.marketText, sel.selectionText);
+          console.log(`  ${sel.matchText} | ${sel.marketText} | ${sel.selectionText} -> ${res}`);
+          if (res !== 'OK') { ok = false; break; }
+          await page.waitForTimeout(1500);
+        }
+        if (!ok) { console.log('  QUOTE_FAILED (no se pudo agregar una seleccion)'); await clearBetslip().catch(() => {}); continue; }
+        // Abrir boleto y leer momio combinado real
+        await openBetslipPanel();
+        await page.waitForTimeout(800);
+        const state = await readBetslipState();
+        console.log(`  Boleto: ${state.selectionCount} selecciones (paneles: ${state.panels}) | Momio DOM: ${state.combinedOdds}`);
+        (state.selectionTexts || []).forEach(t => console.log(`    > ${t.slice(0, 100)}`));
+        const slipText = (state.selectionTexts || []).join(' | ').toLowerCase();
+        const allPresent = combo.selections.every(s => slipText.includes(s.matchText.toLowerCase().split(' vs ')[0].slice(0, 12)) && slipText.includes(s.selectionText.toLowerCase().replace(',', '.').slice(0, 12)));
+        if (!state.combinedOdds || state.selectionCount !== combo.selections.length || !allPresent) {
+          console.log('  QUOTE_FAILED (momio, conteo o contenido invalido)');
+          await clearBetslip();
+          continue;
+        }
+        const shotPath = `captures/dom/playdoit-parlay-${targetDate}-q${String(qi).padStart(2, '0')}.png`;
+        await page.screenshot({ path: path.join(projectDir, shotPath) });
+        const shotSha = sha256File(path.join(projectDir, shotPath));
+        const selectionRows = combo.selections.map(s => {
+          const odds = verifiedOdds.get(s.candidateId) || s.oddsTextAtVerification;
+          return {
+            candidateId: s.candidateId, matchText: s.matchText, marketText: s.marketText,
+            selectionText: s.selectionText, oddsText: odds,
+            rawText: `${s.matchText}\n${s.marketText}\n${s.selectionText}\n${odds}`
+          };
+        });
+        quotes.push({
+          candidateIds: combo.candidateIds, observedAt: new Date().toISOString(),
+          url: 'https://www.playdoit.mx/', visible: true, combinedOddsText: state.combinedOdds,
+          rawText: `Boleto\n${combo.selections.length} Selecciones\nParlay\nMomio: ${state.combinedOdds}\n` + selectionRows.map(r => r.rawText).join('\n'),
+          selectionRows,
+          screenshot: { path: shotPath, sha256: shotSha },
+          cleanup: { empty: true, observedAt: new Date().toISOString() }
+        });
+        persistQuotes();
         await clearBetslip();
-        continue;
+      } catch (err) {
+        console.log(`  QUOTE_ERROR ${combo.candidateIds.join(' + ')}: ${err.message}`);
+        await clearBetslip().catch(() => {});
       }
-      const shotPath = `captures/dom/playdoit-parlay-${targetDate}-q${String(qi).padStart(2, '0')}.png`;
-      await page.screenshot({ path: path.join(projectDir, shotPath) });
-      const shotSha = sha256File(path.join(projectDir, shotPath));
-      const selectionRows = combo.selections.map(s => {
-        const odds = verifiedOdds.get(s.candidateId) || s.oddsTextAtVerification;
-        return {
-          candidateId: s.candidateId, matchText: s.matchText, marketText: s.marketText,
-          selectionText: s.selectionText, oddsText: odds,
-          rawText: `${s.matchText}\n${s.marketText}\n${s.selectionText}\n${odds}`
-        };
-      });
-      quotes.push({
-        candidateIds: combo.candidateIds, observedAt: new Date().toISOString(),
-        url: 'https://www.playdoit.mx/', visible: true, combinedOddsText: state.combinedOdds,
-        rawText: `Boleto\n${combo.selections.length} Selecciones\nParlay\nMomio: ${state.combinedOdds}\n` + selectionRows.map(r => r.rawText).join('\n'),
-        selectionRows,
-        screenshot: { path: shotPath, sha256: shotSha },
-        cleanup: { empty: true, observedAt: new Date().toISOString() }
-      });
-      persistQuotes();
-      await clearBetslip();
     }
 
     if (quotes.length === 0) throw new Error('No se pudo cotizar ninguna combinacion en el boleto real.');
