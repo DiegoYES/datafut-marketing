@@ -11,6 +11,12 @@ esta guía es lo que el modelo NO puede adivinar: tu máquina y tus sesiones.
 - **Python 3.10+** (`py --version`) con el paquete `edge-tts` (solo para la
   narración del video; el script lo instala solo si falta, pero requiere
   Python y red).
+- **Voz local de respaldo** (cuando Microsoft bloquea Edge TTS con 403):
+  `py -m pip install piper-tts` y descargar la voz es_MX-claude-high
+  (`.onnx` + `.onnx.json` de `rhasspy/piper-voices` en HuggingFace,
+  carpeta `es/es_MX/claude/high/`) a `piper-voices/` del proyecto. El
+  script de voz usa Edge por defecto y cambia solo a Piper (`--engine
+  piper` para forzarlo).
 - **Google Chrome** instalado (la cotización del boleto lo usa por CDP).
 - OpenCode + un modelo agente (Muse Spark u otro).
 - ffmpeg NO se instala aparte: viene con `npm install` (paquete `ffmpeg-static`).

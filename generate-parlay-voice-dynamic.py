@@ -3,6 +3,7 @@ import re
 import shutil
 import subprocess
 import sys
+import wave
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -10,6 +11,11 @@ DATA_FILE = PROJECT_DIR / "parlay-data.json"
 OUTPUT_DIR = PROJECT_DIR / "parlay-audio"
 VOICE = "es-MX-JorgeNeural"
 RATE = "+11%"
+# Fallback local cuando Edge TTS esta caido (403): Piper neural local.
+PIPER_VOICE = "piper-es_MX-claude-high"
+PIPER_RATE = "+0%"
+PIPER_MODEL = Path(sys.argv[sys.argv.index("--piper-model") + 1]) if "--piper-model" in sys.argv else (PROJECT_DIR / "piper-voices" / "es_MX-claude-high.onnx")
+ENGINE = sys.argv[sys.argv.index("--engine") + 1] if "--engine" in sys.argv else "auto"  # auto|edge|piper
 
 def ensure_file_exists(path: Path, description: str):
     if not path.exists():
@@ -106,6 +112,90 @@ def generate_tts(text: str, mp3_path: Path, srt_path: Path):
     if res.returncode != 0:
         raise RuntimeError(f"Edge TTS terminó con error: {res.stderr}")
 
+
+def srt_timestamp(seconds: float) -> str:
+    if seconds < 0:
+        seconds = 0.0
+    ms = int(round(seconds * 1000))
+    h, ms = divmod(ms, 3600000)
+    m, ms = divmod(ms, 60000)
+    s, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def write_srt(text: str, duration: float, srt_path: Path):
+    # Subtitulos estimados: reparte la duracion real entre frases,
+    # proporcional a su longitud (ritmo de Piper es uniforme).
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
+    if not parts:
+        parts = [text]
+    chunks = []
+    for p in parts:
+        words = p.split()
+        while len(words) > 12:
+            chunks.append(" ".join(words[:12]))
+            words = words[12:]
+        chunks.append(" ".join(words))
+    total_chars = sum(len(c) for c in chunks) or 1
+    t = 0.0
+    cues = []
+    for i, c in enumerate(chunks):
+        share = len(c) / total_chars
+        end = duration if i == len(chunks) - 1 else t + duration * share
+        cues.append(f"{i+1}\n{srt_timestamp(t)} --> {srt_timestamp(end)}\n{c}\n")
+        t = end
+    srt_path.write_text("\n".join(cues), encoding="utf-8")
+
+
+def wav_duration(wav_path: Path) -> float:
+    with wave.open(str(wav_path), "rb") as w:
+        frames = w.getnframes()
+        rate = w.getframerate()
+        if not rate:
+            raise RuntimeError(f"WAV sin framerate: {wav_path}")
+        return frames / float(rate)
+
+
+def generate_piper(text: str, wav_path: Path):
+    if not PIPER_MODEL.exists():
+        raise RuntimeError(
+            f"Falta el modelo Piper: {PIPER_MODEL}. Descárgalo de "
+            "https://huggingface.co/rhasspy/piper-voices (es/es_MX/claude/high) "
+            "a la carpeta piper-voices/ del proyecto."
+        )
+    cmd = [
+        sys.executable,
+        "-m",
+        "piper",
+        "--model",
+        str(PIPER_MODEL),
+        "--output_file",
+        str(wav_path),
+    ]
+    res = subprocess.run(cmd, input=text, capture_output=True, text=True)
+    if res.returncode != 0 or not wav_path.exists():
+        raise RuntimeError(f"Piper terminó con error: {res.stderr[-2000:]}")
+
+
+def synth_block(text: str, filename: str):
+    """Sintetiza un bloque con Edge (o Piper según ENGINE/auto) Bola.
+    Devuelve (audio_filename, duracion_segundos, motor_usado)."""
+    if ENGINE in ("edge", "auto"):
+        mp3_path = OUTPUT_DIR / f"{filename}.mp3"
+        srt_path = OUTPUT_DIR / f"{filename}.srt"
+        try:
+            generate_tts(text, mp3_path, srt_path)
+            return mp3_path.name, get_srt_duration(srt_path), ("edge", VOICE, RATE)
+        except RuntimeError as e:
+            if ENGINE == "edge":
+                raise
+            print(f"  !! Edge fallo ({str(e)[:80]}...). Cambiando a Piper local.")
+    wav_path = OUTPUT_DIR / f"{filename}.wav"
+    generate_piper(text, wav_path)
+    dur = wav_duration(wav_path)
+    write_srt(text, dur, OUTPUT_DIR / f"{filename}.srt")
+    return wav_path.name, dur, ("piper", PIPER_VOICE, PIPER_RATE)
+
 ensure_file_exists(DATA_FILE, "parlay-data.json")
 
 validation = subprocess.run(
@@ -166,25 +256,28 @@ print(" GENERANDO NARRACIÓN PRECISA SIN SOLAPAMIENTO")
 print("========================================\n")
 
 for b in blocks:
-    mp3_path = OUTPUT_DIR / f"{b['filename']}.mp3"
-    srt_path = OUTPUT_DIR / f"{b['filename']}.srt"
-
     print(f"Generando TTS [{b['id']}]: {b['text'][:50]}...")
-    generate_tts(b["text"], mp3_path, srt_path)
-
-    dur = get_srt_duration(srt_path)
+    audio_name, dur, used = synth_block(b["text"], b["filename"])
+    if b["id"] == "intro":
+        manifest_voice, manifest_rate = used[1], used[2]
+        if used[0] == "piper":
+            globals()["ENGINE"] = "piper"
+        print(f"  Motor de voz: {used[0]} ({used[1]})")
     start_sec = current_time
     end_sec = start_sec + dur
 
-    timeline.append({
+    entry = {
         "id": b["id"],
-        "audio": mp3_path.name,
-        "subtitles": srt_path.name,
+        "audio": audio_name,
         "text": b["text"],
         "startSeconds": round(start_sec, 3),
         "durationSeconds": round(dur, 3),
         "endSeconds": round(end_sec, 3)
-    })
+    }
+    srt_guess = OUTPUT_DIR / f"{b['filename']}.srt"
+    if srt_guess.exists():
+        entry["subtitles"] = srt_guess.name
+    timeline.append(entry)
 
     print(f"  -> Duración exacta: {dur:.2f}s (Inicia: {start_sec:.2f}s | Termina: {end_sec:.2f}s)")
     current_time = end_sec + transition_padding
@@ -194,8 +287,8 @@ video_end_padding = 1.0
 total_video_duration = total_audio_duration + video_end_padding
 
 manifest = {
-    "voice": VOICE,
-    "rate": RATE,
+    "voice": manifest_voice,
+    "rate": manifest_rate,
     "sourceData": "parlay-data.json",
     "blocks": timeline,
     "transitionPaddingSeconds": transition_padding,

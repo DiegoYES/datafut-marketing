@@ -30,6 +30,11 @@ raw-*/
 *.webm
 *.mp4
 
+# Local neural voices (63MB+, cada quien los descarga)
+piper-voices/
+*.onnx
+*.onnx.json
+
 # Generated pipeline state and root-level working data
 pipeline-state/
 /*.json
