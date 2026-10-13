@@ -3,7 +3,9 @@
 // Flujo Playwright con la sesion marketing (sin passwords, sin API inventada):
 //   1. Puerta de auditoria: la opcion debe ser finalista oficial publicado.
 //   2. Por cada seleccion: abre su tarjeta DataFut (sourceUrl de Discovery)
-//      y pulsa "Guardar pick".
+//      y pulsa "Guardar pick" (partido.html) o "+ Agregar a boleta" tras
+//      "Generar análisis" (comparador.html -> borrador "Mi boleta" ->
+//      "Guardar boleta"). Menus mixtos: fail-closed. [--use-boleta reanuda]
 //   3. Panel Mis boletas -> "Guardar Boleta (N)" -> modal Nombrar boleta.
 //   4. En la boleta propia -> "Recomendar en Picks del Dia".
 //   5. Modal: titulo(=boleta), visibilidad, estado=Publicar ahora,
@@ -48,6 +50,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const optionId = optionValue('--option');
   const visibility = (optionValue('--visibility') || '').toLowerCase();
   const doPublish = hasFlag('--publish');
+  const useBoleta = optionValue('--use-boleta');
   const dryRun = hasFlag('--dry-run') || !doPublish;
   if (!optionId) throw new Error('Uso: publish-to-datafut.js --option <optionId> --visibility <gratis|premium> [--publish]');
   if (!['gratis', 'premium'].includes(visibility)) throw new Error('visibility debe ser gratis|premium');
@@ -90,6 +93,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await page.keyboard.press('Escape').catch(() => {});
     await sleep(1000);
 
+    // --- 2/3. Guardar picks + crear boleta (o reanudar con --use-boleta). ---
+    // Ruta partido.html (Mis picks / Por armar) o comparador.html (borrador).
+    const srcKind = s => (s.sourceUrl || '').includes('comparador.html') ? 'comp' : ((s.sourceUrl || '').includes('partido.html') ? 'mc' : '?');
+    const kinds = [...new Set(selections.map(srcKind))];
+    if (kinds.length !== 1 || kinds[0] === '?') throw new Error('Menu mixto o sin tarjeta trazable: sin ruta de guardado unica, aborto.');
+    const isComparador = kinds[0] === 'comp';
+    let boletaName = null;
+    if (useBoleta) {
+      boletaName = useBoleta;
+      console.log(`  Reanudando con boleta existente: "${boletaName}" (se omite guardado).`);
+    } else {
+    if (!isComparador) {
     // --- 2. Guardar cada pick desde su tarjeta (clic JS: los botones
     // viven en contenedores virtualizados no visibles hasta scroll) ---
     for (const sel of selections) {
@@ -150,7 +165,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // --- 3. Armar boleta con nombre propio ---
     const stamp = new Date();
     const hhmm = `${String(stamp.getHours()).padStart(2, '0')}:${String(stamp.getMinutes()).padStart(2, '0')}`;
-    const boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
+    boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
     await page.goto('https://data-fut.com/boletas.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await sleep(4000);
     // Abrir panel Mis picks y pulsar Guardar Boleta (scroll + clic real).
@@ -184,6 +199,79 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await page.getByText(boletaName, { exact: false }).first().waitFor({ timeout: 20000 });
     console.log(`  Boleta: "${boletaName}"`);
     await shot('boleta-creada');
+    } else {
+      // --- 2b/3b. Ruta comparador: borrador "Mi boleta" (requiere que tu
+      // front persista el borrador entre paginas; si el conteo no cuadra,
+      // fail-closed sin guardar nada). ---
+      const stamp = new Date();
+      const hhmm = `${String(stamp.getHours()).padStart(2, '0')}:${String(stamp.getMinutes()).padStart(2, '0')}`;
+      boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
+      const readDraft = () => page.evaluate(() => {
+        const cnt = document.querySelector('#bet-slip-count');
+        if (!cnt) return null;
+        let panel = cnt.parentElement, g = 0;
+        while (panel && panel !== document.body && !/guardar boleta/i.test(panel.innerText || '')) { panel = panel.parentElement; g++; if (g > 10) break; }
+        return { count: Number((cnt.innerText || '').trim()) || 0, text: panel ? (panel.innerText || '') : '' };
+      }).catch(() => null);
+      const pre = await readDraft();
+      if (pre && pre.count > 0) throw new Error(`Borrador con ${pre.count} pick(s) previo(s): no lo vacio por ti, vacialo en tu navegador y reintenta.`);
+      const urls = [...new Set(selections.map(s => s.sourceUrl))];
+      for (const url of urls) {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+        await sleep(5000);
+        const genBtn = page.getByRole('button', { name: /generar an.lisis/i }).first();
+        if (await genBtn.count() > 0) await genBtn.click({ timeout: 15000 }).catch(() => {});
+        await sleep(12000);
+        for (const sel of selections.filter(s => s.sourceUrl === url)) {
+          await page.evaluate(mkt => {
+            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => (e.innerText || '').trim() === mkt);
+            const article = pm ? pm.closest('article') : null;
+            if (!article) return;
+            if (/en la boleta/i.test(article.innerText || '')) return;
+            const btn = Array.from(article.querySelectorAll('button')).find(b => /agregar a boleta/i.test(b.innerText || ''));
+            if (btn) { btn.scrollIntoView(); btn.click(); }
+          }, sel.market).catch(() => {});
+          await sleep(2500);
+          const st = await page.evaluate(mkt => {
+            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => (e.innerText || '').trim() === mkt);
+            const article = pm ? pm.closest('article') : null;
+            if (!article) return 'NO_CARD';
+            const m = (article.innerText || '').match(/(\d+(?:[.,]\d+)?)\s*%/);
+            return { state: /en la boleta/i.test(article.innerText || '') ? 'EN_BOLETA' : 'FALLO', pct: m ? m[1] : '?' };
+          }, sel.market).catch(() => 'EVAL_FAIL');
+          sel.livePct = st && st.pct ? st.pct : '?';
+          console.log(`  ${sel.candidateId} | ${sel.market} -> ${st && st.state ? st.state : st} (sitio hoy: ${sel.livePct}% vs certificado ${sel.percentage}%)`);
+          if (!st || st.state !== 'EN_BOLETA') throw new Error(`No se pudo agregar a boleta: ${sel.market}`);
+          await sleep(1500);
+        }
+      }
+      const post = await readDraft();
+      const postOk = post && post.count === selections.length && selections.every(s => (post.text || '').includes(s.market));
+      if (!postOk) throw new Error(`Borrador inesperado (esperado ${selections.length}, hay ${post ? post.count : '?'}): no guardo nada, aborto.`);
+      console.log(`  Borrador verificado: ${post.count} pick(s).`);
+      await shot('borrador-comparador');
+      const draftPanelHandle = await page.evaluateHandle(() => {
+        const cnt = document.querySelector('#bet-slip-count');
+        if (!cnt) return null;
+        let panel = cnt.parentElement, g = 0;
+        while (panel && panel !== document.body && !/guardar boleta/i.test(panel.innerText || '')) { panel = panel.parentElement; g++; if (g > 10) break; }
+        return panel || null;
+      }).catch(() => null);
+      const draftPanel = draftPanelHandle ? draftPanelHandle.asElement() : null;
+      if (!draftPanel) throw new Error('No se encontro el panel del borrador.');
+      const nameHandle = await draftPanel.evaluateHandle(p => p.querySelector('input[type="text"], input:not([type])')).catch(() => null);
+      const nameEl = nameHandle ? nameHandle.asElement() : null;
+      if (!nameEl) throw new Error('No se encontro el campo Nombre del borrador.');
+      await nameEl.fill(boletaName, { timeout: 15000 });
+      const saveHandle = await draftPanel.evaluateHandle(p => Array.from(p.querySelectorAll('button')).find(b => /^guardar boleta/i.test((b.innerText || '').trim())) || null).catch(() => null);
+      const saveEl = saveHandle ? saveHandle.asElement() : null;
+      if (!saveEl) throw new Error('No se encontro el boton Guardar boleta del borrador.');
+      await saveEl.click({ timeout: 15000 });
+      await page.waitForFunction(nm => (document.body.innerText || '').includes(nm), boletaName, { timeout: 30000 });
+      console.log(`  Boleta: "${boletaName}"`);
+      await shot('boleta-creada');
+    }
+    } // fin guardar (o reanudacion con --use-boleta)
 
     // --- 4. Recomendar en Picks del Dia (boton de NUESTRA boleta) ---
     // Esperar a que la tarjeta renderice (no el modal: nombre + pick).
@@ -250,8 +338,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // Mapeo por PAREJA de equipos (home+away), nunca posicional ni por
     // un solo lado (hay homonimos: Cordoba en Jaguares y en Boca).
     const toks = s => { const w = norm(s).replace(/\(.*?\)/g, '').split(' ').filter(Boolean); const long = w.filter(x => x.length >= 4); return long.length ? long : w; };
+    // Stems para variantes de idioma (Napoli/Nápoles: difieren en 2
+    // letras): solo len>=5 y siempre exigiendo AMBOS lados (pareja intacta).
+    const withStems = toks => [...toks, ...toks.filter(t => t.length >= 5).map(t => t.slice(0, -1)), ...toks.filter(t => t.length >= 6).map(t => t.slice(0, -2))];
     const indivDec = selections.map(s => {
-      const sides = s.match.split(' vs ').map(toks);
+      const sides = s.match.split(' vs ').map(t => withStems(toks(t)));
       return { sides, dec: americanToDecimal(s.oddsText) };
     });
     const indivRes = await page.evaluate(items => {

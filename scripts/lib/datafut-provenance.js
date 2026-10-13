@@ -29,8 +29,9 @@ function cardPayload({ sourceUrl, rawTitle, percentage, evidenceText, fullSnippe
 }
 
 function parseSmoothedPercentages(evidenceText) {
-  const text = normalizedEvidence(evidenceText).join(' ');
-  return [...text.matchAll(/con suavizado:\s*(\d+(?:[.,]\d+)?)%/gi)]
+  // Match Center redacta "con suavizado: X%"; el Comparador (misma regla de
+  // promedio de dos fuentes) redacta "Al suavizar la muestra: X%".
+  return [...normalizedEvidence(evidenceText).join(' ').matchAll(/(?:con suavizado|al suavizar la muestra):\s*(\d+(?:[.,]\d+)?)%/gi)]
     .map(match => Number(match[1].replace(',', '.')));
 }
 
