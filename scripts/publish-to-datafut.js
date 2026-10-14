@@ -5,7 +5,8 @@
 //   2. Por cada seleccion: abre su tarjeta DataFut (sourceUrl de Discovery)
 //      y pulsa "Guardar pick" (partido.html) o "+ Agregar a boleta" tras
 //      "Generar análisis" (comparador.html -> borrador "Mi boleta" ->
-//      "Guardar boleta"). Menus mixtos: fail-closed. [--use-boleta reanuda]
+//      "Guardar boleta"). Menus mixtos: via borrador (requiere "+ Agregar
+//      a boleta" en partido.html y comparador.html). [--use-boleta reanuda]
 //   3. Panel Mis boletas -> "Guardar Boleta (N)" -> modal Nombrar boleta.
 //   4. En la boleta propia -> "Recomendar en Picks del Dia".
 //   5. Modal: titulo(=boleta), visibilidad, estado=Publicar ahora,
@@ -97,8 +98,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     // Ruta partido.html (Mis picks / Por armar) o comparador.html (borrador).
     const srcKind = s => (s.sourceUrl || '').includes('comparador.html') ? 'comp' : ((s.sourceUrl || '').includes('partido.html') ? 'mc' : '?');
     const kinds = [...new Set(selections.map(srcKind))];
-    if (kinds.length !== 1 || kinds[0] === '?') throw new Error('Menu mixto o sin tarjeta trazable: sin ruta de guardado unica, aborto.');
-    const isComparador = kinds[0] === 'comp';
+    if (kinds.includes('?')) throw new Error('Pick sin tarjeta trazable: aborto.');
+    // Ruta borrador cubre comparador puro y mixtos; Mis picks solo MC puro.
+    const isComparador = kinds.includes('comp');
     let boletaName = null;
     if (useBoleta) {
       boletaName = useBoleta;
@@ -207,24 +209,43 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       const hhmm = `${String(stamp.getHours()).padStart(2, '0')}:${String(stamp.getMinutes()).padStart(2, '0')}`;
       boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
       const readDraft = () => page.evaluate(() => {
+        let stored = [];
+        try { stored = JSON.parse(localStorage.getItem('datafut_boleta_draft') || '[]'); } catch {}
         const cnt = document.querySelector('#bet-slip-count');
-        if (!cnt) return null;
-        let panel = cnt.parentElement, g = 0;
-        while (panel && panel !== document.body && !/guardar boleta/i.test(panel.innerText || '')) { panel = panel.parentElement; g++; if (g > 10) break; }
-        return { count: Number((cnt.innerText || '').trim()) || 0, text: panel ? (panel.innerText || '') : '' };
+        let panel = null;
+        if (cnt) {
+          panel = cnt.parentElement;
+          let g = 0;
+          while (panel && panel !== document.body && !/guardar boleta/i.test(panel.innerText || '')) { panel = panel.parentElement; g++; if (g > 10) break; }
+        }
+        return { count: Array.isArray(stored) ? stored.length : 0, text: panel ? (panel.innerText || '') : '' };
       }).catch(() => null);
+      if (hasFlag('--vaciar')) {
+        await page.evaluate(() => { try { localStorage.removeItem('datafut_boleta_draft'); } catch {} });
+        console.log('  Borrador local vaciado (--vaciar).');
+      }
       const pre = await readDraft();
       if (pre && pre.count > 0) throw new Error(`Borrador con ${pre.count} pick(s) previo(s): no lo vacio por ti, vacialo en tu navegador y reintenta.`);
       const urls = [...new Set(selections.map(s => s.sourceUrl))];
       for (const url of urls) {
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await sleep(5000);
-        const genBtn = page.getByRole('button', { name: /generar an.lisis/i }).first();
-        if (await genBtn.count() > 0) await genBtn.click({ timeout: 15000 }).catch(() => {});
-        await sleep(12000);
+        if (url.includes('comparador.html')) {
+          const genBtn = page.getByRole('button', { name: /generar an.lisis/i }).first();
+          if (await genBtn.count() > 0) await genBtn.click({ timeout: 15000 }).catch(() => {});
+          await sleep(12000);
+        } else {
+          // partido.html: abrir la pestana "Picks del partido" (lazy).
+          await page.evaluate(() => {
+            const tab = Array.from(document.querySelectorAll('button')).find(el => /^\s*picks del partido\s*$/i.test(el.innerText || ''));
+            if (tab) { tab.scrollIntoView(); tab.click(); }
+          }).catch(() => {});
+          await sleep(8000);
+        }
         for (const sel of selections.filter(s => s.sourceUrl === url)) {
           await page.evaluate(mkt => {
-            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => (e.innerText || '').trim() === mkt);
+            const eqNum = s => String(s || '').replace(',', '.');
+            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => eqNum((e.innerText || '').trim()) === eqNum(mkt));
             const article = pm ? pm.closest('article') : null;
             if (!article) return;
             if (/en la boleta/i.test(article.innerText || '')) return;
@@ -233,7 +254,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
           }, sel.market).catch(() => {});
           await sleep(2500);
           const st = await page.evaluate(mkt => {
-            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => (e.innerText || '').trim() === mkt);
+            const eqNum = s => String(s || '').replace(',', '.');
+            const pm = Array.from(document.querySelectorAll('.pick-market')).find(e => eqNum((e.innerText || '').trim()) === eqNum(mkt));
             const article = pm ? pm.closest('article') : null;
             if (!article) return 'NO_CARD';
             const m = (article.innerText || '').match(/(\d+(?:[.,]\d+)?)\s*%/);
@@ -247,8 +269,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       }
       const post = await readDraft();
       const postOk = post && post.count === selections.length && selections.every(s => (post.text || '').includes(s.market));
-      if (!postOk) throw new Error(`Borrador inesperado (esperado ${selections.length}, hay ${post ? post.count : '?'}): no guardo nada, aborto.`);
-      console.log(`  Borrador verificado: ${post.count} pick(s).`);
+      if (!postOk) {
+        // El drawer solo vive en comparador.html: finalizar ahi si aplica.
+        const compUrl = urls.find(u => u.includes('comparador.html'));
+        if (compUrl) {
+          await page.goto(compUrl, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+          await sleep(5000);
+        }
+      }
+      const post2 = await readDraft();
+      const ok2 = post2 && post2.count === selections.length && selections.every(s => (post2.text || '').includes(s.market));
+      if (!ok2) throw new Error(`Borrador inesperado (esperado ${selections.length}, hay ${post2 ? post2.count : '?'}): no guardo nada, aborto.`);
+      console.log(`  Borrador verificado: ${post2.count} pick(s).`);
       await shot('borrador-comparador');
       const draftPanelHandle = await page.evaluateHandle(() => {
         const cnt = document.querySelector('#bet-slip-count');
