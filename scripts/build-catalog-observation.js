@@ -24,6 +24,18 @@ function optionValue(name) {
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 const TEAM_NOISE = new Set(['ac', 'atletico', 'club', 'de', 'del', 'deportivo', 'deportes', 'el', 'fc', 'la', 'las', 'los', 'mg', 'sc', 'sjdr', 'sp', 'univ', 'universidad', 'cf', 'cd']);
 
+// Titulos DataFut con ruido: sufijos decorativos y tarjetas de prediccion
+// ("Equipo A vs Equipo B · Match Center", " ... Menos de 3.5 goles 82.1% · muestra 10").
+// Se recorta al segmento de equipos ANTES de any matching.
+function cleanDfTitle(title) {
+  let t = String(title || '');
+  const cutRe = /\s+(?:·\s*muestra|\bmas de\b|\bmenos de\b)/i;
+  const decorIdx = t.search(cutRe);
+  if (decorIdx > 0) t = t.slice(0, decorIdx);
+  t = t.replace(/\s*·\s*match center\s*$/i, '').replace(/%\s*\d*/g, '').replace(/\s+·\s*/g, ' · ').trim();
+  return t;
+}
+
 function readAliasMap() {
   try {
     const doc = JSON.parse(fs.readFileSync(path.join(projectDir, 'config', 'team-aliases.json'), 'utf8'));
@@ -40,10 +52,54 @@ function variants(teamName, aliasMap) {
   return [...new Set(names.map(norm).filter(Boolean))];
 }
 
+// Tokens sin ruido + matching tolerante: exacto O prefijo >= 4 chars
+// ('sheffield wed' == 'sheffield wednesday', 'inter' en 'internacional').
+function teamTokens(name, aliasMap) {
+  const out = new Set();
+  for (const v of variants(name, aliasMap)) {
+    for (const w of norm(v).split(' ').filter(Boolean)) if (!TEAM_NOISE.has(w) && w.length >= 3) out.add(w);
+  }
+  return out;
+}
+function tokenEquals(a, b) {
+  if (a === b) return true;
+  return a.length >= 4 && b.length >= 4 && (a.startsWith(b) || b.startsWith(a));
+}
+function tokensSim2(tokensA, tokensB) {
+  if (!tokensA.size || !tokensB.size) return 0;
+  let inter = 0;
+  const bs = [...tokensB];
+  tokensA.forEach(ta => { if (bs.some(tb => tokenEquals(ta, tb))) inter++; });
+  const union = new Set([...tokensA, ...tokensB]).size;
+  return inter / union;
+}
+function teamSim(a, b, aliasMap) {
+  return tokensSim2(teamTokens(a, aliasMap), teamTokens(b, aliasMap));
+}
+
+// Similitud par-vs-par y orden-insensitiva entre titulo DataFut y nombre PlayDoit.
+function pairSim(dfTitle, evName, aliasMap) {
+  const t = cleanDfTitle(dfTitle);
+  const pT = t.split(/\s+vs\.?\s+/i).map(x => x.trim()).filter(x => x.length > 2);
+  const partsEv = String(evName).split(/\s+vs\.?\s+/i);
+  if (pT.length < 2 || partsEv.length < 2) return 0;
+  const evH = partsEv[0], evA = partsEv.slice(1).join(' vs. ');
+  let best = 0;
+  for (let i = 0; i < pT.length - 1; i++) {
+    for (let j = i + 1; j < pT.length; j++) {
+      const s1 = teamSim(pT[i], evH, aliasMap) * teamSim(pT[j], evA, aliasMap);
+      const s2 = teamSim(pT[i], evA, aliasMap) * teamSim(pT[j], evH, aliasMap);
+      best = Math.max(best, s1, s2);
+    }
+  }
+  return best;
+}
+
 function matchesTitle(homeTeam, awayTeam, title, aliasMap) {
-  const t = norm(title);
-  return variants(homeTeam, aliasMap).some(v => v && t.includes(v)) &&
-    variants(awayTeam, aliasMap).some(v => v && t.includes(v));
+  // Un partido pertenece a un titulo DataFut si el pairSim (limpio y
+  // orden-insensitivo) entre ambos es >= 0.45 (multiplicacion de dos
+  // tokens-sim; 0.45 tolera un extremo parcial como "AEK Athens" vs "AEK").
+  return pairSim(title, `${homeTeam} vs. ${awayTeam}`, aliasMap) >= 0.45;
 }
 
 function am(dec) {
