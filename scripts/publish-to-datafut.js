@@ -185,9 +185,31 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (porArmar !== selections.length) throw new Error(`Por armar trae ${porArmar}, no ${selections.length}: boleta contaminada, aborto.`);
 
     // --- 3. Armar boleta con nombre propio ---
+    // Titulo con la FECHA-HORA en que se sabra el resultado: kickoff del
+    // ULTIMO partido del menu + 90 min, redondeado hacia arriba a la hora
+    // completa (usuario: arranque 6:30pm -> titulo "8pm"). Requerimiento
+    // editorial del 18/10: que se distinga una publicacion de otra.
+    const catalogByMatchId = new Map((catalog.matches || []).map(m => [m.matchId, m]));
+    const discByCandidateId = new Map((discovery.candidates || []).map(c => [c.candidateId, c]));
+    const lastKick = selections.reduce((acc, sel) => {
+      const disc = discByCandidateId.get(sel.candidateId);
+      const cat = catalogByMatchId.get(disc?.catalogMatchId || '');
+      const st = cat?.startTime ? new Date(cat.startTime) : null;
+      return st && (!acc || st > acc) ? st : acc;
+    }, null);
+    let resultTitle = null;
+    if (lastKick && !isNaN(lastKick.getTime())) {
+      const due = new Date(lastKick.getTime() + 90 * 60 * 1000);
+      if (due.getMinutes() > 0 || due.getSeconds() > 0 || due.getMilliseconds() > 0) due.setHours(due.getHours() + 1);
+      due.setMinutes(0, 0, 0);
+      const ap = due.getHours() >= 12 ? 'pm' : 'am';
+      const h12 = ((due.getHours() + 11) % 12) + 1;
+      resultTitle = `Parlay para el ${String(due.getDate()).padStart(2, '0')}/${String(due.getMonth() + 1).padStart(2, '0')}/${due.getFullYear()} ${h12}${ap}`;
+    }
     const stamp = new Date();
     const hhmm = `${String(stamp.getHours()).padStart(2, '0')}:${String(stamp.getMinutes()).padStart(2, '0')}`;
-    boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
+    boletaName = optionValue('--boleta-name') ||
+      (resultTitle ? `${resultTitle} ${finalist.combinedOddsText}` : `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`);
     await page.goto('https://data-fut.com/boletas.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await sleep(4000);
     // Abrir panel Mis picks y pulsar Guardar Boleta (scroll + clic real).
