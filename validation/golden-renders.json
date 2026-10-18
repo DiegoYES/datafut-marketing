@@ -1,11 +1,8 @@
 {
-  "version": 1,
-  "purpose": "Referencia local anterior a la estabilizacion del pipeline",
-  "capturedOn": "2026-08-21",
   "stableSources": [
     {
       "path": "render-parlay-video.js",
-      "sha256": "02fa96f33a3aac634038716e45bb76e4ee35dc574c858687abc231718faa2698"
+      "sha256": "5d2ec40eef03cc7dfc7d1a01541079daeb612ea12ddc00cdb548b5c0b679de4e"
     },
     {
       "path": "parlay-video-template.html",
@@ -13,21 +10,39 @@
     },
     {
       "path": "generate-parlay-voice-dynamic.py",
-      "sha256": "924b6d2c071e553fb43f06b9cff5d1a94460b96900af577b76ef75e29d7ff6d9"
+      "sha256": "2327ee4db8f578823549555bd0665a6b1cb45f618d57b1f5db2fd7fcb623751d"
     }
   ],
   "renders": [
     {
-      "id": "2026-08-21__parlay-de-datos__audax-italiano-mas-de-1-5-goles-totales__san-diego-wave-menos-de-3-5-goles-totales",
-      "videoBytes": 8151607,
-      "videoSha256": "0b0631812f216ca4b9816c10750cfe3313547dd2ee65b0c6a1b35c638172970b",
-      "dataSha256": "c9029c65be1e72e99966644762bd6ee860f1ceb58c6cd007ff6a3b43b42cb682"
+      "id": "2026-09-09__parlay-de-datos__cf-montreal-menos-de-5-5-tiros-a-puerta-del-visitante__dc-united-mas-de-7-5-corners-totales__philadelphia-union-menos-de-5-5-tarjetas-amarillas-totales",
+      "videoSha256": "17a3683d5cf12206fedb8b8555fb2bea1e8ecf345be462491936a8d44127b098",
+      "dataSha256": "47d7a10703a8a5c98fc4ef915a4a7334aa5684e979c68fb41b9c64bee1effac8",
+      "videoBytes": 13027429
     },
     {
-      "id": "2026-08-21__parlay-de-datos__estudiantes-rio-cuarto-menos-de-2-5-goles-totales__audax-italiano-menos-de-10-5-corners-totales",
-      "videoBytes": 8800199,
-      "videoSha256": "5332446e98b75a8491e1e34b7a8ed9e5a7bdb0993f9f6d4aa31ae7a9a8edfa30",
-      "dataSha256": "4fa9b04c426c2c9985991db1a89aae33cc7342832a979cf28e2ec3266eccda82"
+      "id": "2026-09-10__parlay-de-datos__vila-nova-menos-de-7-5-tarjetas-amarillas-totales__gif-sundsvall-mas-de-1-5-goles__orsomarso-menos-de-2-5-goles",
+      "videoSha256": "332a251eab24d1d7bb207b2186e7b8ba2f503f09592f2fe71eb56d80956b3b5d",
+      "dataSha256": "30d927b7163894b127dad10450999a97de2adddbe9de5d63372700ab3ec28838",
+      "videoBytes": 12183211
+    },
+    {
+      "id": "2026-09-11__parlay-de-datos__cusco-fc-menos-de-6-5-tarjetas-amarillas-totales__angel-city-f-menos-de-3-5-goles",
+      "videoSha256": "f057b09d97cd0f521b1469d788e4f7f1ae8636cea58aa5bc6cf8224b447e6d97",
+      "dataSha256": "1142535b3cc0190f4261140ea68b5e9135deacb6a2d7e9cfccfc1065ab353df3",
+      "videoBytes": 9795615
+    },
+    {
+      "id": "2026-09-12__parlay-de-datos__alianza-lima-menos-de-7-5-tarjetas-amarillas-totales__orlando-city-sc-menos-de-6-5-tiros-a-puerta-del-local__santos-mas-de-2-5-tiros-a-puerta-del-visitante",
+      "videoSha256": "9decc83cbd6d7c9eb4c69ceceef77f21f368b410071216f2ac9218450abe4a1f",
+      "dataSha256": "1e1344503b33a4d69a512ff0d5e8a26780f46988db4f3188569f2b0dfb8bb4a9",
+      "videoBytes": 11890576
+    },
+    {
+      "id": "2026-09-13__parlay-de-datos__a-italiano-menos-de-5-5-tiros-a-puerta-del-visitante__san-diego-fc-mas-de-2-5-goles",
+      "videoSha256": "5f82f38fbc23ab1fb80c3ad12de13cff00266a08db0d3d734794b7e138bec7d9",
+      "dataSha256": "69fd70372aff5b07e06241b349dbb992163debf6bbb516aa364caa90dec04d5c",
+      "videoBytes": 8770633
     }
   ]
 }
