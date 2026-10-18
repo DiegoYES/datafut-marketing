@@ -18,6 +18,8 @@ tmp_chrome_profile/
 
 # Local evidence backups (machine-local)
 captures-backup-*/
+piper-voices/
+*.srt
 
 # Generated media and render artifacts
 renders/

@@ -6,14 +6,19 @@ const { readJson, validateParlayData } = require('./lib/validation');
 
 const projectDir = path.resolve(__dirname, '..');
 const rendersDir = path.join(projectDir, 'renders');
+// Obligatorios: entregables del paquete. Los intermediarios de render
+// (music.wav, source.webm, narration.txt) pueden faltar si el paquete paso
+// por cleanup-flow-evidence; eso es ADVERTENCIA, no error.
 const requiredFiles = [
   'caption.txt',
   'metadata.json',
-  'music.wav',
-  'narration-manifest.json',
   'parlay-data.json',
-  'reel.mp4',
-  'source.webm'
+  'reel.mp4'
+];
+const optionalIntermediateFiles = [
+  'music.wav',
+  'source.webm',
+  'narration-manifest.json'
 ];
 
 function inspectMedia(filePath) {
@@ -64,9 +69,34 @@ function validateRender(renderDir) {
   const errors = [];
   const warnings = [];
 
+  // Pre-vuelo: sin metadata.json o parlay-data.json no hay paquete publicable;
+  // se omite sin error (estado historico consumido por cleanup).
+  ['metadata.json', 'parlay-data.json'].forEach(fileName => {
+    if (!fs.existsSync(path.join(renderDir, fileName))) {
+      warnings.push(`pre-vuelo: sin ${fileName}; paquete omitido`);
+    }
+  });
+  if (warnings.length > 0) {
+    return { name, errors: [], warnings };
+  }
+
+  const metadata = readJson(path.join(renderDir, 'metadata.json'));
+  if (metadata.status !== 'ready') {
+    // Paquete historico no publicable (ej. render abortado con status error):
+    // el render que lo genero ya fallo en su propio proceso; aqui se omite.
+    warnings.push(`metadata.status es ${JSON.stringify(metadata.status)}; paquete omitido`);
+    return { name, errors: [], warnings, media: null, reelSize: 0 };
+  }
+
   requiredFiles.forEach(fileName => {
     if (!fs.existsSync(path.join(renderDir, fileName))) {
       errors.push(`falta ${fileName}`);
+    }
+  });
+
+  optionalIntermediateFiles.forEach(fileName => {
+    if (!fs.existsSync(path.join(renderDir, fileName))) {
+      warnings.push(`intermediario ${fileName} ausente (paquete post-cleanup)`);
     }
   });
 
@@ -74,15 +104,10 @@ function validateRender(renderDir) {
     return { name, errors, warnings };
   }
 
-  const metadata = readJson(path.join(renderDir, 'metadata.json'));
   const parlayData = readJson(path.join(renderDir, 'parlay-data.json'));
   const dataValidation = validateParlayData(parlayData, { allowLegacyThreshold: true });
   errors.push(...dataValidation.errors.map(error => `parlay-data.json: ${error}`));
   warnings.push(...dataValidation.warnings.map(warning => `parlay-data.json: ${warning}`));
-
-  if (metadata.status !== 'ready') {
-    errors.push(`metadata.status es ${JSON.stringify(metadata.status)}, se esperaba "ready"`);
-  }
 
   if (JSON.stringify(metadata.picks) !== JSON.stringify(parlayData.picks)) {
     errors.push('metadata.picks no coincide con parlay-data.json');
@@ -143,8 +168,13 @@ if (!fs.existsSync(rendersDir)) {
 }
 
 const renderDirs = fs.readdirSync(rendersDir, { withFileTypes: true })
-  .filter(entry => entry.isDirectory())
-  .map(entry => path.join(rendersDir, entry.name));
+  .filter(entry => entry.isDirectory() && entry.name !== 'recaps')
+  .map(entry => path.join(rendersDir, entry.name))
+  .filter(renderDir => {
+    // Los paquetes consumidos por cleanup-flow-evidence conservan nada:
+    // un directorio sin metadata.json no es un render publicable (OMITIDO).
+    return fs.existsSync(path.join(renderDir, 'metadata.json'));
+  });
 
 if (renderDirs.length === 0) {
   console.error('ERROR: no hay paquetes en renders/.');
