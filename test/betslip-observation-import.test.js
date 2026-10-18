@@ -89,8 +89,8 @@ const output = buildParlayOptionsFromObservation(eligibleItems, observation, {
   verificationGeneratedAt: observation.verificationGeneratedAt
 });
 assert.equal(output.quoteMethod, 'betslip_dom_read');
-assert.equal(output.finalists.length, 2);
-assert.deepEqual(output.finalists.map(item => item.type), ['doble', 'triple']);
+assert.equal(output.finalists.length, 1);
+assert.deepEqual(output.finalists.map(item => item.type), ['doble']);
 assert.equal('combinedProbability' in output.finalists[0], false);
 
 const wrongScope = structuredClone(observation);
@@ -104,8 +104,9 @@ assert.match(rejected.errors.join('\n'), /marketText no coincide/);
 
 console.log('betslip-observation-import.test.js: OK (dobles/triples usan cuota DOM y filas exactas).');
 
-// Diversificacion: el greedy sin tope concentraria A y B en 4-5 finalistas;
-// con la regla ningun pick supera 3 apariciones (tope base 2 + relajacion).
+// Diversificacion OBLIGATORIA: cero repetidos entre finalistas. Aunque haya
+// 7 cotizaciones, solo entran las que no compartan picks (doble AB + triple
+// CDE); el resto se descarta aunque pase pisos.
 const divEligible = [
   eligible('DF-A', 'A1 vs A2', 'Total', 'Mas de 1.5', '-110', 90.0),
   eligible('DF-B', 'B1 vs B2', 'Total', 'Mas de 1.5', '-110', 89.0),
@@ -136,9 +137,39 @@ const divOutput = buildParlayOptionsFromObservation(divEligible, divObservation,
   selectorConfig,
   verificationGeneratedAt: divObservation.verificationGeneratedAt
 });
-assert.equal(divOutput.finalists.length, 5);
+assert.equal(divOutput.finalists.length, 2);
 const uses = new Map();
 divOutput.finalists.forEach(item => item.candidateIds.forEach(id => uses.set(id, (uses.get(id) || 0) + 1)));
-assert.ok(Math.max(...uses.values()) <= 3, `usos por pick: ${JSON.stringify([...uses])}`);
+assert.ok(Math.max(...uses.values()) <= 1, `usos por pick: ${JSON.stringify([...uses])}`);
 
-console.log('betslip-observation-import.test.js: OK (diversificacion con tope y relajacion).');
+console.log('betslip-observation-import.test.js: OK (diversificacion obligatoria sin repetidos).');
+
+// Pisos estrictos: cotizaciones bajo el piso jamas entran, aunque falten
+// para completar 5 (dobles bajo -150, triples bajo +100).
+const floorEligible = [
+  eligible('DF-X1', 'A vs B', 'Total', 'Menos de 3.5', '-200', 80.0),
+  eligible('DF-X2', 'C vs D', 'Total', 'Mas de 1.5', '-200', 79.0),
+  eligible('DF-X3', 'E vs F', 'Total', 'Mas de 1.5', '-200', 78.0)
+];
+const floorObservation = {
+  schemaVersion: 1,
+  captureType: 'playdoit_betslip_quotes',
+  source: 'live_dom',
+  navigationMode: 'chrome_extension',
+  observedAt: '2026-08-24T22:45:00.000Z',
+  verificationGeneratedAt: '2026-08-24T22:40:00.000Z',
+  quotes: [
+    quote(floorEligible.slice(0, 2), '+180', '51'),
+    quote(floorEligible, '+420', '52'),
+    quote(floorEligible.slice(1, 3), '-300', '53'),
+    quote(floorEligible, '-110', '54')
+  ]
+};
+const floorOutput = buildParlayOptionsFromObservation(floorEligible, floorObservation, {
+  selectorConfig,
+  verificationGeneratedAt: floorObservation.verificationGeneratedAt
+});
+assert.equal(floorOutput.finalists.length, 1);
+assert.ok(floorOutput.finalists.every(item => item.meetsMomioFloor));
+
+console.log('betslip-observation-import.test.js: OK (pisos estrictos sin relleno bajo politica).');

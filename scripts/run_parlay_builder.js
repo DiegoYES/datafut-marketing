@@ -62,7 +62,7 @@ const eligible = verifiedRecords
     };
   });
 
-const POOL_SIZE = 6;
+const POOL_SIZE = 8;
 const commercialRank = { normal: 0, low: 1, very_low: 2, unknown: 3 };
 // Politica editorial (cualitativa, no formula cientifica): la cuota no cambia
 // el respaldo, pero una cuota util puede desplazar gaps pequenos de porcentaje
@@ -78,8 +78,9 @@ const rankedEligible = [...eligible].sort((a, b) => {
   return sampleOf(b) - sampleOf(a);
 });
 
-// Pool final: hasta 6, priorizando partidos distintos y diversidad de
-// familias sin sacrificar calidad (CALIDAD > DIVERSIDAD).
+// Pool final: hasta 8, priorizando partidos distintos y diversidad de
+// familias sin sacrificar calidad (CALIDAD > DIVERSIDAD). Pool amplio para
+// que los 5 finalistas puedan repartirse sin repetir base.
 const pool = [];
 for (const candidate of rankedEligible) {
   if (pool.length >= POOL_SIZE) break;

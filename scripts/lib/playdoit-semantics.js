@@ -81,6 +81,16 @@ function classifyMarket(marketText, homeTeam, awayTeam) {
   const homeScore = teamScore(marketText, homeTeam, awayTeam);
   const awayScore = teamScore(marketText, awayTeam, homeTeam);
   if (homeScore > 0 && awayScore > 0 && homeScore === awayScore) {
+    const homeNorm = normalizeText(homeTeam);
+    const awayNorm = normalizeText(awayTeam);
+    const homeContainsAway = homeNorm.length > awayNorm.length && homeNorm.includes(awayNorm);
+    const awayContainsHome = awayNorm.length > homeNorm.length && awayNorm.includes(homeNorm);
+    if (homeContainsAway) {
+      return { valid: true, subject: homeTeam, statistic, scope: 'team', period };
+    }
+    if (awayContainsHome) {
+      return { valid: true, subject: awayTeam, statistic, scope: 'team', period };
+    }
     return { valid: false, reason: 'SUBJECT_AMBIGUOUS', statistic, period, marketText };
   }
   if (homeScore > awayScore) {

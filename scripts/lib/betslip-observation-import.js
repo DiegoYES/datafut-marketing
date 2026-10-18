@@ -123,7 +123,7 @@ function commercialRank(value) {
 }
 
 // Pisos editoriales de momio combinado (politica del operador, no probabi-
-// lidad): dobles desde -150 hacia arriba, triples desde +100 hacia arriba.
+// lidad): dobles desde -110 hacia arriba, triples desde +100 hacia arriba.
 // Un momio bajo no invalida la cotizacion; solo ordena peor al elegir.
 function americanToDecimal(oddsText) {
   const n = Number(String(oddsText || '').replace('+', ''));
@@ -134,7 +134,7 @@ function americanToDecimal(oddsText) {
 function meetsMomioFloor(quote) {
   const decimal = americanToDecimal(quote.combinedOddsText);
   if (!Number.isFinite(decimal)) return false;
-  if (quote.candidateIds.length === 2) return decimal >= 1 + 100 / 150 - 1e-9;
+  if (quote.candidateIds.length === 2) return decimal >= 1 + 100 / 110 - 1e-9;
   if (quote.candidateIds.length === 3) return decimal >= 2 - 1e-9;
   return false;
 }
@@ -155,12 +155,11 @@ function compareQuotes(left, right, candidatesById) {
   return left.candidateIds.join('|').localeCompare(right.candidateIds.join('|'));
 }
 
-// Diversificacion editorial de finalistas: ningun pick puede aparecer en
-// mas de MAX_FINALIST_USES_PER_CANDIDATE finalistas en la primera pasada,
-// para que un solo fallo no mate todo el menu recomendado. Si no hay
-// suficientes combinaciones bajo el tope, se relaja a +1 y luego sin tope
-// (fail-safe: nunca se entregan menos finalistas que sin la regla).
-const MAX_FINALIST_USES_PER_CANDIDATE = 2;
+// Diversificacion editorial OBLIGATORIA: ningun pick puede repetirse entre
+// finalistas. Cada pick aparece maximo UNA vez en todo el menu: si un pick
+// falla, como maximo muere UN parlay. Sin relajacion: se entregan los que
+// llenen (hasta 5); jamas se repite base para completar.
+const MAX_FINALIST_USES_PER_CANDIDATE = 1;
 
 function buildParlayOptionsFromObservation(eligibleItems, observation, options = {}) {
   const candidatesById = new Map(eligibleItems.map(item => {
@@ -168,11 +167,13 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
     return [record.verification.candidateId, record];
   }));
   const sorted = [...observation.quotes].sort((a, b) => compareQuotes(a, b, candidatesById));
+  // Pisos editoriales: SOLO cotizaciones que pasen el piso pueden ser
+  // finalistas. Si un tipo (doble/triple) no tiene cotizaciones que pasen,
+  // no aporta finalistas (se entregan menos de 5 antes que colar momios
+  // bajo politica).
   const passing = sorted.filter(meetsMomioFloor);
-  const bestDouble = passing.find(quote => quote.candidateIds.length === 2)
-    || sorted.find(quote => quote.candidateIds.length === 2);
-  const bestTriple = passing.find(quote => quote.candidateIds.length === 3)
-    || sorted.find(quote => quote.candidateIds.length === 3);
+  const bestDouble = passing.find(quote => quote.candidateIds.length === 2);
+  const bestTriple = passing.find(quote => quote.candidateIds.length === 3);
   const chosen = [];
   const useCounts = new Map();
   const take = quote => {
@@ -181,13 +182,11 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
   };
   const fits = (quote, cap) => quote.candidateIds.every(id => (useCounts.get(id) || 0) < cap);
   if (bestDouble) take(bestDouble);
-  for (const cap of [MAX_FINALIST_USES_PER_CANDIDATE, MAX_FINALIST_USES_PER_CANDIDATE + 1, Infinity]) {
-    for (const quote of [...passing, ...sorted]) {
-      if (chosen.length >= 5) break;
-      if (chosen.includes(quote)) continue;
-      if (fits(quote, cap)) take(quote);
-    }
+  const ordered = [...passing].filter((quote, index, all) => all.indexOf(quote) === index);
+  for (const quote of ordered) {
     if (chosen.length >= 5) break;
+    if (chosen.includes(quote)) continue;
+    if (fits(quote, MAX_FINALIST_USES_PER_CANDIDATE)) take(quote);
   }
   const finalists = chosen.slice(0, 5).map((quote, index) => {
     const records = quote.candidateIds.map(id => candidatesById.get(id));
@@ -242,7 +241,7 @@ function buildParlayOptionsFromObservation(eligibleItems, observation, options =
     eligibleCount: eligibleItems.length,
     combinationsEvaluated: observation.quotes.length,
     finalists,
-    integrityNotice: 'Los porcentajes son respaldos individuales; ninguna probabilidad conjunta fue calculada. Los momios proceden del boleto DOM. Diversificacion: tope base de 2 apariciones por pick entre finalistas, relajado solo para completar 5.'
+    integrityNotice: 'Los porcentajes son respaldos individuales; ninguna probabilidad conjunta fue calculada. Los momios proceden del boleto DOM. Diversificacion obligatoria: ningun pick se repite entre finalistas.'
   };
 }
 
