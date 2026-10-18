@@ -6,9 +6,11 @@ const { spawn } = require('child_process');
 const ffmpegPath = require('ffmpeg-static');
 const { readJson } = require('./scripts/lib/validation');
 const { validateCertifiedParlayData } = require('./scripts/lib/certified-content');
+const { killStaleAutomationChrome } = require('./scripts/lib/chrome-hygiene');
 
 (async () => {
   const projectDir = __dirname;
+  killStaleAutomationChrome(['playwright'], 'render');
 
   const htmlPath = path.join(
     projectDir,

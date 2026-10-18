@@ -80,12 +80,12 @@ npm run datafut -- render --input parlay-data.json --date YYYY-MM-DD
 8. Dominancia de línea: mismo partido/mercado con igual % → Over se queda
    la línea más alta, Under la más baja. % distintos no se tocan.
 9. Pisos de momio en finalistas (betslip-observation-import.js): dobles
-   desde -150, triples desde +100. Si un tipo no tiene cotizaciones que
+   desde -110, triples desde +100. Si un tipo no tiene cotizaciones que
    pasen el piso, no aporta finalistas de ese tipo.
-10. Diversificacion de finalistas: ningun pick aparece en mas de 2 de los
-    5 finalistas en la primera pasada (greedy por cuota); si no se
-    completan 5, el tope se relaja a 3 y luego sin tope. Un solo fallo no
-    debe matar todo el menu.
+10. Diversificacion OBLIGATORIA de finalistas: ningun pick se repite
+    entre finalistas (maximo 1 uso por pick en todo el menu). Se entregan
+    los que llenen hasta 5; jamas se repite base para completar. Si un
+    pick falla, como maximo muere UN parlay.
 
 ## 3. Límites conocidos (no pelear contra ellos)
 
@@ -104,7 +104,9 @@ npm run datafut -- render --input parlay-data.json --date YYYY-MM-DD
   combinación; al re-ejecutar salta las ya cotizadas.
 - Pool editorial: `run_parlay_builder.js` ordena elegibles por respaldo
   menos penalización comercial (normal 0, low 6, very_low 12) y arma el
-  pool de 6 con partidos distintos. Pesos editoriales, no ciencia.
+  pool de 8 con partidos distintos. Pesos editoriales, no ciencia.
+- Catálogo amplio: hasta 40 mercados por evento y 30 selecciones por
+  mercado (escaleras completas Over/Under) para no esconder respaldos.
 - Sesgo de captura: si `audit` reporta errores, no existe `finalists`.
 
 ## 4. Archivos que mandan

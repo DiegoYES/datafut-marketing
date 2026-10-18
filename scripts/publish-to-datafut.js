@@ -5,8 +5,7 @@
 //   2. Por cada seleccion: abre su tarjeta DataFut (sourceUrl de Discovery)
 //      y pulsa "Guardar pick" (partido.html) o "+ Agregar a boleta" tras
 //      "Generar análisis" (comparador.html -> borrador "Mi boleta" ->
-//      "Guardar boleta"). Menus mixtos: via borrador (requiere "+ Agregar
-//      a boleta" en partido.html y comparador.html). [--use-boleta reanuda]
+//      "Guardar boleta"). Menus mixtos: fail-closed.
 //   3. Panel Mis boletas -> "Guardar Boleta (N)" -> modal Nombrar boleta.
 //   4. En la boleta propia -> "Recomendar en Picks del Dia".
 //   5. Modal: titulo(=boleta), visibilidad, estado=Publicar ahora,
@@ -19,6 +18,7 @@
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
 const path = require('node:path');
+const { killStaleAutomationChrome } = require('./lib/chrome-hygiene');
 const crypto = require('node:crypto');
 
 function optionValue(name) {
@@ -55,16 +55,36 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const dryRun = hasFlag('--dry-run') || !doPublish;
   if (!optionId) throw new Error('Uso: publish-to-datafut.js --option <optionId> --visibility <gratis|premium> [--publish]');
   if (!['gratis', 'premium'].includes(visibility)) throw new Error('visibility debe ser gratis|premium');
+  killStaleAutomationChrome(['playwright'], 'publish');
 
   // --- 1. Puerta de auditoria ---
-  const catalog = readJson(path.join(stateDir, 'playdoit-catalog.json'));
-  const verification = readJson(path.join(stateDir, 'verified-candidates.json'));
+  const catalog = readJson(path.join(stateDir, 'playdoit-catalog.json'));  const verification = readJson(path.join(stateDir, 'verified-candidates.json'));
   const parlays = readJson(path.join(stateDir, 'parlay-options.json'));
   const discovery = readJson(path.join(stateDir, 'discovery-candidates.json'));
   if (catalog.catalogStatus !== 'VERIFIED') throw new Error('Catalog no VERIFIED: publicacion bloqueada.');
   if (!parlays.publishable || !Array.isArray(parlays.finalists)) throw new Error('Sin finalistas oficiales: publicacion bloqueada.');
-  const finalist = parlays.finalists.find(f => f.candidateIds.join('+') === optionId || `PAR-${f.candidateIds.join('-')}` === optionId);
-  if (!finalist) throw new Error(`Opcion ${optionId} no es finalista oficial.`);
+  let finalist = parlays.finalists.find(f => f.candidateIds.join('+') === optionId || `PAR-${f.candidateIds.join('-')}` === optionId);
+  let editorial = false;
+  if (!finalist) {
+    // Orden editorial: permite publicar un combo COTIZADO (boleto real) que
+    // no quedo finalista, solo con --editorial + --publish explicitos.
+    // Exige verificacion AVAILABLE_EXACT + quote live_dom + piso de momio.
+    if (!hasFlag('--editorial') || !doPublish) throw new Error(`Opcion ${optionId} no es finalista oficial (usa --editorial --publish bajo tu responsabilidad).`);
+    const qr = readJson(path.join(stateDir, 'parlay-quote-request.json'));
+    const req = (qr.combinations || []).find(c => c.candidateIds.join('+') === optionId || `PAR-${c.candidateIds.join('-')}` === optionId);
+    if (!req) throw new Error(`Opcion ${optionId} ni siquiera esta cotizada: bloqueo total.`);
+    const bet = readJson(path.join(domDir, `playdoit-betslip-observation-${catalog.targetDate}.json`));
+    const quote = (bet.quotes || []).find(q => (q.candidateIds || []).join('+') === req.candidateIds.join('+'));
+    if (!quote || !quote.combinedOddsText) throw new Error(`Opcion ${optionId} sin momio de boleto real: bloqueo total.`);
+    const n = req.candidateIds.length;
+    const am = Number(String(quote.combinedOddsText).replace('+', ''));
+    if ((n === 2 && am < -110) || (n === 3 && am < 100)) throw new Error(`Opcion ${optionId} no pasa el piso editorial (${quote.combinedOddsText}).`);
+    const allExact = req.candidateIds.every(id => (verification.results || []).some(r => r.candidateId === id && r.status === 'AVAILABLE_EXACT'));
+    if (!allExact) throw new Error(`Opcion ${optionId} tiene piernas sin AVAILABLE_EXACT: bloqueo total.`);
+    finalist = { candidateIds: req.candidateIds, type: n === 2 ? 'doble' : 'triple', combinedOddsText: quote.combinedOddsText };
+    editorial = true;
+    console.log(`ORDEN EDITORIAL: ${optionId} (${finalist.type} ${finalist.combinedOddsText}) cotizado en boleto real, no-finalista.`);
+  }
   const discById = new Map((discovery.candidates || []).map(c => [c.candidateId, c]));
   const selections = finalist.candidateIds.map(id => {
     const d = discById.get(id);
@@ -95,20 +115,20 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await sleep(1000);
 
     // --- 2/3. Guardar picks + crear boleta (o reanudar con --use-boleta). ---
-    // Ruta partido.html (Mis picks / Por armar) o comparador.html (borrador).
-    const srcKind = s => (s.sourceUrl || '').includes('comparador.html') ? 'comp' : ((s.sourceUrl || '').includes('partido.html') ? 'mc' : '?');
-    const kinds = [...new Set(selections.map(srcKind))];
-    if (kinds.includes('?')) throw new Error('Pick sin tarjeta trazable: aborto.');
-    // Ruta borrador cubre comparador puro y mixtos; Mis picks solo MC puro.
-    const isComparador = kinds.includes('comp');
     let boletaName = null;
     if (useBoleta) {
       boletaName = useBoleta;
       console.log(`  Reanudando con boleta existente: "${boletaName}" (se omite guardado).`);
     } else {
+    // --- 2. Guardar picks: ruta partido.html (Mis picks / Por armar) o ruta
+    // comparador.html (borrador "Mi boleta" via "+ Agregar a boleta").
+    // Mezcla de fuentes: fail-closed (no hay boleta unica). ---
+    const srcKind = s => (s.sourceUrl || '').includes('comparador.html') ? 'comp' : ((s.sourceUrl || '').includes('partido.html') ? 'mc' : '?');
+    const kinds = [...new Set(selections.map(srcKind))];
+    if (kinds.includes('?')) throw new Error('Pick sin tarjeta trazable: aborto.');
+    // Ruta borrador cubre comparador puro y mixtos; Mis picks solo MC puro.
+    const isComparador = kinds.includes('comp');
     if (!isComparador) {
-    // --- 2. Guardar cada pick desde su tarjeta (clic JS: los botones
-    // viven en contenedores virtualizados no visibles hasta scroll) ---
     for (const sel of selections) {
       await page.goto(sel.sourceUrl, { waitUntil: 'networkidle', timeout: 60000 }).catch(async () => {
         await page.goto(sel.sourceUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -202,9 +222,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log(`  Boleta: "${boletaName}"`);
     await shot('boleta-creada');
     } else {
-      // --- 2b/3b. Ruta comparador: borrador "Mi boleta" (requiere que tu
-      // front persista el borrador entre paginas; si el conteo no cuadra,
-      // fail-closed sin guardar nada). ---
+      // --- 2b/3b. Ruta comparador: borrador "Mi boleta". ---
       const stamp = new Date();
       const hhmm = `${String(stamp.getHours()).padStart(2, '0')}:${String(stamp.getMinutes()).padStart(2, '0')}`;
       boletaName = optionValue('--boleta-name') || `Parlay ${stamp.toISOString().slice(0, 10)} ${hhmm} ${finalist.combinedOddsText}`;
@@ -428,7 +446,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     const evidence = {
       schemaVersion: 1, captureType: 'datafut_publish', source: 'live_dom',
-      observedAt: new Date().toISOString(), dryRun,
+      observedAt: new Date().toISOString(), dryRun, editorial,
       optionId, type: finalist.type, visibility,
       combinedOddsAmerican: finalist.combinedOddsText, combinedOddsDecimal: momioDecimal,
       boletaName, visibleUntil: until.toISOString(), selections, formFill: filled, screenshots: shots
