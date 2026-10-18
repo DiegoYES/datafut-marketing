@@ -70,7 +70,10 @@ function selectionsOf(odds) {
   for (const o of (odds || [])) {
     const nm = (o.name || '').trim();
     if (/^(m[aá]s de|menos de|over|under)\s+\d/i.test(nm)) out.push({ selectionText: nm, oddsText: am(o.price) });
-    if (out.length >= 6) break;
+    // Cobertura amplia de lineas por mercado (el book ofrece escaleras de
+    // ~20 selecciones; recortar a 6 escondia respaldos como Over 4.5 junto
+    // a Under 7.5). Tope operativo 30.
+    if (out.length >= 30) break;
   }
   return out;
 }
@@ -91,9 +94,45 @@ function selectionsOf(odds) {
     await dfPage.goto(`https://data-fut.com/calendario.html?fecha=${targetDate}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dfPage.waitForTimeout(5000);
     if (/\/login\.html(?:$|[?#])/i.test(dfPage.url())) throw new Error('Sesion DataFut expirada. Renueva con: npm run datafut -- login-datafut');
-    const links = await dfPage.evaluate(() => Array.from(document.querySelectorAll('a[href*="partido.html"]')).map(a => ({
+    let links = await dfPage.evaluate(() => Array.from(document.querySelectorAll('a[href*="partido.html"]')).map(a => ({
       url: a.href, text: a.innerText.replace(/\s+/g, ' ').trim()
     })));
+    // El calendario viene agrupado por competicion CONTRAIDA: expandir todo y
+    // recolectar una segunda pasada, si el boton existe.
+    const didExpand = await dfPage.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button, a, [role="button"]'))
+        .find(el => /expandir todo/i.test((el.innerText || '').trim()));
+      if (btn) { btn.click(); return true; }
+      return false;
+    });
+    if (didExpand) {
+      await dfPage.waitForTimeout(2500);
+      const links2 = await dfPage.evaluate(() => {
+        const grab = a => ({ url: a.href, text: a.innerText.replace(/\s+/g, ' ').trim() });
+        const rows = Array.from(document.querySelectorAll('.match[data-match-open], .match-picks[data-match-url]')).map(el => {
+          const raw = el.getAttribute('data-match-open') || el.getAttribute('data-match-url');
+          if (!raw) return null;
+          let abs;
+          try { abs = raw.startsWith('http') ? raw : new URL(raw, location.origin).href; } catch { return null; }
+          const names = Array.from(el.querySelectorAll('.equipo span')).map(s => (s.innerText || '').trim()).filter(Boolean);
+          const hora = (() => { const h = el.querySelector('.hora'); return h ? (h.innerText || '').trim() : ''; })();
+          const league = (() => {
+            const det = el.closest('details');
+            const t = det ? det.querySelector('.liga-title') : null;
+            return t ? (t.innerText || '').replace(/\s+/g, ' ').trim() : '';
+          })();
+          const text = names.length ? names.join(' vs ') : '';
+          return { url: abs, text, fullCardText: `${league} ${hora} ${text}`.trim(), fromRow: true };
+        }).filter(Boolean);
+        const anchors = Array.from(document.querySelectorAll('a[href*="partido.html"]')).map(grab);
+        return [...anchors, ...rows];
+      });
+      console.log(`Calendario DataFut expandido: ${links.length} -> ${links2.length} elemento(s).`);
+      const seen = new Set(links.map(l => l.url));
+      for (const link of links2) if (!seen.has(link.url)) { links.push(link); seen.add(link.url); }
+    } else {
+      console.log('Calendario DataFut: boton Expandir todo no encontrado (vista ya expandida).');
+    };
     if (links.length === 0) throw new Error('Calendario sin enlaces partido.html; no se escribe extraccion vacia.');
     const cachePath = path.join(os.tmpdir(), 'datafut-link-titles.json');
     let cache = {};
@@ -137,9 +176,9 @@ function selectionsOf(odds) {
     const aliasMap = readAliasMap();
     let targets;
     if (forcedEvents.length > 0) {
-      targets = forcedEvents.map(id => {
+      targets = forcedEvents.flatMap(id => {
         const ev = upcoming.find(e => String(e.id) === String(id));
-        if (!ev) throw new Error(`Evento ${id} no encontrado en upcoming.`);
+        if (!ev) { console.log(`Evento ${id} ya no esta en upcoming (finalizado): se omite.`); return []; }
         const parts = String(ev.name || '').split(/\s+vs\.?\s+/i);
         return { eventId: String(ev.id), homeTeam: (parts[0] || '').trim(), awayTeam: (parts[1] || '').trim(), league: ev.league };
       });
@@ -203,7 +242,7 @@ function selectionsOf(odds) {
           rawText: `${name}\nSGP\n${ss.map(x => `${x.selectionText}\n${x.oddsText}`).join('\n')}`,
           selections: ss.map((x, i) => ({ selectionId: `dom-${t.eventId}-m${mkts.length}s${i}`, selectionText: x.selectionText, oddsText: x.oddsText }))
         });
-        if (mkts.length >= 16) break;
+        if (mkts.length >= 40) break;
       }
       if (mkts.length === 0) { console.log(t.eventId, 'SIN MERCADOS'); continue; }
       await pdPage.goto(url, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});

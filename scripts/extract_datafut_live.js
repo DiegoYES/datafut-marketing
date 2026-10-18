@@ -107,7 +107,7 @@ function readAliasMap() {
       );
     }
 
-    const calendarLinks = await page.evaluate(() => Array.from(
+    let calendarLinks = await page.evaluate(() => Array.from(
       document.querySelectorAll('a[href*="partido.html"]')
     ).map(anchor => {
       const container = anchor.closest('.tarjeta-partido, [class*="match"], .card, div') || anchor;
@@ -117,6 +117,44 @@ function readAliasMap() {
         fullCardText: container.innerText.replace(/\n+/g, ' ').trim()
       };
     }));
+
+    // El calendario agrupa por competicion CONTRAIDA por defecto: solo las ligas
+    // expandidas exponen sus enlaces. Expandir todo y volver a recolectar.
+    const didExpand = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button, a, [role="button"]'))
+        .find(el => /expandir todo/i.test((el.innerText || '').trim()));
+      if (btn) { btn.click(); return true; }
+      return false;
+    });
+    if (didExpand) {
+      await page.waitForTimeout(2500);
+      const expandedLinks = await page.evaluate(() => {
+        const grab = a => ({ url: a.href, text: a.innerText.replace(/\n+/g, ' ').trim(), fullCardText: a.innerText.replace(/\n+/g, ' ').trim() });
+        const rows = Array.from(document.querySelectorAll('.match[data-match-open], .match-picks[data-match-url]')).map(el => {
+          const raw = el.getAttribute('data-match-open') || el.getAttribute('data-match-url');
+          if (!raw) return null;
+          let abs;
+          try { abs = raw.startsWith('http') ? raw : new URL(raw, location.origin).href; } catch { return null; }
+          const names = Array.from(el.querySelectorAll('.equipo span')).map(s => (s.innerText || '').trim()).filter(Boolean);
+          const hora = (() => { const h = el.querySelector('.hora'); return h ? (h.innerText || '').trim() : ''; })();
+          const league = (() => {
+            const det = el.closest('details');
+            const t = det ? det.querySelector('.liga-title') : null;
+            return t ? (t.innerText || '').replace(/\s+/g, ' ').trim() : '';
+          })();
+          const text = names.length ? names.join(' vs ') : '';
+          return { url: abs, text, fullCardText: `${league} ${hora} ${text}`.trim(), fromRow: true };
+        }).filter(Boolean);
+        const anchors = Array.from(document.querySelectorAll('a[href*="partido.html"]')).map(grab);
+        return [...anchors, ...rows];
+      });
+      console.log(`Calendario expandido: ${calendarLinks.length} -> ${expandedLinks.length} enlace(s).`);
+      const seen = new Set(calendarLinks.map(l => l.url));
+      for (const link of expandedLinks) {
+        if (!seen.has(link.url)) { calendarLinks.push(link); seen.add(link.url); }
+      }
+    }
+
     await resolveBareLinkTitles(page, calendarLinks);
     if (calendarLinks.length === 0) {
       throw new Error(
