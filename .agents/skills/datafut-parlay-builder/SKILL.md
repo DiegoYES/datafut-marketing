@@ -614,10 +614,10 @@ Pero debe competir editorialmente contra alternativas más útiles.
 
 Presentar hasta 5.
 
-Regla dura de diversidad (la aplica `parlays-dom`, no es aspiracional):
-ningun pick aparece en mas de 2 finalistas en la primera pasada greedy
-por cuota; si no se completan 5, el tope se relaja a 3 y luego sin tope.
-Asi, si un pick falla, quedan vivos finalistas sin el.
+Regla dura de diversidad OBLIGATORIA (la aplica `parlays-dom`): ningun
+pick se repite entre finalistas (maximo 1 uso por pick en todo el menu).
+Se entregan los que llenen hasta 5; jamas se repite base para completar.
+Asi, si un pick falla, como maximo muere UN parlay.
 
 Intentar incluir variedad cuando existan opciones válidas:
 
