@@ -111,9 +111,14 @@ function validateDatafutCard(candidate) {
   }
 
   const smoothed = parseSmoothedPercentages(payload.evidenceText);
-  const computedPercentage = roundedAverage(smoothed);
-  if (smoothed.length !== 2) {
-    errors.push('La tarjeta debe contener exactamente dos tasas "con suavizado".');
+  const comparadorCard = card.captureRoute === 'comparador_state_url';
+  const computedPercentage = comparadorCard && smoothed.length === 1
+    ? Math.round(smoothed[0] * 10) / 10
+    : roundedAverage(smoothed);
+  if (comparadorCard ? smoothed.length !== 1 : smoothed.length !== 2) {
+    errors.push(comparadorCard
+      ? 'La tarjeta comparador debe contener exactamente una tasa "al suavizar la muestra" (fuente disponible).'
+      : 'La tarjeta debe contener exactamente dos tasas "con suavizado".');
   } else if (Math.abs(computedPercentage - payload.displayedPercentage) > 0.11) {
     errors.push(
       `El porcentaje mostrado ${payload.displayedPercentage}% no coincide con el promedio ` +

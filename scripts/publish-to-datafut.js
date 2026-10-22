@@ -90,7 +90,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const d = discById.get(id);
     if (!d || !d.sourceUrl || !d.market) throw new Error(`Sin tarjeta DataFut trazable para ${id}.`);
     const v = (verification.results || []).find(r => r.candidateId === id);
-    return { candidateId: id, match: d.match, market: d.market, percentage: d.percentage, sample: d.sample, sourceUrl: d.sourceUrl, oddsText: v?.playdoit?.oddsText };
+    return { candidateId: id, match: d.match, market: d.market, percentage: d.percentage, sample: d.sample, sourceUrl: d.sourceUrl, oddsText: v?.playdoit?.oddsText ?? d.playdoitOddsText };
   });
   const momioDecimal = americanToDecimal(finalist.combinedOddsText);
   console.log(`Opcion oficial: ${optionId} (${finalist.type} ${finalist.combinedOddsText} = ${momioDecimal} decimal), ${selections.length} picks. Modo: ${dryRun ? 'DRY-RUN (no publica)' : 'PUBLICAR'}.`);
@@ -331,14 +331,29 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       }).catch(() => null);
       const draftPanel = draftPanelHandle ? draftPanelHandle.asElement() : null;
       if (!draftPanel) throw new Error('No se encontro el panel del borrador.');
-      const nameHandle = await draftPanel.evaluateHandle(p => p.querySelector('input[type="text"], input:not([type])')).catch(() => null);
-      const nameEl = nameHandle ? nameHandle.asElement() : null;
-      if (!nameEl) throw new Error('No se encontro el campo Nombre del borrador.');
-      await nameEl.fill(boletaName, { timeout: 15000 });
       const saveHandle = await draftPanel.evaluateHandle(p => Array.from(p.querySelectorAll('button')).find(b => /^guardar boleta/i.test((b.innerText || '').trim())) || null).catch(() => null);
       const saveEl = saveHandle ? saveHandle.asElement() : null;
       if (!saveEl) throw new Error('No se encontro el boton Guardar boleta del borrador.');
-      await saveEl.click({ timeout: 15000 });
+      await saveEl.click({ timeout: 15000 }).catch(() => {});
+      await sleep(3500);
+      const modalInput = page.locator('#global-boleta-modal-input');
+      if (await modalInput.isVisible().catch(() => false)) {
+        await modalInput.fill(boletaName, { timeout: 15000 });
+        await page.getByRole('button', { name: /^guardar boleta/i }).first().click({ timeout: 15000 }).catch(() => {});
+        await sleep(3000);
+      } else {
+        const nameHandle = await draftPanel.evaluateHandle(p => Array.from(p.querySelectorAll('input')).find(i => i.offsetParent !== null) || null).catch(() => null);
+        const nameEl = nameHandle ? nameHandle.asElement() : null;
+        if (!nameEl) throw new Error('No se encontro el campo Nombre del borrador.');
+        await nameEl.fill(boletaName, { timeout: 15000 });
+        await saveEl.click({ timeout: 15000 }).catch(() => {});
+        await sleep(3500);
+        if (await modalInput.isVisible().catch(() => false)) {
+          await modalInput.fill(boletaName, { timeout: 15000 });
+          await page.getByRole('button', { name: /^guardar boleta/i }).first().click({ timeout: 15000 }).catch(() => {});
+          await sleep(3000);
+        }
+      }
       await page.waitForFunction(nm => (document.body.innerText || '').includes(nm), boletaName, { timeout: 30000 });
       console.log(`  Boleta: "${boletaName}"`);
       await shot('boleta-creada');

@@ -87,8 +87,9 @@ function findCertifiedParlay(context, optionId) {
 function certifiedPick(entry, match) {
   const discovery = entry.discovery;
   const verification = entry.verification;
+  const comparadorCard = discovery?.datafutCard?.captureRoute === 'comparador_state_url';
   const smoothed = discovery?.datafutCard?.smoothedPercentages || [];
-  if (!discovery || !verification || !match || smoothed.length !== 2) {
+  if (!discovery || !verification || !match || (comparadorCard ? smoothed.length !== 1 : smoothed.length !== 2)) {
     throw new Error(`El candidato ${discovery?.candidateId || '(sin id)'} esta incompleto.`);
   }
   if (
@@ -111,18 +112,26 @@ function certifiedPick(entry, match) {
     percentage: Number(discovery.percentage),
     individualOdds: verification.playdoit?.oddsText || null,
     sampleText: `Muestra ${discovery.sample.home} local / ${discovery.sample.away} visitante`,
-    evidence: [
-      {
-        label: `${match.homeTeam} (fuente local)`,
-        value: `${Number(smoothed[0]).toFixed(1)}%`,
-        detail: 'tasa suavizada de la tarjeta DataFut exacta'
-      },
-      {
-        label: `${match.awayTeam} (fuente visitante)`,
-        value: `${Number(smoothed[1]).toFixed(1)}%`,
-        detail: 'tasa suavizada de la tarjeta DataFut exacta'
-      }
-    ]
+    evidence: comparadorCard
+      ? [
+        {
+          label: `Fuente disponible (${match.awayTeam || match.homeTeam})`,
+          value: `${Number(smoothed[0]).toFixed(1)}%`,
+          detail: 'tasa suavizada del comparador DataFut, promedio de la fuente disponible'
+        }
+      ]
+      : [
+        {
+          label: `${match.homeTeam} (fuente local)`,
+          value: `${Number(smoothed[0]).toFixed(1)}%`,
+          detail: 'tasa suavizada de la tarjeta DataFut exacta'
+        },
+        {
+          label: `${match.awayTeam} (fuente visitante)`,
+          value: `${Number(smoothed[1]).toFixed(1)}%`,
+          detail: 'tasa suavizada de la tarjeta DataFut exacta'
+        }
+      ]
   };
 }
 

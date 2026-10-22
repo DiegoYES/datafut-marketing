@@ -105,8 +105,11 @@ function validateParlayData(data, options = {}) {
         }
       }
 
-      if (!Array.isArray(pick.evidence) || pick.evidence.length !== 2) {
-        errors.push(`${prefix}.evidence debe contener exactamente 2 elementos.`);
+      const comparadorPick = /^DF-RC-/.test(pick.candidateId || '');
+      if (!Array.isArray(pick.evidence) || pick.evidence.length !== (comparadorPick ? 1 : 2)) {
+        errors.push(`${prefix}.evidence debe contener exactamente ${comparadorPick ? 1 : 2} elemento(s).`);
+      } else if (comparadorPick && pick.evidence.filter(e => e && String(e.detail || '').includes('comparador')).length === 0) {
+        errors.push(`${prefix}.evidence debe citar la tasa suavizada del comparador.`);
       } else {
         pick.evidence.forEach((evidence, evidenceIndex) => {
           ['label', 'value', 'detail'].forEach(field => {

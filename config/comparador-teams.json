@@ -1,0 +1,1317 @@
+{
+  "UEFA Champions League": {
+    "leagueValue": "2",
+    "teams": [
+      {
+        "v": "",
+        "t": "-- Equipo --"
+      },
+      {
+        "v": "575",
+        "t": "AEK Athens FC"
+      },
+      {
+        "v": "497",
+        "t": "AS Roma"
+      },
+      {
+        "v": "406",
+        "t": "Aarhus"
+      },
+      {
+        "v": "3683",
+        "t": "Ararat-Armenia"
+      },
+      {
+        "v": "42",
+        "t": "Arsenal"
+      },
+      {
+        "v": "66",
+        "t": "Aston Villa"
+      },
+      {
+        "v": "15847",
+        "t": "Atert Bissen"
+      },
+      {
+        "v": "530",
+        "t": "Atletico Madrid"
+      },
+      {
+        "v": "529",
+        "t": "Barcelona"
+      },
+      {
+        "v": "157",
+        "t": "Bayern München"
+      },
+      {
+        "v": "327",
+        "t": "Bodo/Glimt"
+      },
+      {
+        "v": "3364",
+        "t": "Borac Banja Luka"
+      },
+      {
+        "v": "165",
+        "t": "Borussia Dortmund"
+      },
+      {
+        "v": "4360",
+        "t": "Celje"
+      },
+      {
+        "v": "247",
+        "t": "Celtic"
+      },
+      {
+        "v": "569",
+        "t": "Club Brugge KV"
+      },
+      {
+        "v": "895",
+        "t": "Como"
+      },
+      {
+        "v": "620",
+        "t": "Dinamo Zagreb"
+      },
+      {
+        "v": "14281",
+        "t": "Drita"
+      },
+      {
+        "v": "3327",
+        "t": "Egnatia Rrogozhinë"
+      },
+      {
+        "v": "3502",
+        "t": "FC Iberia 1999"
+      },
+      {
+        "v": "212",
+        "t": "FC Porto"
+      },
+      {
+        "v": "1012",
+        "t": "FC Thun"
+      },
+      {
+        "v": "598",
+        "t": "FK Crvena Zvezda"
+      },
+      {
+        "v": "611",
+        "t": "Fenerbahçe"
+      },
+      {
+        "v": "209",
+        "t": "Feyenoord"
+      },
+      {
+        "v": "687",
+        "t": "Flora Tallinn"
+      },
+      {
+        "v": "4625",
+        "t": "Floriana"
+      },
+      {
+        "v": "645",
+        "t": "Galatasaray"
+      },
+      {
+        "v": "340",
+        "t": "Gornik Zabrze"
+      },
+      {
+        "v": "2402",
+        "t": "Gyori ETO FC"
+      },
+      {
+        "v": "563",
+        "t": "Hapoel Beer Sheva"
+      },
+      {
+        "v": "254",
+        "t": "Heart Of Midlothian"
+      },
+      {
+        "v": "505",
+        "t": "Inter"
+      },
+      {
+        "v": "3342",
+        "t": "Inter Club d'Escaldes"
+      },
+      {
+        "v": "701",
+        "t": "KI Klaksvik"
+      },
+      {
+        "v": "664",
+        "t": "Kairat Almaty"
+      },
+      {
+        "v": "3872",
+        "t": "Kauno Žalgiris"
+      },
+      {
+        "v": "1165",
+        "t": "KuPS"
+      },
+      {
+        "v": "5354",
+        "t": "Larne"
+      },
+      {
+        "v": "1026",
+        "t": "Lask Linz"
+      },
+      {
+        "v": "347",
+        "t": "Lech Poznan"
+      },
+      {
+        "v": "116",
+        "t": "Lens"
+      },
+      {
+        "v": "646",
+        "t": "Levski Sofia"
+      },
+      {
+        "v": "79",
+        "t": "Lille"
+      },
+      {
+        "v": "667",
+        "t": "Lincoln Red Imps FC"
+      },
+      {
+        "v": "40",
+        "t": "Liverpool"
+      },
+      {
+        "v": "80",
+        "t": "Lyon"
+      },
+      {
+        "v": "7808",
+        "t": "ML Vitebsk"
+      },
+      {
+        "v": "50",
+        "t": "Manchester City"
+      },
+      {
+        "v": "33",
+        "t": "Manchester United"
+      },
+      {
+        "v": "2240",
+        "t": "Mjallby AIF"
+      },
+      {
+        "v": "413",
+        "t": "NEC Nijmegen"
+      },
+      {
+        "v": "492",
+        "t": "Napoli"
+      },
+      {
+        "v": "553",
+        "t": "Olympiakos Piraeus"
+      },
+      {
+        "v": "3402",
+        "t": "Omonia Nicosia"
+      },
+      {
+        "v": "197",
+        "t": "PSV Eindhoven"
+      },
+      {
+        "v": "85",
+        "t": "Paris Saint Germain"
+      },
+      {
+        "v": "2271",
+        "t": "Petrocub"
+      },
+      {
+        "v": "173",
+        "t": "RB Leipzig"
+      },
+      {
+        "v": "543",
+        "t": "Real Betis"
+      },
+      {
+        "v": "541",
+        "t": "Real Madrid"
+      },
+      {
+        "v": "10124",
+        "t": "Riga"
+      },
+      {
+        "v": "13976",
+        "t": "Sabah FA"
+      },
+      {
+        "v": "550",
+        "t": "Shakhtar Donetsk"
+      },
+      {
+        "v": "652",
+        "t": "Shamrock Rovers"
+      },
+      {
+        "v": "560",
+        "t": "Slavia Praha"
+      },
+      {
+        "v": "656",
+        "t": "Slovan Bratislava"
+      },
+      {
+        "v": "628",
+        "t": "Sparta Praha"
+      },
+      {
+        "v": "228",
+        "t": "Sporting CP"
+      },
+      {
+        "v": "637",
+        "t": "Sturm Graz"
+      },
+      {
+        "v": "673",
+        "t": "Sutjeska"
+      },
+      {
+        "v": "354",
+        "t": "The New Saints"
+      },
+      {
+        "v": "2260",
+        "t": "Tre Fiori"
+      },
+      {
+        "v": "1393",
+        "t": "Union St. Gilloise"
+      },
+      {
+        "v": "632",
+        "t": "Universitatea Craiova"
+      },
+      {
+        "v": "574",
+        "t": "Vardar Skopje"
+      },
+      {
+        "v": "172",
+        "t": "VfB Stuttgart"
+      },
+      {
+        "v": "759",
+        "t": "Viking"
+      },
+      {
+        "v": "278",
+        "t": "Vikingur Reykjavik"
+      },
+      {
+        "v": "533",
+        "t": "Villarreal"
+      }
+    ]
+  },
+  "UEFA Europa Conference League": {
+    "leagueValue": "848",
+    "teams": [
+      {
+        "v": "",
+        "t": "-- Equipo --"
+      },
+      {
+        "v": "614",
+        "t": "AEK Larnaca"
+      },
+      {
+        "v": "20406",
+        "t": "AF Elbasani"
+      },
+      {
+        "v": "406",
+        "t": "Aarhus"
+      },
+      {
+        "v": "194",
+        "t": "Ajax"
+      },
+      {
+        "v": "582",
+        "t": "Alashkert"
+      },
+      {
+        "v": "4358",
+        "t": "Aluminij"
+      },
+      {
+        "v": "602",
+        "t": "Apollon Limassol"
+      },
+      {
+        "v": "499",
+        "t": "Atalanta"
+      },
+      {
+        "v": "15847",
+        "t": "Atert Bissen"
+      },
+      {
+        "v": "3345",
+        "t": "Atlètic Club d'Escaldes"
+      },
+      {
+        "v": "4135",
+        "t": "Auda"
+      },
+      {
+        "v": "601",
+        "t": "Austria Vienna"
+      },
+      {
+        "v": "12733",
+        "t": "Ballkani"
+      },
+      {
+        "v": "388",
+        "t": "Bate Borisov"
+      },
+      {
+        "v": "564",
+        "t": "Başakşehir"
+      },
+      {
+        "v": "657",
+        "t": "Beitar Jerusalem"
+      },
+      {
+        "v": "3840",
+        "t": "Bohemians"
+      },
+      {
+        "v": "3364",
+        "t": "Borac Banja Luka"
+      },
+      {
+        "v": "319",
+        "t": "Brann"
+      },
+      {
+        "v": "4359",
+        "t": "Bravo"
+      },
+      {
+        "v": "51",
+        "t": "Brighton"
+      },
+      {
+        "v": "2246",
+        "t": "CFR 1907 Cluj"
+      },
+      {
+        "v": "1426",
+        "t": "CSKA 1948"
+      },
+      {
+        "v": "853",
+        "t": "CSKA Sofia"
+      },
+      {
+        "v": "356",
+        "t": "Caernarfon Town"
+      },
+      {
+        "v": "669",
+        "t": "Coleraine FC"
+      },
+      {
+        "v": "2392",
+        "t": "Debreceni VSC"
+      },
+      {
+        "v": "670",
+        "t": "Derry City"
+      },
+      {
+        "v": "3745",
+        "t": "Dečić"
+      },
+      {
+        "v": "3499",
+        "t": "Dila"
+      },
+      {
+        "v": "394",
+        "t": "Dinamo Minsk"
+      },
+      {
+        "v": "2262",
+        "t": "Dinamo Tbilisi"
+      },
+      {
+        "v": "3326",
+        "t": "Dinamo Tirana"
+      },
+      {
+        "v": "14281",
+        "t": "Drita"
+      },
+      {
+        "v": "14393",
+        "t": "Dukagjini"
+      },
+      {
+        "v": "2257",
+        "t": "Dunajska Streda"
+      },
+      {
+        "v": "572",
+        "t": "Dynamo Kyiv"
+      },
+      {
+        "v": "3327",
+        "t": "Egnatia Rrogozhinë"
+      },
+      {
+        "v": "10125",
+        "t": "Europa"
+      },
+      {
+        "v": "562",
+        "t": "FC Astana"
+      },
+      {
+        "v": "400",
+        "t": "FC Copenhagen"
+      },
+      {
+        "v": "684",
+        "t": "FC Differdange 03"
+      },
+      {
+        "v": "3502",
+        "t": "FC Iberia 1999"
+      },
+      {
+        "v": "2273",
+        "t": "FC Levadia Tallinn"
+      },
+      {
+        "v": "606",
+        "t": "FC Lugano"
+      },
+      {
+        "v": "397",
+        "t": "FC Midtjylland"
+      },
+      {
+        "v": "3684",
+        "t": "FC Noah"
+      },
+      {
+        "v": "398",
+        "t": "FC Nordsjaelland"
+      },
+      {
+        "v": "1011",
+        "t": "FC ST. Gallen"
+      },
+      {
+        "v": "591",
+        "t": "FC Santa Coloma"
+      },
+      {
+        "v": "630",
+        "t": "FC Sion"
+      },
+      {
+        "v": "1012",
+        "t": "FC Thun"
+      },
+      {
+        "v": "660",
+        "t": "FC Vaduz"
+      },
+      {
+        "v": "559",
+        "t": "FCSB"
+      },
+      {
+        "v": "598",
+        "t": "FK Crvena Zvezda"
+      },
+      {
+        "v": "1122",
+        "t": "FK Jablonec"
+      },
+      {
+        "v": "661",
+        "t": "FK Liepaja"
+      },
+      {
+        "v": "573",
+        "t": "FK Partizan"
+      },
+      {
+        "v": "679",
+        "t": "FK Sarajevo"
+      },
+      {
+        "v": "2259",
+        "t": "FK Tobol Kostanay"
+      },
+      {
+        "v": "586",
+        "t": "FK Zalgiris Vilnius"
+      },
+      {
+        "v": "687",
+        "t": "Flora Tallinn"
+      },
+      {
+        "v": "4625",
+        "t": "Floriana"
+      },
+      {
+        "v": "357",
+        "t": "GAP Connah S Quay FC"
+      },
+      {
+        "v": "3484",
+        "t": "GKS Katowice"
+      },
+      {
+        "v": "2170",
+        "t": "Gais"
+      },
+      {
+        "v": "631",
+        "t": "Gent"
+      },
+      {
+        "v": "546",
+        "t": "Getafe"
+      },
+      {
+        "v": "5352",
+        "t": "Glentoran"
+      },
+      {
+        "v": "340",
+        "t": "Gornik Zabrze"
+      },
+      {
+        "v": "2402",
+        "t": "Gyori ETO FC"
+      },
+      {
+        "v": "4133",
+        "t": "HB Torshavn"
+      },
+      {
+        "v": "649",
+        "t": "HJK Helsinki"
+      },
+      {
+        "v": "608",
+        "t": "HNK Hajduk Split"
+      },
+      {
+        "v": "561",
+        "t": "HNK Rijeka"
+      },
+      {
+        "v": "363",
+        "t": "Hammarby FF"
+      },
+      {
+        "v": "4626",
+        "t": "Hamrun Spartans"
+      },
+      {
+        "v": "4501",
+        "t": "Hapoel Tel Aviv"
+      },
+      {
+        "v": "254",
+        "t": "Heart Of Midlothian"
+      },
+      {
+        "v": "3861",
+        "t": "Hegelmann Litauen"
+      },
+      {
+        "v": "249",
+        "t": "Hibernian"
+      },
+      {
+        "v": "3723",
+        "t": "Hradec Králové"
+      },
+      {
+        "v": "366",
+        "t": "IFK Goteborg"
+      },
+      {
+        "v": "1163",
+        "t": "Ilves"
+      },
+      {
+        "v": "3342",
+        "t": "Inter Club d'Escaldes"
+      },
+      {
+        "v": "1164",
+        "t": "Inter Turku"
+      },
+      {
+        "v": "701",
+        "t": "KI Klaksvik"
+      },
+      {
+        "v": "664",
+        "t": "Kairat Almaty"
+      },
+      {
+        "v": "662",
+        "t": "Kalju Nomme"
+      },
+      {
+        "v": "3872",
+        "t": "Kauno Žalgiris"
+      },
+      {
+        "v": "4374",
+        "t": "Koper"
+      },
+      {
+        "v": "1165",
+        "t": "KuPS"
+      },
+      {
+        "v": "17161",
+        "t": "LNZ Cherkasy"
+      },
+      {
+        "v": "2249",
+        "t": "La Fiorita"
+      },
+      {
+        "v": "5354",
+        "t": "Larne"
+      },
+      {
+        "v": "667",
+        "t": "Lincoln Red Imps FC"
+      },
+      {
+        "v": "583",
+        "t": "Linfield"
+      },
+      {
+        "v": "566",
+        "t": "Ludogorets"
+      },
+      {
+        "v": "7808",
+        "t": "ML Vitebsk"
+      },
+      {
+        "v": "604",
+        "t": "Maccabi Tel Aviv"
+      },
+      {
+        "v": "15576",
+        "t": "Malisheva"
+      },
+      {
+        "v": "14507",
+        "t": "Marsaxlokk"
+      },
+      {
+        "v": "691",
+        "t": "Milsami Orhei"
+      },
+      {
+        "v": "2240",
+        "t": "Mjallby AIF"
+      },
+      {
+        "v": "91",
+        "t": "Monaco"
+      },
+      {
+        "v": "3740",
+        "t": "Mornar"
+      },
+      {
+        "v": "256",
+        "t": "Motherwell"
+      },
+      {
+        "v": "1483",
+        "t": "NK Varazdin"
+      },
+      {
+        "v": "682",
+        "t": "NSI Runavik"
+      },
+      {
+        "v": "2270",
+        "t": "Neftchi Baku"
+      },
+      {
+        "v": "619",
+        "t": "PAOK"
+      },
+      {
+        "v": "3403",
+        "t": "Pafos"
+      },
+      {
+        "v": "3528",
+        "t": "Paide"
+      },
+      {
+        "v": "2390",
+        "t": "Paks"
+      },
+      {
+        "v": "617",
+        "t": "Panathinaikos"
+      },
+      {
+        "v": "3874",
+        "t": "Panevėžys"
+      },
+      {
+        "v": "2191",
+        "t": "Penybont"
+      },
+      {
+        "v": "2271",
+        "t": "Petrocub"
+      },
+      {
+        "v": "3741",
+        "t": "Petrovac"
+      },
+      {
+        "v": "6496",
+        "t": "Polessya"
+      },
+      {
+        "v": "709",
+        "t": "Pyunik Yerevan"
+      },
+      {
+        "v": "556",
+        "t": "Qarabag"
+      },
+      {
+        "v": "3491",
+        "t": "Raków Częstochowa"
+      },
+      {
+        "v": "257",
+        "t": "Rangers"
+      },
+      {
+        "v": "781",
+        "t": "Rapid Vienna"
+      },
+      {
+        "v": "10124",
+        "t": "Riga"
+      },
+      {
+        "v": "4160",
+        "t": "Rīgas FS"
+      },
+      {
+        "v": "217",
+        "t": "SC Braga"
+      },
+      {
+        "v": "160",
+        "t": "SC Freiburg"
+      },
+      {
+        "v": "652",
+        "t": "Shamrock Rovers"
+      },
+      {
+        "v": "3854",
+        "t": "Shelbourne"
+      },
+      {
+        "v": "568",
+        "t": "Sheriff Tiraspol"
+      },
+      {
+        "v": "609",
+        "t": "Shkendija"
+      },
+      {
+        "v": "4331",
+        "t": "Sileks"
+      },
+      {
+        "v": "1120",
+        "t": "Spartak Trnava"
+      },
+      {
+        "v": "698",
+        "t": "St Joseph S Fc"
+      },
+      {
+        "v": "735",
+        "t": "St. Truiden"
+      },
+      {
+        "v": "275",
+        "t": "Stjarnan"
+      },
+      {
+        "v": "673",
+        "t": "Sutjeska"
+      },
+      {
+        "v": "354",
+        "t": "The New Saints"
+      },
+      {
+        "v": "685",
+        "t": "Torpedo Kutaisi"
+      },
+      {
+        "v": "998",
+        "t": "Trabzonspor"
+      },
+      {
+        "v": "2260",
+        "t": "Tre Fiori"
+      },
+      {
+        "v": "325",
+        "t": "Tromso"
+      },
+      {
+        "v": "415",
+        "t": "Twente"
+      },
+      {
+        "v": "2036",
+        "t": "UNA Strassen"
+      },
+      {
+        "v": "2037",
+        "t": "US Mondorf-les-bains"
+      },
+      {
+        "v": "2599",
+        "t": "Universitatea Cluj"
+      },
+      {
+        "v": "632",
+        "t": "Universitatea Craiova"
+      },
+      {
+        "v": "659",
+        "t": "Valletta FC"
+      },
+      {
+        "v": "274",
+        "t": "Valur Reykjavik"
+      },
+      {
+        "v": "574",
+        "t": "Vardar Skopje"
+      },
+      {
+        "v": "3381",
+        "t": "Velež"
+      },
+      {
+        "v": "4165",
+        "t": "Vestri"
+      },
+      {
+        "v": "580",
+        "t": "Vikingur Gota"
+      },
+      {
+        "v": "278",
+        "t": "Vikingur Reykjavik"
+      },
+      {
+        "v": "5308",
+        "t": "Virtus"
+      },
+      {
+        "v": "3339",
+        "t": "Vllaznia Shkodër"
+      },
+      {
+        "v": "702",
+        "t": "Vojvodina"
+      },
+      {
+        "v": "21011",
+        "t": "Yelimay Semey"
+      },
+      {
+        "v": "4633",
+        "t": "Zimbru"
+      },
+      {
+        "v": "648",
+        "t": "Zira"
+      },
+      {
+        "v": "588",
+        "t": "Zrinjski"
+      },
+      {
+        "v": "12360",
+        "t": "Železničar Pančevo"
+      },
+      {
+        "v": "3554",
+        "t": "Žilina"
+      }
+    ]
+  },
+  "UEFA Europa League": {
+    "leagueValue": "3",
+    "teams": [
+      {
+        "v": "",
+        "t": "-- Equipo --"
+      },
+      {
+        "v": "167",
+        "t": "1899 Hoffenheim"
+      },
+      {
+        "v": "489",
+        "t": "AC Milan"
+      },
+      {
+        "v": "201",
+        "t": "AZ Alkmaar"
+      },
+      {
+        "v": "406",
+        "t": "Aarhus"
+      },
+      {
+        "v": "4358",
+        "t": "Aluminij"
+      },
+      {
+        "v": "554",
+        "t": "Anderlecht"
+      },
+      {
+        "v": "3683",
+        "t": "Ararat-Armenia"
+      },
+      {
+        "v": "168",
+        "t": "Bayer Leverkusen"
+      },
+      {
+        "v": "211",
+        "t": "Benfica"
+      },
+      {
+        "v": "549",
+        "t": "Beşiktaş"
+      },
+      {
+        "v": "35",
+        "t": "Bournemouth"
+      },
+      {
+        "v": "853",
+        "t": "CSKA Sofia"
+      },
+      {
+        "v": "4360",
+        "t": "Celje"
+      },
+      {
+        "v": "538",
+        "t": "Celta Vigo"
+      },
+      {
+        "v": "247",
+        "t": "Celtic"
+      },
+      {
+        "v": "52",
+        "t": "Crystal Palace"
+      },
+      {
+        "v": "670",
+        "t": "Derry City"
+      },
+      {
+        "v": "620",
+        "t": "Dinamo Zagreb"
+      },
+      {
+        "v": "572",
+        "t": "Dynamo Kyiv"
+      },
+      {
+        "v": "3327",
+        "t": "Egnatia Rrogozhinë"
+      },
+      {
+        "v": "3502",
+        "t": "FC Iberia 1999"
+      },
+      {
+        "v": "397",
+        "t": "FC Midtjylland"
+      },
+      {
+        "v": "1011",
+        "t": "FC ST. Gallen"
+      },
+      {
+        "v": "1012",
+        "t": "FC Thun"
+      },
+      {
+        "v": "598",
+        "t": "FK Crvena Zvezda"
+      },
+      {
+        "v": "651",
+        "t": "Ferencvarosi TC"
+      },
+      {
+        "v": "340",
+        "t": "Gornik Zabrze"
+      },
+      {
+        "v": "608",
+        "t": "HNK Hajduk Split"
+      },
+      {
+        "v": "363",
+        "t": "Hammarby FF"
+      },
+      {
+        "v": "563",
+        "t": "Hapoel Beer Sheva"
+      },
+      {
+        "v": "254",
+        "t": "Heart Of Midlothian"
+      },
+      {
+        "v": "3723",
+        "t": "Hradec Králové"
+      },
+      {
+        "v": "336",
+        "t": "Jagiellonia"
+      },
+      {
+        "v": "496",
+        "t": "Juventus"
+      },
+      {
+        "v": "701",
+        "t": "KI Klaksvik"
+      },
+      {
+        "v": "664",
+        "t": "Kairat Almaty"
+      },
+      {
+        "v": "3872",
+        "t": "Kauno Žalgiris"
+      },
+      {
+        "v": "1165",
+        "t": "KuPS"
+      },
+      {
+        "v": "5354",
+        "t": "Larne"
+      },
+      {
+        "v": "347",
+        "t": "Lech Poznan"
+      },
+      {
+        "v": "646",
+        "t": "Levski Sofia"
+      },
+      {
+        "v": "321",
+        "t": "Lillestrom"
+      },
+      {
+        "v": "667",
+        "t": "Lincoln Red Imps FC"
+      },
+      {
+        "v": "80",
+        "t": "Lyon"
+      },
+      {
+        "v": "604",
+        "t": "Maccabi Tel Aviv"
+      },
+      {
+        "v": "81",
+        "t": "Marseille"
+      },
+      {
+        "v": "2240",
+        "t": "Mjallby AIF"
+      },
+      {
+        "v": "413",
+        "t": "NEC Nijmegen"
+      },
+      {
+        "v": "1124",
+        "t": "OFI"
+      },
+      {
+        "v": "553",
+        "t": "Olympiakos Piraeus"
+      },
+      {
+        "v": "3402",
+        "t": "Omonia Nicosia"
+      },
+      {
+        "v": "619",
+        "t": "PAOK"
+      },
+      {
+        "v": "3403",
+        "t": "Pafos"
+      },
+      {
+        "v": "567",
+        "t": "Plzen"
+      },
+      {
+        "v": "556",
+        "t": "Qarabag"
+      },
+      {
+        "v": "257",
+        "t": "Rangers"
+      },
+      {
+        "v": "548",
+        "t": "Real Sociedad"
+      },
+      {
+        "v": "571",
+        "t": "Red Bull Salzburg"
+      },
+      {
+        "v": "94",
+        "t": "Rennes"
+      },
+      {
+        "v": "652",
+        "t": "Shamrock Rovers"
+      },
+      {
+        "v": "568",
+        "t": "Sheriff Tiraspol"
+      },
+      {
+        "v": "628",
+        "t": "Sparta Praha"
+      },
+      {
+        "v": "735",
+        "t": "St. Truiden"
+      },
+      {
+        "v": "637",
+        "t": "Sturm Graz"
+      },
+      {
+        "v": "746",
+        "t": "Sunderland"
+      },
+      {
+        "v": "4799",
+        "t": "Torreense"
+      },
+      {
+        "v": "998",
+        "t": "Trabzonspor"
+      },
+      {
+        "v": "325",
+        "t": "Tromso"
+      },
+      {
+        "v": "415",
+        "t": "Twente"
+      },
+      {
+        "v": "1393",
+        "t": "Union St. Gilloise"
+      },
+      {
+        "v": "2599",
+        "t": "Universitatea Cluj"
+      },
+      {
+        "v": "632",
+        "t": "Universitatea Craiova"
+      },
+      {
+        "v": "4165",
+        "t": "Vestri"
+      },
+      {
+        "v": "278",
+        "t": "Vikingur Reykjavik"
+      },
+      {
+        "v": "702",
+        "t": "Vojvodina"
+      },
+      {
+        "v": "3554",
+        "t": "Žilina"
+      }
+    ]
+  }
+}

@@ -2,97 +2,293 @@
   "version": 2,
   "note": "Mapa controlado por el repo: nombre canonico PlayDoIt -> alias explicitos usados por DataFut. Solo entradas verificadas como mismo club/partido. El contrato de matching (config/playdoit-dom.json) permite exact_text_or_explicit_alias; este archivo es la lista cerrada de alias permitidos.",
   "aliases": {
-    "Shandong Taishan FC": ["Shandong Luneng"],
-    "Shanghai Port FC": ["Shanghai SIPG"],
-    "Dalian Young Boy FC": ["Dalian Zhixing"],
-    "Wuhan Three Towns FC": ["Wuhan Three Towns"],
-    "Boyaca Chico": ["Chico"],
-    "Cúcuta Deportivo": ["Cucuta"],
-    "Independiente Santa Fe": ["Santa Fe"],
-    "Jaguares de Córdoba": ["Jaguares"],
-    "Universitario de Deportes": ["Universitario"],
-    "Cusco FC": ["Cusco"],
-    "CD Moquegua": ["UCV Moquegua"],
-    "Deportes Quindío": ["Quindio"],
-    "Maldonado": ["Deportivo Maldonado"],
-    "U. de Chile": ["Universidad de Chile"],
-    "Universidad Católica": ["U. Catolica"],
-    "Coquimbo": ["Coquimbo Unido"],
-    "San Martin de Tucuman": ["San Martin Tucuman"],
-    "Ulsan HD FC": ["Ulsan Hyundai FC"],
-    "Gimhae FC": ["Gimhae City"],
-    "Suwon FC": ["Suwon City FC"],
-    "Hwaseong FC": ["Hwaseong"],
-    "Cheonan City FC": ["Cheonan City"],
-    "Yongin City FC": ["Yongin City"],
-    "Helsingborgs IF": ["Helsingborg"],
-    "Sandvikens IF": ["Sandviken"],
-    "IK Oddevold": ["Oddevold"],
-    "Keflavik IF": ["Keflavik"],
-    "Racing Louisville (F)": ["Racing Louisville W"],
-    "Angel City (F)": ["Angel City W"],
-    "Ferroviaria SP (F)": ["Ferroviaria W"],
-    "Flamengo RJ (F)": ["Flamengo W"],
-    "São Paulo SP (F)": ["Sao Paulo W"],
-    "Gremio (F)": ["Gremio W"],
-    "Internacional Limeira": ["Inter De Limeira"],
-    "Inter Miami CF": ["Inter Miami"],
-    "Atlanta United": ["Atlanta United FC"],
-    "FC Toronto": ["Toronto FC"],
-    "Charlotte FC": ["Charlotte"],
-    "Austin FC": ["Austin"],
-    "San Diego FC": ["San Diego"],
-    "NY Red Bulls": ["New York Red Bulls"],
-    "Sao Paulo FC": ["Sao Paulo"],
-    "Athletic Club SJDR": ["Athletic Club"],
-    "Xolos de Tijuana": ["Club Tijuana"],
-    "Pumas UNAM": ["U.N.A.M. - Pumas"],
-    "Cologne": ["1. FC Köln"],
-    "Cottbus": ["Energie Cottbus"],
-    "Nurnberg": ["1. FC Nürnberg"],
-    "Verona": ["Hellas Verona"],
-    "US Catanzaro": ["Catanzaro"],
-    "Club Atletico La Paz": ["CA La Paz"],
-    "Coyotes Tlaxcala": ["Tlaxcala"],
-    "Rapid Wien": ["Rapid Vienna"],
-    "Hartberg": ["TSV Hartberg"],
-    "HB Koege": ["HB Koge"],
-    "AB Gladsaxe": ["AB Copenhagen"],
-    "St. Polten": ["SKN ST. Polten"],
-    "Rapid Viena (a)": ["Rapid Wien II"],
-    "SC Fortuna Cologne": ["Fortuna Köln"],
-    "VfB Stuttgart II": ["Stuttgart II"],
-    "Ayr United": ["Ayr Utd"],
-    "Partick Thistle FC": ["Partick"],
-    "Din. Bucarest": ["Dinamo Bucuresti"],
-    "Botosani": ["FC Botosani"],
-    "Freiburg (F)": ["SC Freiburg W"],
-    "RB Leipzig (F)": ["RB Leipzig W"],
-    "Boston Legacy (F)": ["Boston Legacy W"],
-    "Nápoles": ["Napoli", "SSC Napoli"],
-    "PSG": ["Paris Saint Germain", "Paris SG", "Paris Saint-Germain"],
-    "Slavia Prague": ["Slavia Praha", "Slavia Praga", "SK Slavia Praha"],
-    "Bodo/Glimt": ["Bodo Glimt", "FK Bodo Glimt"],
-    "Inter Bogotá": ["Internacional de Bogota", "Internacional Bogota"],
-    "Atlético Nacional": ["Atletico Nacional"],
-    "Zamalek SC": ["Zamalek"],
-    "Asyut Petroleum": ["Asyut Petrol"],
-    "Pyramids FC": ["Pyramids"],
-    "Al Taawoun": ["Al Taawon"],
-    "Al Qadisiyah": ["Al-Qadisiyah FC"],
-    "Al Nassr FC": ["Al Nassr", "Al-Nassr"],
-    "Milton Keynes Dons": ["MK Dons"],
-    "IFK Norrkoping FK": ["IFK Norrkoping"],
-    "Oxford United": ["Oxford Utd"],
-    "Cambridge United": ["Cambridge Utd"],
-    "York City": ["York", "York Accrington ST"],
-    "Fenerbahçe": ["Fenerbahce"],
-    "Villarreal CF": ["Villarreal"],
-    "Bromley": ["Bromley FC"],
-    "Blackpool": ["Blackpool FC"],
-    "Wigan Athletic": ["Wigan"],
-    "AEK": ["AEK Athens"],
-    "Estudiantes de La Plata": ["Estudiantes L.P."],
-    "Sheffield Wednesday": ["Sheffield Wed"]
+    "Shandong Taishan FC": [
+      "Shandong Luneng"
+    ],
+    "Shanghai Port FC": [
+      "Shanghai SIPG"
+    ],
+    "Dalian Young Boy FC": [
+      "Dalian Zhixing"
+    ],
+    "Wuhan Three Towns FC": [
+      "Wuhan Three Towns"
+    ],
+    "Boyaca Chico": [
+      "Chico"
+    ],
+    "Cúcuta Deportivo": [
+      "Cucuta"
+    ],
+    "Independiente Santa Fe": [
+      "Santa Fe"
+    ],
+    "Jaguares de Córdoba": [
+      "Jaguares"
+    ],
+    "Universitario de Deportes": [
+      "Universitario"
+    ],
+    "Cusco FC": [
+      "Cusco"
+    ],
+    "CD Moquegua": [
+      "UCV Moquegua"
+    ],
+    "Deportes Quindío": [
+      "Quindio"
+    ],
+    "Maldonado": [
+      "Deportivo Maldonado"
+    ],
+    "U. de Chile": [
+      "Universidad de Chile"
+    ],
+    "Universidad Católica": [
+      "U. Catolica"
+    ],
+    "Coquimbo": [
+      "Coquimbo Unido"
+    ],
+    "San Martin de Tucuman": [
+      "San Martin Tucuman"
+    ],
+    "Ulsan HD FC": [
+      "Ulsan Hyundai FC"
+    ],
+    "Gimhae FC": [
+      "Gimhae City"
+    ],
+    "Suwon FC": [
+      "Suwon City FC"
+    ],
+    "Hwaseong FC": [
+      "Hwaseong"
+    ],
+    "Cheonan City FC": [
+      "Cheonan City"
+    ],
+    "Yongin City FC": [
+      "Yongin City"
+    ],
+    "Helsingborgs IF": [
+      "Helsingborg"
+    ],
+    "Sandvikens IF": [
+      "Sandviken"
+    ],
+    "IK Oddevold": [
+      "Oddevold"
+    ],
+    "Keflavik IF": [
+      "Keflavik"
+    ],
+    "Racing Louisville (F)": [
+      "Racing Louisville W"
+    ],
+    "Angel City (F)": [
+      "Angel City W"
+    ],
+    "Ferroviaria SP (F)": [
+      "Ferroviaria W"
+    ],
+    "Flamengo RJ (F)": [
+      "Flamengo W"
+    ],
+    "São Paulo SP (F)": [
+      "Sao Paulo W"
+    ],
+    "Gremio (F)": [
+      "Gremio W"
+    ],
+    "Internacional Limeira": [
+      "Inter De Limeira"
+    ],
+    "Inter Miami CF": [
+      "Inter Miami"
+    ],
+    "Atlanta United": [
+      "Atlanta United FC"
+    ],
+    "FC Toronto": [
+      "Toronto FC"
+    ],
+    "Charlotte FC": [
+      "Charlotte"
+    ],
+    "Austin FC": [
+      "Austin"
+    ],
+    "San Diego FC": [
+      "San Diego"
+    ],
+    "NY Red Bulls": [
+      "New York Red Bulls"
+    ],
+    "Sao Paulo FC": [
+      "Sao Paulo"
+    ],
+    "Athletic Club SJDR": [
+      "Athletic Club"
+    ],
+    "Xolos de Tijuana": [
+      "Club Tijuana"
+    ],
+    "Pumas UNAM": [
+      "U.N.A.M. - Pumas"
+    ],
+    "Cologne": [
+      "1. FC Köln"
+    ],
+    "Cottbus": [
+      "Energie Cottbus"
+    ],
+    "Nurnberg": [
+      "1. FC Nürnberg"
+    ],
+    "Verona": [
+      "Hellas Verona"
+    ],
+    "US Catanzaro": [
+      "Catanzaro"
+    ],
+    "Club Atletico La Paz": [
+      "CA La Paz"
+    ],
+    "Coyotes Tlaxcala": [
+      "Tlaxcala"
+    ],
+    "Rapid Wien": [
+      "Rapid Vienna"
+    ],
+    "Hartberg": [
+      "TSV Hartberg"
+    ],
+    "HB Koege": [
+      "HB Koge"
+    ],
+    "AB Gladsaxe": [
+      "AB Copenhagen"
+    ],
+    "St. Polten": [
+      "SKN ST. Polten"
+    ],
+    "Rapid Viena (a)": [
+      "Rapid Wien II"
+    ],
+    "SC Fortuna Cologne": [
+      "Fortuna Köln"
+    ],
+    "VfB Stuttgart II": [
+      "Stuttgart II"
+    ],
+    "Ayr United": [
+      "Ayr Utd"
+    ],
+    "Partick Thistle FC": [
+      "Partick"
+    ],
+    "Din. Bucarest": [
+      "Dinamo Bucuresti"
+    ],
+    "Botosani": [
+      "FC Botosani"
+    ],
+    "Freiburg (F)": [
+      "SC Freiburg W"
+    ],
+    "RB Leipzig (F)": [
+      "RB Leipzig W"
+    ],
+    "Boston Legacy (F)": [
+      "Boston Legacy W"
+    ],
+    "Nápoles": [
+      "Napoli",
+      "SSC Napoli"
+    ],
+    "PSG": [
+      "Paris Saint Germain",
+      "Paris SG",
+      "Paris Saint-Germain"
+    ],
+    "Slavia Prague": [
+      "Slavia Praha",
+      "Slavia Praga",
+      "SK Slavia Praha"
+    ],
+    "Bodo/Glimt": [
+      "Bodo Glimt",
+      "FK Bodo Glimt"
+    ],
+    "Inter Bogotá": [
+      "Internacional de Bogota",
+      "Internacional Bogota"
+    ],
+    "Atlético Nacional": [
+      "Atletico Nacional"
+    ],
+    "Zamalek SC": [
+      "Zamalek"
+    ],
+    "Asyut Petroleum": [
+      "Asyut Petrol"
+    ],
+    "Pyramids FC": [
+      "Pyramids"
+    ],
+    "Al Taawoun": [
+      "Al Taawon"
+    ],
+    "Al Qadisiyah": [
+      "Al-Qadisiyah FC"
+    ],
+    "Al Nassr FC": [
+      "Al Nassr",
+      "Al-Nassr"
+    ],
+    "Milton Keynes Dons": [
+      "MK Dons"
+    ],
+    "IFK Norrkoping FK": [
+      "IFK Norrkoping"
+    ],
+    "Oxford United": [
+      "Oxford Utd"
+    ],
+    "Cambridge United": [
+      "Cambridge Utd"
+    ],
+    "York City": [
+      "York",
+      "York Accrington ST"
+    ],
+    "Fenerbahçe": [
+      "Fenerbahce"
+    ],
+    "Villarreal CF": [
+      "Villarreal"
+    ],
+    "Bromley": [
+      "Bromley FC"
+    ],
+    "Blackpool": [
+      "Blackpool FC"
+    ],
+    "Wigan Athletic": [
+      "Wigan"
+    ],
+    "AEK": [
+      "AEK Athens"
+    ],
+    "Estudiantes de La Plata": [
+      "Estudiantes L.P."
+    ],
+    "Sheffield Wednesday": [
+      "Sheffield Wed"
+    ],
+    "Union Saint-Gilloise": "Union St. Gilloise",
+    "Union Saint Gilloise": "Union St. Gilloise",
+    "Inter Club de Escaldes": "Inter Club d'Escaldes"
   }
 }
