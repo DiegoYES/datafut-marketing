@@ -6,6 +6,7 @@
 // Uso: node scripts/build-verification-observation.js
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
+const { spawn } = require('node:child_process');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
@@ -25,15 +26,27 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u030
   const targetDate = catalog.targetDate;
   const catById = new Map(catalog.matches.map(m => [m.matchId, m]));
   const browser = await chromium.launch({ headless: true });
+  let chromeProc = null;
+  let page = null;
   try {
-    const ctx = await browser.newContext({
-      storageState: fs.existsSync(path.join(projectDir, 'playdoit-public-state.json'))
-        ? path.join(projectDir, 'playdoit-public-state.json') : undefined,
-      viewport: { width: 1440, height: 900 }
-    });
-    const page = await ctx.newPage();
-    await page.goto('https://www.playdoit.mx/', { waitUntil: 'networkidle', timeout: 45000 });
-    await page.waitForTimeout(2000);
+    let killChrome = null;
+    try { ({ killStaleAutomationChrome: killChrome } = require('./lib/chrome-hygiene')); } catch { /* opcional */ }
+    const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+    const chromeProfile = path.join(projectDir, 'chrome_cdp_verify');
+    if (!fs.existsSync(chromeProfile)) fs.mkdirSync(chromeProfile, { recursive: true });
+    if (killChrome) killChrome(['chrome_cdp_verify', 'remote-debugging-port=9227'], 'verify');
+    chromeProc = spawn(chromePath, [
+      '--remote-debugging-port=9227',
+      `--user-data-dir=${chromeProfile}`,
+      '--no-first-run'
+    ], { detached: true, stdio: 'ignore' });
+    await new Promise(r => setTimeout(r, 2500));
+    const cdp = await chromium.connectOverCDP('http://localhost:9227');
+    const dctx = cdp.contexts()[0];
+    page = dctx.pages()[0] || await dctx.newPage();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('https://www.playdoit.mx/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForTimeout(4000);
     const now = new Date().toISOString();
     const obs = [];
     for (const c of disc.candidates || []) {
@@ -81,7 +94,7 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u030
       await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
       await page.waitForTimeout(3000);
       const eventText = `${cm.homeTeam} vs ${cm.awayTeam}`;
-      const shotPath = `captures/dom/playdoit-verify-${eventId}-${targetDate}.png`;
+      const shotPath = `captures/dom/playdoit-verify-${c.candidateId}-${eventId}-${targetDate}.png`;
       await page.screenshot({ path: path.join(projectDir, shotPath) });
       const sha = crypto.createHash('sha256').update(fs.readFileSync(path.join(projectDir, shotPath))).digest('hex');
       console.log(c.candidateId, '|', candMkt.marketText, '|', sel.name, '|', oddsText);
@@ -108,7 +121,11 @@ const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u030
     const outPath = path.join(projectDir, 'captures', 'dom', `playdoit-verification-observation-${targetDate}.json`);
     fs.writeFileSync(outPath, `${JSON.stringify(doc, null, 2)}\n`);
     console.log(`OBS_OK ${obs.length}/${(disc.candidates || []).length} -> ${outPath}`);
+  } catch (e) {
+    if (chromeProc) { try { chromeProc.kill(); } catch { /* nada */ } }
+    throw e;
   } finally {
+    if (chromeProc) { try { chromeProc.kill(); } catch { /* nada */ } }
     await browser.close();
   }
 })().catch(error => { console.error(`ERROR: ${error.message}`); process.exitCode = 1; });

@@ -10,6 +10,7 @@
 //      node scripts/build-catalog-observation.js --date YYYY-MM-DD --events 123,456
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs');
+const { spawn } = require('node:child_process');
 const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -209,15 +210,35 @@ function selectionsOf(odds) {
     try { fs.writeFileSync(cachePath, JSON.stringify(cache)); } catch { /* opcional */ }
     console.log(`DataFut: ${links.length} enlaces, ${dfTitles.length} con titulo.`);
 
-    // --- PlayDoIt: upcoming del dia (CDMX) ---
-    const pdCtx = await browser.newContext({
-      storageState: fs.existsSync(path.join(projectDir, 'playdoit-public-state.json'))
-        ? path.join(projectDir, 'playdoit-public-state.json') : undefined,
-      viewport: { width: 1440, height: 900 }
-    });
-    const pdPage = await pdCtx.newPage();
-    await pdPage.goto('https://www.playdoit.mx/', { waitUntil: 'networkidle', timeout: 45000 });
-    await pdPage.waitForTimeout(2000);
+    // --- PlayDoIt: upcoming del dia (CDMX) via Chrome real (Cloudflare) ---
+    // Declarados fuera del try externo: el finally debe poder cerrar Chrome.
+    var chromeProc = null;
+    var pdPage = null;
+    try {
+      let killChrome = null;
+      try { ({ killStaleAutomationChrome: killChrome } = require('./lib/chrome-hygiene')); } catch { /* opcional */ }
+      const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+      const chromeProfile = path.join(projectDir, 'chrome_cdp_catalog');
+      if (!fs.existsSync(chromeProfile)) fs.mkdirSync(chromeProfile, { recursive: true });
+      if (killChrome) killChrome(['chrome_cdp_catalog', 'remote-debugging-port=9226'], 'catalog');
+      chromeProc = spawn(chromePath, [
+        '--remote-debugging-port=9226',
+        `--user-data-dir=${chromeProfile}`,
+        '--no-first-run'
+      ], { detached: true, stdio: 'ignore' });
+      await new Promise(r => setTimeout(r, 2500));
+      const cdp = await chromium.connectOverCDP('http://localhost:9226');
+      console.log('[' + new Date().toISOString() + '] CDP conectado');
+      const dctx = cdp.contexts()[0];
+      pdPage = dctx.pages()[0] || await dctx.newPage();
+      await pdPage.setViewportSize({ width: 1440, height: 900 });
+      await pdPage.goto('https://www.playdoit.mx/', { waitUntil: 'domcontentloaded', timeout: 45000 });
+      console.log('[' + new Date().toISOString() + '] PlayDoIt cargado');
+      await pdPage.waitForTimeout(4000);
+    } catch (e) {
+      if (chromeProc) { try { chromeProc.kill(); } catch { /* nada */ } }
+      throw new Error(`PlayDoIt Chrome CDP no disponible: ${e.message}`);
+    }
     const upcoming = await pdPage.evaluate(async () => {
       const res = await fetch('https://sb2frontend-altenar2.biahosted.com/api/widget/GetUpcoming?culture=es-ES&timezoneOffset=360&integration=playdoit2&sportId=66');
       const j = await res.json();
@@ -225,6 +246,7 @@ function selectionsOf(odds) {
       (j.champs || []).forEach(c => { champs[c.id] = c.name; });
       return (j.events || []).map(e => ({ id: String(e.id), name: e.name, start: e.startDate, league: champs[e.champId] || '' }));
     });
+    console.log('[' + new Date().toISOString() + '] Upcoming obtenidos: ' + upcoming.length + ' | del dia: ' + upcoming.filter(e => { const mx = new Date(new Date(e.start).getTime() - 6 * 3600 * 1000); return mx.toISOString().slice(0, 10) === targetDate; }).length);
     const inDay = upcoming.filter(e => {
       const mx = new Date(new Date(e.start).getTime() - 6 * 3600 * 1000);
       return mx.toISOString().slice(0, 10) === targetDate;
@@ -328,6 +350,7 @@ function selectionsOf(odds) {
     fs.writeFileSync(outPath, `${JSON.stringify(doc, null, 2)}\n`);
     console.log(`Catalogo escrito: ${outPath} (${events.length} eventos).`);
   } finally {
+    if (chromeProc) { try { chromeProc.kill(); } catch { /* nada */ } }
     await browser.close();
   }
-})().catch(error => { console.error(`ERROR: ${error.message}`); process.exitCode = 1; });
+})().catch(error => { console.error(`ERROR: ${error.message}`); if (error.stack) console.error(error.stack.split('\n').slice(1, 4).join('\n')); process.exitCode = 1; });
